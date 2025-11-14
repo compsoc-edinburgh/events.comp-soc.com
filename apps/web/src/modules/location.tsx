@@ -1,18 +1,18 @@
 import SectionHeader from "./section-header";
 
-interface LocationSectionProps {
+interface LocationProps {
   locationName: string;
   description: string;
   mapEmbedUrl: string;
   mapTitle?: string;
 }
 
-function LocationSection({
+function Location({
   locationName,
   description,
   mapEmbedUrl,
   mapTitle = "Location Map",
-}: LocationSectionProps) {
+}: LocationProps) {
   return (
     <section className="mt-8 sm:mt-10">
       <SectionHeader title="Location" />
@@ -38,4 +38,4 @@ function LocationSection({
   );
 }
 
-export default LocationSection;
+export default Location;

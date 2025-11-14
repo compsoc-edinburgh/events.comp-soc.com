@@ -34,3 +34,5 @@ docker-data/
 
 # Local testing files
 coverage/
+
+/generated/prisma

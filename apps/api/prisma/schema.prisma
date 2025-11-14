@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  COMMITTEE
+  SIGS_LEADER
+}
+
+model User {
+  id        String   @id
+  email     String   @unique
+  firstName String
+  lastName  String
+  role      UserRole @default(USER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  registrations EventRegistration[]
+}
+
+model Event {
+  id             String  @id @default(uuid())
+
+  organizerSig   String
+
+  heroTitle      String
+  heroTagsCsv    String
+
+  regTitle       String
+  regDescription String
+  regButtonText  String
+
+  aboutMarkdown  String
+
+  locationName   String
+  locationDesc   String
+  mapEmbedUrl    String
+  mapTitle       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  registrations EventRegistration[]
+}
+
+model EventRegistration {
+  id       String @id @default(uuid())
+
+  userId   String
+  eventId  String
+
+  user     User  @relation(fields: [userId], references: [id])
+  event    Event @relation(fields: [eventId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, eventId])
+}
