@@ -2,16 +2,15 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import Footer from "../../modules/footer";
-import Header from "../../modules/header";
 import { SIGsCarousel } from "../../modules/sigs-carousel";
 import Tag from "../../components/tag";
 import Register from "../../modules/register";
 import AboutMarkdown from "../../modules/about-markdown";
 import Location from "../../modules/location";
+import { Sigs } from "@monorepo/types";
 
 const eventData = {
-  organizer: { sig: "typesig" },
+  organizer: { sig: Sigs.ProjectShare },
   hero: {
     title: "MathSoc x TypeSig: Lean Sesh",
     tags: ["Mathematics", "Proof Assistants", "Lean", "Logic", "Collaboration"],
@@ -49,7 +48,7 @@ const BUTTON_VARIANTS = {
   exit: { opacity: 0, y: -25 },
 };
 
-function EventsDetails() {
+function Details() {
   const [isRSVPModalOpen, setIsRSVPModalOpen] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
 
@@ -68,9 +67,7 @@ function EventsDetails() {
 
   return (
     <div className="relative min-h-screen text-white bg-neutral-900">
-      <Header />
-
-      <main className="flex flex-col items-center justify-center px-4 sm:px-6 pt-20 sm:pt-24 pb-10">
+      <main className="flex flex-col items-center justify-center px-4 sm:px-6 pb-10">
         <div className="max-w-2xl w-full">
           <SIGsCarousel organizer={eventData.organizer.sig} />
 
@@ -99,8 +96,6 @@ function EventsDetails() {
             mapEmbedUrl={eventData.location.mapEmbedUrl}
             mapTitle={eventData.location.mapTitle}
           />
-
-          <Footer />
         </div>
       </main>
 
@@ -213,4 +208,4 @@ function EventsDetails() {
   );
 }
 
-export default EventsDetails;
+export default Details;
