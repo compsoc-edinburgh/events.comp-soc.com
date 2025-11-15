@@ -10,7 +10,7 @@ import Location from "../../modules/location";
 import { Sigs } from "@monorepo/types";
 
 const eventData = {
-  organizer: { sig: Sigs.ProjectShare },
+  organizer: { sig: Sigs.TypeSig },
   hero: {
     title: "MathSoc x TypeSig: Lean Sesh",
     tags: ["Mathematics", "Proof Assistants", "Lean", "Logic", "Collaboration"],
@@ -111,11 +111,10 @@ function Details() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={handleClose}
           >
             <button
               onClick={handleClose}
-              className="fixed top-4 right-4 sm:top-6 sm:right-6 text-gray-300 hover:text-white text-2xl z-10 transition-colors touch-manipulation"
+              className="fixed top-4 right-4 sm:top-6 sm:right-6 text-gray-300 hover:text-white text-2xl z-10 transition-colors touch-manipulation hover:cursor-pointer"
               aria-label="Close modal"
             >
               ✕
@@ -170,8 +169,7 @@ function Details() {
                         setIsPageLoading(false);
                       }, 1000);
                     }}
-                    whileHover={{ scale: isPageLoading ? 1 : 1.01 }}
-                    whileTap={{ scale: isPageLoading ? 1 : 0.99 }}
+                    whileTap={{ scale: isPageLoading ? 1 : 0.98 }}
                     className="mt-2 bg-white text-black font-semibold py-3 rounded-lg hover:bg-neutral-200 transition-colors relative overflow-hidden"
                   >
                     <AnimatePresence mode="popLayout" initial={false}>
