@@ -2,49 +2,16 @@
 
 import React from "react";
 import { Sigs } from "@monorepo/types";
+import { ALL_SIGS, getSigColors } from "../lib/sigs";
 
 interface SIGsCarouselProps {
-  organizer?: string;
+  organizer?: Sigs;
 }
 
-interface SIGColors {
-  border: string;
-  background: string;
-  text: string;
-}
-
-const SIG_COLORS: Record<string, SIGColors> = {
-  [Sigs.ProjectShare]: { border: "#ffffff", background: "#7a16f5", text: "#ffffff" },
-  [Sigs.SigInt]: { border: "#666666", background: "#000000", text: "#ffffff" },
-  [Sigs.CCSig]: { border: "#3b6d8f", background: "#153d59", text: "#ffffff" },
-  [Sigs.CloudSig]: { border: "#f2a530", background: "#ff9900", text: "#ffffff" },
-  [Sigs.EdinburghAI]: { border: "#e37f2d", background: "#cc640e", text: "#ffffff" },
-  [Sigs.TypeSig]: { border: "#60a5fa", background: "#008ee0", text: "#ffffff" },
-  [Sigs.Tardis]: { border: "#5a8fc7", background: "#2a5085", text: "#ffffff" },
-  [Sigs.GameDevSig]: { border: "#3cab98", background: "#000000", text: "#ffffff" },
-  [Sigs.Evp]: { border: "#ffffff", background: "#3333f5", text: "#ffffff" },
-  [Sigs.QuantSig]: { border: "#ffffff", background: "#0a182e", text: "#ffffff" },
-  [Sigs.BitSig]: { border: "#ff0000", background: "#ffffff", text: "#000000" },
-  compsoc: { border: "#737373", background: "#262626", text: "#ffffff" }
-};
-
-const ALL_SIGS = [
-  { id: "compsoc", name: "CompSoc", logo: "/sigs/comp-soc.png" },
-  { id: Sigs.ProjectShare, name: "ProjectShare", logo: "/sigs/projectshare.png" },
-  { id: Sigs.Tardis, name: "TARDIS", logo: "/sigs/tardis.webp" },
-  { id: Sigs.TypeSig, name: "TypeSIG", logo: "/sigs/typesig.webp" },
-  { id: Sigs.SigInt, name: "SIGINT", logo: "/sigs/sigint.webp" },
-  { id: Sigs.QuantSig, name: "QuantSIG", logo: "/sigs/quant.svg" },
-  { id: Sigs.GameDevSig, name: "GameDevSIG", logo: "/sigs/gamedev.webp" },
-  { id: Sigs.EdinburghAI, name: "Edinburgh AI", logo: "/sigs/ai.webp" },
-  { id: Sigs.Evp, name: "EVP", logo: "/sigs/evp.png" },
-  { id: Sigs.BitSig, name: "BitSIG", logo: "/sigs/bitsig.png" },
-  { id: Sigs.CloudSig, name: "CloudSIG", logo: "/sigs/cloud.png" },
-  { id: Sigs.CCSig, name: "CCSIG", logo: "/sigs/ccsig.webp" }
-];
-
-export const SIGsCarousel = ({ organizer = "compsoc" }: SIGsCarouselProps) => {
-  const organizerColors = SIG_COLORS[organizer] || SIG_COLORS.compsoc;
+export const SIGsCarousel = ({
+  organizer = Sigs.Compsoc
+}: SIGsCarouselProps) => {
+  const organizerColors = getSigColors(organizer);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const organizerRef = React.useRef<HTMLDivElement>(null);
   const [orderedSigs, setOrderedSigs] = React.useState<typeof ALL_SIGS>([]);
@@ -59,9 +26,7 @@ export const SIGsCarousel = ({ organizer = "compsoc" }: SIGsCarouselProps) => {
       const shuffled = [...ALL_SIGS].sort(() => Math.random() - 0.5);
 
       // Find the organizer and remove it from the shuffled array
-      const organizerIndex = shuffled.findIndex(
-        sig => sig.id === organizer
-      );
+      const organizerIndex = shuffled.findIndex(sig => sig.id === organizer);
       let organizerSig;
       if (organizerIndex !== -1) {
         organizerSig = shuffled.splice(organizerIndex, 1)[0];
@@ -133,8 +98,8 @@ export const SIGsCarousel = ({ organizer = "compsoc" }: SIGsCarouselProps) => {
                   style={
                     isOrganizer
                       ? {
-                          backgroundColor: organizerColors?.background,
-                          borderColor: organizerColors?.border,
+                          backgroundColor: organizerColors.background,
+                          borderColor: organizerColors.border,
                           borderWidth: "1px",
                           borderStyle: "solid"
                         }
@@ -150,7 +115,7 @@ export const SIGsCarousel = ({ organizer = "compsoc" }: SIGsCarouselProps) => {
                     className="text-xs sm:text-sm font-medium"
                     style={
                       isOrganizer
-                        ? { color: organizerColors?.text }
+                        ? { color: organizerColors.text }
                         : { color: "#a3a3a3" }
                     }
                   >

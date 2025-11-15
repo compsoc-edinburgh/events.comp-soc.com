@@ -16,14 +16,28 @@ export const formatDateHeader = (dateString: string) => {
   date.setHours(0, 0, 0, 0);
 
   if (date.getTime() === today.getTime()) {
-    return "Today";
+    return { main: "Today", weekday: null };
   } else if (date.getTime() === tomorrow.getTime()) {
-    return "Tomorrow";
+    return { main: "Tomorrow", weekday: null };
   }
 
-  return date.toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
+  const mainDate = date.toLocaleDateString("en-GB", {
+    month: "short",
+    day: "numeric"
   });
+
+  const weekday = date.toLocaleDateString("en-GB", {
+    weekday: "long"
+  });
+
+  return { main: mainDate, weekday };
+};
+
+export const formatTime = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const period = hours && hours >= 12 ? "PM" : "AM";
+  const displayHours = (hours && hours % 12) || 12;
+  return `${displayHours?.toString().padStart(2, "0")}:${minutes
+    ?.toString()
+    .padStart(2, "0")} ${period}`;
 };

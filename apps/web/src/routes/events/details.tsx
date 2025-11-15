@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { SIGsCarousel } from "../../modules/sigs-carousel";
+import { SIGsCarousel } from "../../components/sigs-carousel";
 import Tag from "../../components/tag";
 import Register from "../../modules/register";
 import AboutMarkdown from "../../modules/about-markdown";
@@ -13,13 +13,13 @@ const eventData = {
   organizer: { sig: Sigs.TypeSig },
   hero: {
     title: "MathSoc x TypeSig: Lean Sesh",
-    tags: ["Mathematics", "Proof Assistants", "Lean", "Logic", "Collaboration"],
+    tags: ["Mathematics", "Proof Assistants", "Lean", "Logic", "Collaboration"]
   },
   registration: {
     title: "Sign Up",
     description:
       "Join us for the MathSoc x TypeSig Lean Sesh! Whether you're curious about formal proofs, want to put Lean through its paces, or just enjoy logic puzzles, this collaborative workshop is for you.",
-    buttonText: "I'm interested!",
+    buttonText: "I'm interested!"
   },
   about: {
     content: `A chill collaborative session with **MathSoc** and **TypeSig**.
@@ -30,7 +30,7 @@ const eventData = {
 - No prior experience required
 - Bring your curiosity and laptop!
 
-All interested in mathematics, logic, or programming are welcome.`,
+All interested in mathematics, logic, or programming are welcome.`
   },
   location: {
     locationName: "Informatics Forum, Room G.07",
@@ -38,14 +38,14 @@ All interested in mathematics, logic, or programming are welcome.`,
       "Enter via the main doors of the Informatics Forum (10 Crichton Street), turn left, and G.07 is the large seminar room past the atrium.",
     mapEmbedUrl:
       "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2244.396113649709!2d-3.1890397840362427!3d55.94460328058827!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4887c786d29dbdd3%3A0x6b23e390e6a4c91!2sInformatics%20Forum!5e0!3m2!1sen!2suk!4v1710000000000!5m2!1sen!2suk",
-    mapTitle: "Informatics Forum Map",
-  },
+    mapTitle: "Informatics Forum Map"
+  }
 };
 
 const BUTTON_VARIANTS = {
   initial: { opacity: 0, y: 25 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -25 },
+  exit: { opacity: 0, y: -25 }
 };
 
 function Details() {
@@ -57,13 +57,16 @@ function Details() {
     setIsRSVPModalOpen(false);
   };
 
-  useEffect(() => {
-    if (isRSVPModalOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-  }, [isRSVPModalOpen]);
+  useEffect(
+    () => {
+      if (isRSVPModalOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+    },
+    [isRSVPModalOpen]
+  );
 
   return (
     <div className="relative min-h-screen text-white bg-neutral-900">
@@ -76,9 +79,11 @@ function Details() {
           </h1>
 
           <div className="flex flex-wrap gap-2 mt-4">
-            {eventData.hero.tags.map((tag, index) => (
-              <Tag key={index}>{tag}</Tag>
-            ))}
+            {eventData.hero.tags.map((tag, index) =>
+              <Tag key={index}>
+                {tag}
+              </Tag>
+            )}
           </div>
 
           <Register
@@ -100,13 +105,13 @@ function Details() {
       </main>
 
       <AnimatePresence>
-        {isRSVPModalOpen && (
+        {isRSVPModalOpen &&
           <motion.div
             className="fixed inset-0 z-50 overflow-y-auto mobile-backdrop"
             style={{
               backdropFilter: "blur(8px) brightness(0.4)",
               WebkitBackdropFilter: "blur(8px) brightness(0.4)",
-              backgroundColor: "rgba(10, 10, 10, 0.85)",
+              backgroundColor: "rgba(10, 10, 10, 0.85)"
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -126,7 +131,7 @@ function Details() {
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 30, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={e => e.stopPropagation()}
               >
                 <h2 className="text-2xl sm:text-3xl font-bold mb-2">
                   Request to join
@@ -137,7 +142,7 @@ function Details() {
 
                 <form
                   className="flex flex-col gap-5 sm:gap-6"
-                  onSubmit={(e) => {
+                  onSubmit={e => {
                     e.preventDefault();
                     setIsPageLoading(true);
                     setTimeout(() => {
@@ -173,34 +178,31 @@ function Details() {
                     className="mt-2 bg-white text-black font-semibold py-3 rounded-lg hover:bg-neutral-200 transition-colors relative overflow-hidden"
                   >
                     <AnimatePresence mode="popLayout" initial={false}>
-                      {isPageLoading ? (
-                        <motion.p
-                          key="loading"
-                          variants={BUTTON_VARIANTS}
-                          initial="initial"
-                          animate="animate"
-                          exit="exit"
-                        >
-                          Loading...
-                        </motion.p>
-                      ) : (
-                        <motion.p
-                          key="request-to-join"
-                          variants={BUTTON_VARIANTS}
-                          initial="initial"
-                          animate="animate"
-                          exit="exit"
-                        >
-                          I'm interested!
-                        </motion.p>
-                      )}
+                      {isPageLoading
+                        ? <motion.p
+                            key="loading"
+                            variants={BUTTON_VARIANTS}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                          >
+                            Loading...
+                          </motion.p>
+                        : <motion.p
+                            key="request-to-join"
+                            variants={BUTTON_VARIANTS}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                          >
+                            I'm interested!
+                          </motion.p>}
                     </AnimatePresence>
                   </motion.button>
                 </form>
               </motion.div>
             </div>
-          </motion.div>
-        )}
+          </motion.div>}
       </AnimatePresence>
     </div>
   );

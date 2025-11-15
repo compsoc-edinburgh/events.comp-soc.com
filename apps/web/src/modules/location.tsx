@@ -11,7 +11,7 @@ function Location({
   locationName,
   description,
   mapEmbedUrl,
-  mapTitle = "Location Map",
+  mapTitle = "Location Map"
 }: LocationProps) {
   return (
     <section className="mt-8 sm:mt-10">
@@ -27,11 +27,11 @@ function Location({
           title={mapTitle}
           width="100%"
           height="100%"
-          style={{ border: 0 }}
+          style={{ border: 0, pointerEvents: "none" }}
           loading="lazy"
           allowFullScreen
           referrerPolicy="no-referrer-when-downgrade"
-          src={mapEmbedUrl}
+          src={`${mapEmbedUrl}&gestureHandling=none&scrollwheel=0`}
         />
       </div>
     </section>
