@@ -1,5 +1,3 @@
-"use client";
-
 import { Sigs } from "@monorepo/types";
 import { formatDateHeader } from "../../lib/utils";
 import SearchEventCard from "../../modules/search-event-card";

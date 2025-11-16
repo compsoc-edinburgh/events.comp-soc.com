@@ -1,5 +1,3 @@
-"use client";
-
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { SIGsCarousel } from "../../components/sigs-carousel";
@@ -8,6 +6,7 @@ import Register from "../../modules/register";
 import AboutMarkdown from "../../modules/about-markdown";
 import Location from "../../modules/location";
 import { Sigs } from "@monorepo/types";
+import Backdrop from "../../components/backdrop";
 
 const eventData = {
   organizer: { sig: Sigs.TypeSig },
@@ -106,17 +105,7 @@ function Details() {
 
       <AnimatePresence>
         {isRSVPModalOpen &&
-          <motion.div
-            className="fixed inset-0 z-50 overflow-y-auto mobile-backdrop"
-            style={{
-              backdropFilter: "blur(8px) brightness(0.4)",
-              WebkitBackdropFilter: "blur(8px) brightness(0.4)",
-              backgroundColor: "rgba(10, 10, 10, 0.85)"
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <Backdrop>
             <button
               onClick={handleClose}
               className="fixed top-4 right-4 sm:top-6 sm:right-6 text-gray-300 hover:text-white text-2xl z-10 transition-colors touch-manipulation hover:cursor-pointer"
@@ -202,7 +191,7 @@ function Details() {
                 </form>
               </motion.div>
             </div>
-          </motion.div>}
+          </Backdrop>}
       </AnimatePresence>
     </div>
   );

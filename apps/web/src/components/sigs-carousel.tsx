@@ -1,8 +1,6 @@
-"use client";
-
-import React from "react";
 import { Sigs } from "@monorepo/types";
 import { ALL_SIGS, getSigColors } from "../lib/sigs";
+import { useEffect, useRef, useState } from "react";
 
 interface SIGsCarouselProps {
   organizer?: Sigs;
@@ -12,13 +10,13 @@ export const SIGsCarousel = ({
   organizer = Sigs.Compsoc
 }: SIGsCarouselProps) => {
   const organizerColors = getSigColors(organizer);
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-  const organizerRef = React.useRef<HTMLDivElement>(null);
-  const [orderedSigs, setOrderedSigs] = React.useState<typeof ALL_SIGS>([]);
-  const [isClient, setIsClient] = React.useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const organizerRef = useRef<HTMLDivElement>(null);
+  const [orderedSigs, setOrderedSigs] = useState<typeof ALL_SIGS>([]);
+  const [isClient, setIsClient] = useState(false);
 
   // Randomize and reorder SIGs with organizer in the center (client-side only)
-  React.useEffect(
+  useEffect(
     () => {
       setIsClient(true);
 
@@ -45,7 +43,7 @@ export const SIGsCarousel = ({
   );
 
   // Scroll to center the organizer badge after order is set
-  React.useEffect(
+  useEffect(
     () => {
       if (
         isClient &&
