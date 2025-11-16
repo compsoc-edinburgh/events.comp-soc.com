@@ -36,3 +36,7 @@ docker-data/
 coverage/
 
 /generated/prisma
+
+prisma/dev.db
+*.db
+*.db-journal

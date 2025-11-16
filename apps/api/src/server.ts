@@ -1,16 +1,14 @@
 import Fastify from "fastify";
-import cors from "@fastify/cors";
+import { clerkPlugin } from "@clerk/fastify";
+import { setupPrisma } from "./plugins/setupPrisma";
+import userRoutes from "./routes/user";
 
 const app = Fastify({ logger: true });
 
-await app.register(cors, { origin: "*" });
+await app.register(clerkPlugin);
+await setupPrisma(app);
 
-app.get("/", async () => ({ message: "API is running 🚀" }));
-
-app.get("/events", async () => [
-  { id: 1, name: "HackTheBurgh" },
-  { id: 2, name: "Art Meets Code" },
-]);
+app.register(userRoutes, { prefix: "/v1/users" });
 
 try {
   await app.listen({ port: 8080, host: "0.0.0.0" });
