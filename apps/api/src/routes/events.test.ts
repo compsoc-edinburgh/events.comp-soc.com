@@ -10,7 +10,7 @@ let app: FastifyInstance;
 const baseEventData = {
   organizerSig: Sigs.TypeSig,
   hero: {
-    title: "Test-Event",
+    title: "vite-test: Test-Event",
     tags: ["Math", "Lean"]
   },
   registration: {
@@ -37,7 +37,12 @@ describe("Events API", () => {
 
   afterAll(async () => {
     await app.prisma.user.deleteMany({ where: { id: "test-user" } });
-    await app.prisma.event.deleteMany({ where: { heroTitle: "Test-Event" } });
+    await app.prisma.event.deleteMany({
+      where: { heroTitle: "vite-test: Test-Event" }
+    });
+    await app.prisma.event.deleteMany({
+      where: { heroTitle: "vite-test: Updated Event" }
+    });
 
     await app.prisma.$disconnect();
     await app.close();
@@ -45,7 +50,6 @@ describe("Events API", () => {
 
   beforeEach(async () => {
     await app.prisma.user.deleteMany({ where: { id: "test-user" } });
-    await app.prisma.event.deleteMany({ where: { heroTitle: "Test-Event" } });
 
     await app.prisma.user.create({
       data: {
@@ -133,12 +137,12 @@ describe("Events API", () => {
         url: `/v1/events/${created.id}`,
         payload: {
           ...baseEventData,
-          hero: { title: "Updated Event", tags: ["Updated"] }
+          hero: { title: "vite-test: Updated Event", tags: ["Updated"] }
         }
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.json().hero.title).toBe("Updated Event");
+      expect(res.json().hero.title).toBe("vite-test: Updated Event");
     });
 
     it("returns 404 if event does not exist", async () => {
