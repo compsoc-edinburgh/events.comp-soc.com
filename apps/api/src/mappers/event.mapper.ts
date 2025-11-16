@@ -83,9 +83,6 @@ export function toSearch(dbEvent: PrismaEvent): SearchEventModel {
     id: dbEvent.id,
     organizerSig: dbEvent.organizerSig,
     heroTitle: dbEvent.heroTitle,
-    heroTags: dbEvent.heroTagsCsv
-      ? dbEvent.heroTagsCsv.split(",").filter(Boolean)
-      : [],
     date: dbEvent.date,
     time: time,
     locationName: dbEvent.locationName

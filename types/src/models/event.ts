@@ -45,7 +45,6 @@ export type SearchEvent = {
   id: string;
   organizerSig: string;
   heroTitle: string;
-  heroTags: string[];
   date: string;
   time: Time;
   locationName: string;
