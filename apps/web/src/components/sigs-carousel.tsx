@@ -13,13 +13,9 @@ export const SIGsCarousel = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const organizerRef = useRef<HTMLDivElement>(null);
   const [orderedSigs, setOrderedSigs] = useState<typeof ALL_SIGS>([]);
-  const [isClient, setIsClient] = useState(false);
 
-  // Randomize and reorder SIGs with organizer in the center (client-side only)
   useEffect(
     () => {
-      setIsClient(true);
-
       // Shuffle all SIGs
       const shuffled = [...ALL_SIGS].sort(() => Math.random() - 0.5);
 
@@ -37,16 +33,15 @@ export const SIGsCarousel = ({
       const middleIndex = Math.floor(shuffled.length / 2);
       shuffled.splice(middleIndex, 0, organizerSig as typeof ALL_SIGS[number]);
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOrderedSigs(shuffled);
     },
     [organizer]
   );
 
-  // Scroll to center the organizer badge after order is set
   useEffect(
     () => {
       if (
-        isClient &&
         scrollContainerRef.current &&
         organizerRef.current &&
         orderedSigs.length > 0
@@ -67,7 +62,7 @@ export const SIGsCarousel = ({
         });
       }
     },
-    [orderedSigs, isClient]
+    [orderedSigs]
   );
 
   return (

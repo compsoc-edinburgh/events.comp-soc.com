@@ -1,4 +1,4 @@
-import Fastify, { type FastifyInstance } from "fastify";
+import Fastify, {type FastifyInstance, type FastifyPluginOptions} from "fastify";
 import { setupPrisma } from "../plugins/setupPrisma";
 import eventsRoutes from "../routes/events";
 import usersRoutes from "../routes/users";
@@ -6,7 +6,7 @@ import { clerkPlugin } from "@clerk/fastify";
 import { vi } from "vitest";
 
 vi.mock("@clerk/fastify", () => ({
-  clerkPlugin: vi.fn((instance: any, _opts: any, done: any) => {
+  clerkPlugin: vi.fn((instance: FastifyInstance, _opts: FastifyPluginOptions, done: (err?: Error) => void) => {
     instance.decorate("auth", {
       userId: "test-user",
       isAuthenticated: true
