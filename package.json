@@ -8,8 +8,7 @@
     "build": "pnpm --recursive build",
     "lint": "pnpm --recursive lint",
     "typecheck": "pnpm --recursive typecheck",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "test": "pnpm --recursive test"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
