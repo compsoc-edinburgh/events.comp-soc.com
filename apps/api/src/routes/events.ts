@@ -3,6 +3,7 @@ import requireAuth from "../hooks/requireAuth";
 import { EventUpdateSchema } from "@monorepo/types/schemas";
 import z from "zod";
 import requireCommitteeOrSigLeader from "../hooks/requireCommitteeOrSigLeader";
+import { EventMapper } from "../mappers/event.mapper";
 
 export default async function eventsRoutes(app: FastifyInstance) {
   app.get("/", async (_, reply) => {
@@ -12,7 +13,8 @@ export default async function eventsRoutes(app: FastifyInstance) {
       }
     });
 
-    return reply.code(200).send(events);
+    const searchEvents = events.map(EventMapper.toSearch);
+    return reply.code(200).send(searchEvents);
   });
 
   app.get("/:id", { preHandler: [requireAuth] }, async (request, reply) => {
@@ -26,7 +28,8 @@ export default async function eventsRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: "Event not found" });
     }
 
-    return reply.code(200).send(event);
+    const eventOutput = EventMapper.toModel(event);
+    return reply.code(200).send(eventOutput);
   });
 
   app.post(
@@ -41,38 +44,13 @@ export default async function eventsRoutes(app: FastifyInstance) {
         });
       }
 
-      const {
-        organizerSig,
-        hero,
-        registration,
-        aboutMarkdown,
-        location,
-        date,
-        time,
-        form
-      } = parseResult.data;
-
+      const dbInput = EventMapper.toDB(parseResult.data);
       const event = await app.prisma.event.create({
-        data: {
-          organizerSig,
-          heroTitle: hero.title,
-          heroTagsCsv: hero.tags ? hero.tags.join(",") : "",
-          regEnabled: registration?.enabled ?? true,
-          regTitle: registration?.title || "",
-          regDescription: registration?.description || "",
-          regButtonText: registration?.buttonText || "",
-          aboutMarkdown,
-          locationName: location.name,
-          locationDesc: location.description || "",
-          mapEmbedUrl: location.mapUrl || "",
-          mapTitle: location.mapTitle || "",
-          date,
-          time: JSON.stringify(time),
-          form: form ? JSON.stringify(form) : null
-        }
+        data: dbInput
       });
 
-      return reply.code(201).send(event);
+      const eventOutput = EventMapper.toModel(event);
+      return reply.code(201).send(eventOutput);
     }
   );
 
@@ -98,39 +76,14 @@ export default async function eventsRoutes(app: FastifyInstance) {
         });
       }
 
-      const {
-        organizerSig,
-        hero,
-        registration,
-        aboutMarkdown,
-        location,
-        date,
-        time,
-        form
-      } = parseResult.data;
-
+      const dbInput = EventMapper.toDB(parseResult.data);
       const event = await app.prisma.event.update({
         where: { id },
-        data: {
-          organizerSig,
-          heroTitle: hero.title,
-          heroTagsCsv: hero.tags ? hero.tags.join(",") : "",
-          regEnabled: registration?.enabled ?? true,
-          regTitle: registration?.title || "",
-          regDescription: registration?.description || "",
-          regButtonText: registration?.buttonText || "",
-          aboutMarkdown,
-          locationName: location.name,
-          locationDesc: location.description || "",
-          mapEmbedUrl: location.mapUrl || "",
-          mapTitle: location.mapTitle || "",
-          date,
-          time: time,
-          form: form ? form : existingEvent.form ? existingEvent.form : null
-        }
+        data: dbInput
       });
 
-      return reply.code(200).send(event);
+      const eventOutput = EventMapper.toModel(event);
+      return reply.code(200).send(eventOutput);
     }
   );
 
