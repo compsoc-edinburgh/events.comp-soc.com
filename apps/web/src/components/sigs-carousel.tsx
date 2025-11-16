@@ -1,4 +1,4 @@
-import { Sigs } from "@monorepo/types";
+import { Sigs } from "@monorepo/types/const";
 import { ALL_SIGS, getSigColors } from "../lib/sigs";
 import { useEffect, useRef, useState } from "react";
 

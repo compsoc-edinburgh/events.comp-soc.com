@@ -5,7 +5,7 @@ import Tag from "../../components/tag";
 import Register from "../../modules/register";
 import AboutMarkdown from "../../modules/about-markdown";
 import Location from "../../modules/location";
-import { Sigs } from "@monorepo/types";
+import { Sigs } from "@monorepo/types/const";
 import Backdrop from "../../components/backdrop";
 
 const eventData = {

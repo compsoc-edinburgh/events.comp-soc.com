@@ -1,4 +1,4 @@
-import { Sigs } from "@monorepo/types";
+import { Sigs } from "@monorepo/types/const";
 import { formatDateHeader } from "../../lib/utils";
 import SearchEventCard from "../../modules/search-event-card";
 import { MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";

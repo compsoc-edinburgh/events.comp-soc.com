@@ -1,4 +1,4 @@
-import { Sigs } from "@monorepo/types";
+import { Sigs } from "@monorepo/types/const";
 
 export interface SIGColors {
   border: string;

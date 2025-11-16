@@ -10,13 +10,21 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./event": {
-      "types": "./src/event.ts",
-      "default": "./src/event.ts"
+    "./models": {
+      "types": "./src/models/index.ts",
+      "default": "./src/models/index.ts"
     },
-    "./sigs": {
-      "types": "./src/sigs.ts",
-      "default": "./src/sigs.ts"
+    "./schemas": {
+      "types": "./src/schemas/index.ts",
+      "default": "./src/schemas/index.ts"
+    },
+    "./const": {
+      "types": "./src/const/index.ts",
+      "default": "./src/const/index.ts"
+    },
+    "./utils": {
+      "types": "./src/utils/index.ts",
+      "default": "./src/utils/index.ts"
     }
   },
   "scripts": {
@@ -24,5 +32,8 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
   }
 }

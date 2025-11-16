@@ -1,4 +1,4 @@
-import { Sigs } from "@monorepo/types";
+import { Sigs } from "@monorepo/types/const";
 import { formatTime } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
 import { SigBadge } from "../components/sig-badge";

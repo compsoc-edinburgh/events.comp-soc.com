@@ -1,19 +1,46 @@
+import "dotenv/config";
 import Fastify from "fastify";
 import { clerkPlugin } from "@clerk/fastify";
 import { setupPrisma } from "./plugins/setupPrisma";
-import userRoutes from "./routes/user";
+import usersRoutes from "./routes/users";
+import eventsRoutes from "./routes/events";
 
 const app = Fastify({ logger: true });
 
+// Auth
 await app.register(clerkPlugin);
+
+// Database
 await setupPrisma(app);
 
-app.register(userRoutes, { prefix: "/v1/users" });
+// Routes
+app.register(usersRoutes, { prefix: "/v1/users" });
+app.register(eventsRoutes, { prefix: "/v1/events" });
 
-try {
-  await app.listen({ port: 8080, host: "0.0.0.0" });
-  console.log("🚀 Server running at http://localhost:8080");
-} catch (err) {
-  app.log.error(err);
-  process.exit(1);
+// Health check
+app.get("/health", async () => ({ status: "ok" }));
+
+async function start() {
+  try {
+    await app.listen({
+      port: Number(process.env.PORT) || 8080,
+      host: process.env.HOST || "0.0.0.0"
+    });
+
+    app.log.info(`Server running on port ${process.env.PORT || 8080}`);
+  } catch (err) {
+    app.log.error(err);
+    process.exit(1);
+  }
+
+  const shutdown = async () => {
+    app.log.info("Shutting down");
+    await app.close();
+    process.exit(0);
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
+
+start();

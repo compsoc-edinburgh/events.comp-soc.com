@@ -38,6 +38,7 @@ model Event {
   heroTitle      String
   heroTagsCsv    String
 
+  regEnabled     Boolean @default(true)
   regTitle       String
   regDescription String
   regButtonText  String
@@ -48,6 +49,10 @@ model Event {
   locationDesc   String
   mapEmbedUrl    String
   mapTitle       String
+
+  date           String
+  time           Json
+  form           Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

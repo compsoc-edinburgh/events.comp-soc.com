@@ -1,4 +1,4 @@
-import type { Sigs } from "@monorepo/types";
+import type { Sigs } from "@monorepo/types/const";
 import { getSigById, getSigColors } from "../lib/sigs";
 
 interface SigBadgeProps {

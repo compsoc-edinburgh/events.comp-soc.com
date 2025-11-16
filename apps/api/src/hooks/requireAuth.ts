@@ -1,7 +1,10 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { getAuth } from "@clerk/fastify";
 
 const requireAuth = async (request: FastifyRequest, reply: FastifyReply) => {
-  if (!request.auth?.userId) {
+  const { userId } = getAuth(request);
+
+  if (!userId) {
     return reply.code(401).send({ error: "Unauthorized" });
   }
 };

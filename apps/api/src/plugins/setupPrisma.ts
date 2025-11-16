@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import type { FastifyInstance } from "fastify";
+
+import { PrismaClient } from "../../generated/prisma/client";
 
 const prisma = new PrismaClient();
 
