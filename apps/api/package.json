@@ -9,8 +9,7 @@
     "lint": "eslint .",
     "build": "swc src -d dist",
     "start": "node dist/server.js",
-    "test": "vitest --run",
-    "test:watch": "vitest --watch",
+    "test": "vitest",
     "test:coverage": "vitest --coverage"
   },
   "keywords": [],
