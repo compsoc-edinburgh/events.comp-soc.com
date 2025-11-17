@@ -1,7 +1,7 @@
 import "dotenv/config";
 import Fastify from "fastify";
 import { clerkPlugin } from "@clerk/fastify";
-import { setupPrisma } from "./plugins/setupPrisma";
+import { setupPrisma } from "./plugins/setup-prisma";
 import usersRoutes from "./routes/users";
 import eventsRoutes from "./routes/events";
 
@@ -23,11 +23,11 @@ app.get("/health", async () => ({ status: "ok" }));
 async function start() {
   try {
     await app.listen({
-      port: Number(process.env.PORT) || 8080,
-      host: process.env.HOST || "0.0.0.0"
+      port: Number(process.env.PORT),
+      host: process.env.HOST
     });
 
-    app.log.info(`Server running on port ${process.env.PORT || 8080}`);
+    app.log.info(`Server running on port ${process.env.PORT}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);
@@ -43,4 +43,7 @@ async function start() {
   process.on("SIGTERM", shutdown);
 }
 
-start();
+start().catch((err) => {
+  app.log.error(err);
+  process.exit(1);
+});

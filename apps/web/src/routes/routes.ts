@@ -12,22 +12,22 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: Search,
+        Component: Search
       },
       {
         path: "events/create",
-        Component: Create,
+        Component: Create
       },
       {
         path: "events/:eventId",
-        Component: Details,
+        Component: Details
       },
       {
         path: "events/:eventId/manage",
-        Component: Manage,
-      },
-    ],
-  },
+        Component: Manage
+      }
+    ]
+  }
 ]);
 
 export default router;

@@ -2,7 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { UserRole } from "@monorepo/types/const";
 import { getAuth } from "@clerk/fastify";
 
-const requireCommitteeOrSigLeader = async (
+const requireRole = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
@@ -26,4 +26,4 @@ const requireCommitteeOrSigLeader = async (
   }
 };
 
-export default requireCommitteeOrSigLeader;
+export default requireRole;

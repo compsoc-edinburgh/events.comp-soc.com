@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import requireAuth from "../hooks/requireAuth";
+import requireAuth from "../hooks/require-auth";
 import { z } from "zod";
 import { UserUpdateSchema } from "@monorepo/types/schemas";
 import { getAuth } from "@clerk/fastify";

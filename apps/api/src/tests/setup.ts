@@ -1,5 +1,5 @@
 import Fastify, {type FastifyInstance, type FastifyPluginOptions} from "fastify";
-import { setupPrisma } from "../plugins/setupPrisma";
+import { setupPrisma } from "../plugins/setup-prisma";
 import eventsRoutes from "../routes/events";
 import usersRoutes from "../routes/users";
 import { clerkPlugin } from "@clerk/fastify";

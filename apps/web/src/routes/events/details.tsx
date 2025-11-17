@@ -56,16 +56,13 @@ function Details() {
     setIsRSVPModalOpen(false);
   };
 
-  useEffect(
-    () => {
-      if (isRSVPModalOpen) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "";
-      }
-    },
-    [isRSVPModalOpen]
-  );
+  useEffect(() => {
+    if (isRSVPModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [isRSVPModalOpen]);
 
   return (
     <div className="relative min-h-screen text-white bg-neutral-900">
@@ -78,11 +75,9 @@ function Details() {
           </h1>
 
           <div className="flex flex-wrap gap-2 mt-4">
-            {eventData.hero.tags.map((tag, index) =>
-              <Tag key={index}>
-                {tag}
-              </Tag>
-            )}
+            {eventData.hero.tags.map((tag, index) => (
+              <Tag key={index}>{tag}</Tag>
+            ))}
           </div>
 
           <Register
@@ -104,13 +99,12 @@ function Details() {
       </main>
 
       <AnimatePresence>
-        {isRSVPModalOpen &&
+        {isRSVPModalOpen && (
           <Backdrop>
             <button
               onClick={handleClose}
               className="fixed top-4 right-4 sm:top-6 sm:right-6 text-gray-300 hover:text-white text-2xl z-10 transition-colors touch-manipulation hover:cursor-pointer"
-              aria-label="Close modal"
-            >
+              aria-label="Close modal">
               ✕
             </button>
 
@@ -120,30 +114,23 @@ function Details() {
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 30, opacity: 0 }}
-                onClick={e => e.stopPropagation()}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold mb-2">
-                  Request to join
-                </h2>
+                onClick={(e) => e.stopPropagation()}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-2">Request to join</h2>
                 <p className="text-neutral-300 mb-6 sm:mb-8 text-sm sm:text-base">
                   Please enter your email address to request to join.
                 </p>
 
                 <form
                   className="flex flex-col gap-5 sm:gap-6"
-                  onSubmit={e => {
+                  onSubmit={(e) => {
                     e.preventDefault();
                     setIsPageLoading(true);
                     setTimeout(() => {
                       setIsPageLoading(false);
                     }, 1000);
-                  }}
-                >
+                  }}>
                   <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="email"
-                      className="text-sm font-medium text-neutral-200"
-                    >
+                    <label htmlFor="email" className="text-sm font-medium text-neutral-200">
                       Email Address
                     </label>
                     <input
@@ -164,34 +151,34 @@ function Details() {
                       }, 1000);
                     }}
                     whileTap={{ scale: isPageLoading ? 1 : 0.98 }}
-                    className="mt-2 bg-white text-black font-semibold py-3 rounded-lg hover:bg-neutral-200 transition-colors relative overflow-hidden"
-                  >
+                    className="mt-2 bg-white text-black font-semibold py-3 rounded-lg hover:bg-neutral-200 transition-colors relative overflow-hidden">
                     <AnimatePresence mode="popLayout" initial={false}>
-                      {isPageLoading
-                        ? <motion.p
-                            key="loading"
-                            variants={BUTTON_VARIANTS}
-                            initial="initial"
-                            animate="animate"
-                            exit="exit"
-                          >
-                            Loading...
-                          </motion.p>
-                        : <motion.p
-                            key="request-to-join"
-                            variants={BUTTON_VARIANTS}
-                            initial="initial"
-                            animate="animate"
-                            exit="exit"
-                          >
-                            I'm interested!
-                          </motion.p>}
+                      {isPageLoading ? (
+                        <motion.p
+                          key="loading"
+                          variants={BUTTON_VARIANTS}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit">
+                          Loading...
+                        </motion.p>
+                      ) : (
+                        <motion.p
+                          key="request-to-join"
+                          variants={BUTTON_VARIANTS}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit">
+                          I'm interested!
+                        </motion.p>
+                      )}
                     </AnimatePresence>
                   </motion.button>
                 </form>
               </motion.div>
             </div>
-          </Backdrop>}
+          </Backdrop>
+        )}
       </AnimatePresence>
     </div>
   );

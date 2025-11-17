@@ -35,9 +35,7 @@ function SearchEventCard({
       onClick={handleClick}
     >
       <div className="text-neutral-400 text-xs sm:text-sm mb-1 sm:mb-2">
-        <span className="font-medium">
-          {time}
-        </span>
+        <span className="font-medium">{time}</span>
       </div>
 
       <h3 className="font-semibold text-base sm:text-lg md:text-xl leading-tight group-hover:text-white mb-2">
@@ -49,9 +47,7 @@ function SearchEventCard({
       </div>
 
       <div className="flex items-center gap-1.5 text-xs sm:text-sm text-neutral-400 pt-2">
-        <span className="leading-snug truncate">
-          {event.location}
-        </span>
+        <span className="leading-snug truncate">{event.location}</span>
       </div>
     </div>
   );

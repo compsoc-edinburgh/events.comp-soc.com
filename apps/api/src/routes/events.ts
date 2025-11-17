@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import requireAuth from "../hooks/requireAuth";
+import requireAuth from "../hooks/require-auth";
 import { EventUpdateSchema } from "@monorepo/types/schemas";
 import z from "zod";
-import requireCommitteeOrSigLeader from "../hooks/requireCommitteeOrSigLeader";
+import requireRole from "../hooks/require-role";
 import { EventMapper } from "../mappers/event.mapper";
 
 export default async function eventsRoutes(app: FastifyInstance) {
@@ -34,7 +34,7 @@ export default async function eventsRoutes(app: FastifyInstance) {
 
   app.post(
     "/",
-    { preHandler: [requireAuth, requireCommitteeOrSigLeader] },
+    { preHandler: [requireAuth, requireRole] },
     async (request, reply) => {
       const parseResult = EventUpdateSchema.safeParse(request.body);
       if (!parseResult.success) {
@@ -56,7 +56,7 @@ export default async function eventsRoutes(app: FastifyInstance) {
 
   app.patch(
     "/:id",
-    { preHandler: [requireAuth, requireCommitteeOrSigLeader] },
+    { preHandler: [requireAuth, requireRole] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
 
@@ -89,7 +89,7 @@ export default async function eventsRoutes(app: FastifyInstance) {
 
   app.delete(
     "/:id",
-    { preHandler: [requireAuth, requireCommitteeOrSigLeader] },
+    { preHandler: [requireAuth, requireRole] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
 

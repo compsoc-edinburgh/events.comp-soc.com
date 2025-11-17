@@ -7,11 +7,7 @@ interface SigBadgeProps {
   className?: string;
 }
 
-export const SigBadge = ({
-  sig,
-  size = "md",
-  className = ""
-}: SigBadgeProps) => {
+export const SigBadge = ({ sig, size = "md", className = "" }: SigBadgeProps) => {
   const sizeClasses = {
     sm: {
       container: "px-2 py-0.5",

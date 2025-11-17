@@ -3,15 +3,14 @@
 :root {
   --background: #171717;
   --foreground: #ededed;
-  --font-tomorrow: "Tomorrow", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
+  --font-tomorrow:
+    "Tomorrow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--color-neutral-800);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-tomorrow);
-  --font-mono: var(--font-geist-mono);
 }
 
 html {
@@ -21,7 +20,6 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-tomorrow);
 }
 
 .scrollbar-hide {

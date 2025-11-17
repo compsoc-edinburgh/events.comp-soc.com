@@ -16,9 +16,7 @@ function Location({
   return (
     <section className="mt-8 sm:mt-10">
       <SectionHeader title="Location" />
-      <p className="text-neutral-200 leading-relaxed mb-1 text-sm sm:text-base">
-        {locationName}
-      </p>
+      <p className="text-neutral-200 leading-relaxed mb-1 text-sm sm:text-base">{locationName}</p>
       <p className="text-neutral-500 leading-relaxed mb-4 sm:mb-5 text-xs sm:text-sm">
         {description}
       </p>
