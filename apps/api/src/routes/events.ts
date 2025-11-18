@@ -17,7 +17,7 @@ export default async function eventsRoutes(app: FastifyInstance) {
     return reply.code(200).send(searchEvents);
   });
 
-  app.get("/:id", { preHandler: [requireAuth] }, async (request, reply) => {
+  app.get("/:id", async (request, reply) => {
     const { id } = request.params as { id: string };
 
     const event = await app.prisma.event.findUnique({

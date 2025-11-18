@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { SearchEvent } from "@monorepo/types";
 
 export const cn = (...inputs: ClassValue[]): string => {
   return twMerge(clsx(...inputs));
@@ -41,3 +42,33 @@ export const formatTime = (time: string) => {
     ?.toString()
     .padStart(2, "0")} ${period}`;
 };
+
+export function filterEvents(events: SearchEvent[], term: string) {
+  const t = term.trim().toLowerCase();
+  if (!t) return events;
+
+  return events.filter((event) => {
+    const searchable = [
+      event.heroTitle,
+      event.locationName,
+      event.organizerSig,
+      event.date,
+      event.time.start,
+      event.time.end
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return searchable.includes(t);
+  });
+}
+
+export function groupEvents(events: SearchEvent[]) {
+  return events.reduce<Record<string, SearchEvent[]>>((groups, event) => {
+    const date = event.date;
+    if (!groups[date]) groups[date] = [];
+    groups[date].push(event);
+    return groups;
+  }, {});
+}

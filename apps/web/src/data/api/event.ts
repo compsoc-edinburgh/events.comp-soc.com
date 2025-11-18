@@ -17,7 +17,7 @@ const getEvents = async () => {
 };
 
 const getEvent = async (id: string) => {
-  return api.get<Event[]>(`${ROUTE_URL}/${id}`);
+  return api.get<Event>(`${ROUTE_URL}/${id}`);
 };
 
 const deleteEvent = async (id: string) => {

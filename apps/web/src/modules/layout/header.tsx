@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
 
 const CompSocImage = () => (
   <motion.img
@@ -12,9 +13,11 @@ const CompSocImage = () => (
 );
 
 function Header() {
+  const navigate = useNavigate();
+
   return (
-    <header className="w-full flex items-center justify-start px-6 py-4 fixed top-0 left-0 z-50 backdrop-blur-md sm:backdrop-blur-none">
-      <a href="https://comp-soc.com" target="_blank" rel="noopener noreferrer">
+    <header className="w-full flex items-center justify-start px-6 py-4 fixed top-0 left-0 z-50 backdrop-blur-md sm:backdrop-blur-none hover:cursor-pointer">
+      <a onClick={() => navigate("")}>
         <CompSocImage />
       </a>
     </header>

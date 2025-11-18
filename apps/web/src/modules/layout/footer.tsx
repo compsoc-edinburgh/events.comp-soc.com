@@ -1,6 +1,6 @@
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
-import Link from "../components/link";
-import { LINKS, SOCIAL_LINKS } from "../lib/const";
+import Link from "../../components/link.tsx";
+import { LINKS, SOCIAL_LINKS } from "../../lib/const.ts";
 
 const MadeBy = () => (
   <p className="text-xs text-neutral-600 text-center select-none mt-4 flex gap-1 items-center justify-center flex-wrap">
@@ -9,7 +9,8 @@ const MadeBy = () => (
       href="https://danyilbutov.com"
       target="_blank"
       rel="noopener noreferrer"
-      className="hover:text-white transition-colors duration-200 flex items-center gap-1">
+      className="hover:text-white transition-colors duration-200 flex items-center gap-1"
+    >
       Danyil Butov
       <ArrowTopRightIcon className="w-3 h-3" />
     </a>
@@ -25,7 +26,8 @@ function Footer() {
             <a
               key={link.href}
               href={link.href}
-              className="hover:text-white transition-colors duration-200 cursor-pointer">
+              className="hover:text-white transition-colors duration-200 cursor-pointer"
+            >
               {link.label}
             </a>
           ))}

@@ -31,9 +31,7 @@ const COMPONENTS = {
       {children}
     </ol>
   ),
-  li: ({ children }: { children: ReactNode }) => (
-    <li className="text-neutral-200">{children}</li>
-  ),
+  li: ({ children }: { children: ReactNode }) => <li className="text-neutral-200">{children}</li>,
   strong: ({ children }: { children: ReactNode }) => (
     <strong className="font-semibold text-white">{children}</strong>
   ),

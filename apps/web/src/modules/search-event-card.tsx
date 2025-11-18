@@ -18,7 +18,8 @@ function SearchEventCard({ event }: { event: SearchEvent }) {
       style={{
         transitionTimingFunction: "ease-out"
       }}
-      onClick={handleClick}>
+      onClick={handleClick}
+    >
       <div className="text-neutral-400 text-xs sm:text-sm mb-1 sm:mb-2">
         <span className="font-medium">{time}</span>
       </div>

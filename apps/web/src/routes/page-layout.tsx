@@ -1,6 +1,6 @@
-import { Outlet } from "react-router-dom";
-import Header from "../modules/header";
-import Footer from "../modules/footer";
+import { Outlet, ScrollRestoration } from "react-router-dom";
+import Header from "../modules/layout/header.tsx";
+import Footer from "../modules/layout/footer.tsx";
 
 function PageLayout() {
   return (
@@ -12,6 +12,7 @@ function PageLayout() {
           <Outlet />
 
           <Footer />
+          <ScrollRestoration />
         </div>
       </main>
     </div>
