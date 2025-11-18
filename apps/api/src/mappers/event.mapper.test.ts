@@ -1,13 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { EventMapper } from "./event.mapper";
 import type { Event as PrismaEvent } from "../../generated/prisma/client";
-import type { z } from "zod";
-import { EventUpdateSchema } from "@monorepo/types/schemas";
+import type { EventCreateInput } from "@monorepo/types/schemas";
 
 describe("EventMapper", () => {
   describe("toDB", () => {
     it("should map event input to database format", () => {
-      const input: z.infer<typeof EventUpdateSchema> = {
+      const input: EventCreateInput = {
         organizerSig: "edinburghAI",
         hero: {
           title: "AI Workshop",
@@ -53,7 +52,7 @@ describe("EventMapper", () => {
     });
 
     it("should handle optional fields with defaults", () => {
-      const input: z.infer<typeof EventUpdateSchema> = {
+      const input: EventCreateInput = {
         organizerSig: "gameDevSig",
         hero: {
           title: "Game Jam"

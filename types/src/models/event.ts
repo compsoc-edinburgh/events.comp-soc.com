@@ -1,5 +1,5 @@
 import type { Form } from "./form";
-import type { Sigs } from "../const/sigs";
+import type { Sigs } from "../const";
 
 type Hero = {
   title: string;
@@ -33,17 +33,15 @@ export type Event = {
   aboutMarkdown: string;
   location: Location;
   form?: Form;
-
   date: string;
   time: Time;
-
   createdAt: string;
   updatedAt: string;
 };
 
 export type SearchEvent = {
   id: string;
-  organizerSig: string;
+  organizerSig: Sigs;
   heroTitle: string;
   date: string;
   time: Time;

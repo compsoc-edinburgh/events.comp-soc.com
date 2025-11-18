@@ -4,8 +4,18 @@ import { clerkPlugin } from "@clerk/fastify";
 import { setupPrisma } from "./plugins/setup-prisma";
 import usersRoutes from "./routes/users";
 import eventsRoutes from "./routes/events";
+import fastifyCors from "@fastify/cors";
 
 const app = Fastify({ logger: true });
+
+// TODO: Change it later
+app.register(fastifyCors, {
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+});
+
 
 // Auth
 await app.register(clerkPlugin);

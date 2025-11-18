@@ -1,25 +1,11 @@
-import { Sigs } from "@monorepo/types/const";
 import { formatTime } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
 import { SigBadge } from "../components/sig-badge";
+import type { SearchEvent } from "@monorepo/types";
 
-function SearchEventCard({
-  event
-}: {
-  event: {
-    id: string;
-    organizer: { sig: Sigs };
-    hero: { title: string; tags: string[] };
-    description: string;
-    date: string;
-    startTime: string;
-    endTime: string;
-    location: string;
-    image: string;
-  };
-}) {
+function SearchEventCard({ event }: { event: SearchEvent }) {
   const navigate = useNavigate();
-  const time = formatTime(event.startTime);
+  const time = formatTime(event.time.start);
 
   const handleClick = () => {
     navigate(`/events/${event.id}`);
@@ -32,22 +18,21 @@ function SearchEventCard({
       style={{
         transitionTimingFunction: "ease-out"
       }}
-      onClick={handleClick}
-    >
+      onClick={handleClick}>
       <div className="text-neutral-400 text-xs sm:text-sm mb-1 sm:mb-2">
         <span className="font-medium">{time}</span>
       </div>
 
       <h3 className="font-semibold text-base sm:text-lg md:text-xl leading-tight group-hover:text-white mb-2">
-        {event.hero.title}
+        {event.heroTitle}
       </h3>
 
       <div className="mb-3">
-        <SigBadge sig={event.organizer.sig} size="md" />
+        <SigBadge sig={event.organizerSig} size="md" />
       </div>
 
       <div className="flex items-center gap-1.5 text-xs sm:text-sm text-neutral-400 pt-2">
-        <span className="leading-snug truncate">{event.location}</span>
+        <span className="leading-snug truncate">{event.locationName}</span>
       </div>
     </div>
   );

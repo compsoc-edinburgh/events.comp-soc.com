@@ -3,10 +3,13 @@ import type {
   Event as EventModel,
   SearchEvent as SearchEventModel
 } from "@monorepo/types/models";
-import type { z } from "zod";
-import { EventUpdateSchema } from "@monorepo/types/schemas";
+import type {
+  EventCreateInput,
+  EventUpdateInput
+} from "@monorepo/types/schemas";
+import type {Sigs} from "@monorepo/types";
 
-type EventInput = z.infer<typeof EventUpdateSchema>;
+type EventInput = EventCreateInput | EventUpdateInput;
 
 export const EventMapper = {
   toDB,
@@ -18,20 +21,20 @@ export function toDB(
   input: EventInput
 ): Omit<PrismaEvent, "id" | "createdAt" | "updatedAt"> {
   return {
-    organizerSig: input.organizerSig,
-    heroTitle: input.hero.title,
-    heroTagsCsv: input.hero.tags?.join(",") || "",
+    organizerSig: input.organizerSig!,
+    heroTitle: input.hero!.title,
+    heroTagsCsv: input.hero?.tags?.join(",") || "",
     regEnabled: input.registration?.enabled ?? true,
     regTitle: input.registration?.title || "",
     regDescription: input.registration?.description || "",
     regButtonText: input.registration?.buttonText || "",
-    aboutMarkdown: input.aboutMarkdown,
-    locationName: input.location.name,
-    locationDesc: input.location.description || "",
-    mapEmbedUrl: input.location.mapUrl || "",
-    mapTitle: input.location.mapTitle || "",
-    date: input.date,
-    time: input.time,
+    aboutMarkdown: input.aboutMarkdown!,
+    locationName: input.location!.name,
+    locationDesc: input.location?.description || "",
+    mapEmbedUrl: input.location?.mapUrl || "",
+    mapTitle: input.location?.mapTitle || "",
+    date: input.date!,
+    time: input.time!,
     form: input.form || null
   };
 }
@@ -42,7 +45,7 @@ export function toModel(dbEvent: PrismaEvent): EventModel {
 
   return {
     id: dbEvent.id,
-    organizerSig: dbEvent.organizerSig as EventModel["organizerSig"],
+    organizerSig: dbEvent.organizerSig as Sigs,
     hero: {
       title: dbEvent.heroTitle,
       tags: dbEvent.heroTagsCsv
@@ -81,7 +84,7 @@ export function toSearch(dbEvent: PrismaEvent): SearchEventModel {
 
   return {
     id: dbEvent.id,
-    organizerSig: dbEvent.organizerSig,
+    organizerSig: dbEvent.organizerSig as Sigs,
     heroTitle: dbEvent.heroTitle,
     date: dbEvent.date,
     time: time,

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "Shared types, schemas, and constants for the CompSoc events monorepo",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -23,8 +24,8 @@
       "default": "./src/const/index.ts"
     },
     "./utils": {
-      "types": "./src/utils/index.ts",
-      "default": "./src/utils/index.ts"
+      "types": "./src/utils.ts",
+      "default": "./src/utils.ts"
     }
   },
   "scripts": {

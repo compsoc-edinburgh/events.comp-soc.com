@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import requireAuth from "../hooks/require-auth";
 import { z } from "zod";
-import { UserUpdateSchema } from "@monorepo/types/schemas";
+import { UserCreateSchema, UserUpdateSchema } from "@monorepo/types/schemas";
 import { getAuth } from "@clerk/fastify";
 
 export default async function usersRoutes(app: FastifyInstance) {
@@ -22,7 +22,7 @@ export default async function usersRoutes(app: FastifyInstance) {
   app.post("/", { preHandler: [requireAuth] }, async (request, reply) => {
     const { userId } = getAuth(request);
 
-    const parseResult = UserUpdateSchema.safeParse(request.body);
+    const parseResult = UserCreateSchema.safeParse(request.body);
     if (!parseResult.success) {
       return reply.code(400).send({
         error: "Invalid body",
@@ -40,14 +40,15 @@ export default async function usersRoutes(app: FastifyInstance) {
       });
     }
 
-    const { email, firstName, lastName } = parseResult.data;
+    const { email, firstName, lastName, role } = parseResult.data;
 
     const newUser = await app.prisma.user.create({
       data: {
         id: userId,
         email,
         firstName,
-        lastName
+        lastName,
+        role
       }
     });
 

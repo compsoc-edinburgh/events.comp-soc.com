@@ -1,5 +1,5 @@
 type BaseField = {
-  key: string;
+  id: string;
   label: string;
   required?: boolean;
 };

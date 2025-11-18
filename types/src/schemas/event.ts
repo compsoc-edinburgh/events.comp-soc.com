@@ -1,33 +1,33 @@
-import z from "zod";
-import FormSchema from "./form";
+import { z } from "zod";
+import { FormSchema } from "./form";
 import { Sigs } from "../const";
 
-export const TimeSchema = z.object({
+const TimeSchema = z.object({
   start: z.string().min(1, "Start time is required"),
   end: z.string().optional()
 });
 
-export const HeroSchema = z.object({
+const HeroSchema = z.object({
   title: z.string().min(1, "Hero title is required"),
   tags: z.array(z.string()).optional()
 });
 
-export const RegistrationSchema = z.object({
+const RegistrationSchema = z.object({
   enabled: z.boolean().default(true),
   title: z.string().optional(),
   description: z.string().optional(),
   buttonText: z.string().optional()
 });
 
-export const LocationSchema = z.object({
+const LocationSchema = z.object({
   name: z.string().min(1, "Location name is required"),
   description: z.string().optional(),
-  mapUrl: z.string().optional(),
+  mapUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   mapTitle: z.string().optional()
 });
 
-const EventUpdateSchema = z.object({
-  organizerSig: z.enum(Object.values(Sigs)),
+export const EventCreateSchema = z.object({
+  organizerSig: z.nativeEnum(Sigs),
   hero: HeroSchema,
   registration: RegistrationSchema.optional(),
   aboutMarkdown: z.string().min(1, "About markdown is required"),
@@ -37,4 +37,7 @@ const EventUpdateSchema = z.object({
   time: TimeSchema
 });
 
-export default EventUpdateSchema;
+export const EventUpdateSchema = EventCreateSchema.partial();
+
+export type EventCreateInput = z.infer<typeof EventCreateSchema>;
+export type EventUpdateInput = z.infer<typeof EventUpdateSchema>;

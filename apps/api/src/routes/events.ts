@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import requireAuth from "../hooks/require-auth";
-import { EventUpdateSchema } from "@monorepo/types/schemas";
+import { EventCreateSchema, EventUpdateSchema } from "@monorepo/types/schemas";
 import z from "zod";
 import requireRole from "../hooks/require-role";
 import { EventMapper } from "../mappers/event.mapper";
@@ -36,7 +36,7 @@ export default async function eventsRoutes(app: FastifyInstance) {
     "/",
     { preHandler: [requireAuth, requireRole] },
     async (request, reply) => {
-      const parseResult = EventUpdateSchema.safeParse(request.body);
+      const parseResult = EventCreateSchema.safeParse(request.body);
       if (!parseResult.success) {
         return reply.code(400).send({
           error: "Invalid body",
