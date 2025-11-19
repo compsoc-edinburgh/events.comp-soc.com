@@ -2,13 +2,14 @@ import { describe, it, beforeAll, afterAll, beforeEach, expect } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { App } from "../tests/setup";
 
-import { Sigs, UserRole } from "@monorepo/types/const";
+import { EventState, Sigs, UserRole } from "@monorepo/types/const";
 import { EventMapper } from "../mappers/event.mapper";
 
 let app: FastifyInstance;
 
 const baseEventData = {
   organizerSig: Sigs.TypeSig,
+  state: EventState.Uploaded,
   hero: {
     title: "vite-test: Test-Event",
     tags: ["Math", "Lean"]
@@ -49,6 +50,8 @@ describe("Events API", () => {
   });
 
   beforeEach(async () => {
+    await app.prisma.event.deleteMany();
+
     await app.prisma.user.deleteMany({ where: { id: "test-user" } });
 
     await app.prisma.user.create({
@@ -71,6 +74,56 @@ describe("Events API", () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.json()).toEqual([]);
+    });
+
+    it("hides draft events from regular users", async () => {
+      const draftEvent = await app.prisma.event.create({
+        data: {
+          ...EventMapper.toDB(baseEventData),
+          state: EventState.Draft
+        }
+      });
+
+      await app.prisma.user.update({
+        where: { id: "test-user" },
+        data: { role: UserRole.User }
+      });
+
+      const res = await app.inject({
+        method: "GET",
+        url: "/v1/events"
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual([]);
+
+      await app.prisma.event.delete({
+        where: { id: draftEvent.id }
+      });
+    });
+
+    it("allows committee to see draft events", async () => {
+      const draftEvent = await app.prisma.event.create({
+        data: {
+          ...EventMapper.toDB(baseEventData),
+          state: EventState.Draft,
+          heroTitle: "vite-test: Draft Event"
+        }
+      });
+
+      const res = await app.inject({
+        method: "GET",
+        url: "/v1/events"
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: draftEvent.id })])
+      );
+
+      await app.prisma.event.delete({
+        where: { id: draftEvent.id }
+      });
     });
   });
 
@@ -123,6 +176,58 @@ describe("Events API", () => {
       });
 
       expect(res.statusCode).toBe(404);
+    });
+
+    it("restricts draft event access for regular users", async () => {
+      const created = await app.prisma.event.create({
+        data: {
+          ...EventMapper.toDB(baseEventData),
+          state: EventState.Draft
+        }
+      });
+
+      await app.prisma.user.update({
+        where: { id: "test-user" },
+        data: { role: UserRole.User }
+      });
+
+      const res = await app.inject({
+        method: "GET",
+        url: `/v1/events/${created.id}`
+      });
+
+      expect(res.statusCode).toBe(404);
+
+      await app.prisma.user.update({
+        where: { id: "test-user" },
+        data: { role: UserRole.Committee }
+      });
+
+      await app.prisma.event.delete({
+        where: { id: created.id }
+      });
+    });
+
+    it("allows committee to view draft event", async () => {
+      const created = await app.prisma.event.create({
+        data: {
+          ...EventMapper.toDB(baseEventData),
+          state: EventState.Draft,
+          heroTitle: "vite-test: Draft Detail Event"
+        }
+      });
+
+      const res = await app.inject({
+        method: "GET",
+        url: `/v1/events/${created.id}`
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json().state).toBe(EventState.Draft);
+
+      await app.prisma.event.delete({
+        where: { id: created.id }
+      });
     });
   });
 

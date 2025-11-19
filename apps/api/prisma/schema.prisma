@@ -17,6 +17,11 @@ enum UserRole {
   SIGS_LEADER
 }
 
+enum EventState {
+  DRAFT
+  UPLOADED
+}
+
 model User {
   id        String   @id
   email     String   @unique
@@ -34,6 +39,7 @@ model Event {
   id             String  @id @default(uuid())
 
   organizerSig   String
+  state          EventState @default(DRAFT)
 
   heroTitle      String
   heroTagsCsv    String

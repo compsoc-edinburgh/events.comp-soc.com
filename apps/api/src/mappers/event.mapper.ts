@@ -7,7 +7,8 @@ import type {
   EventCreateInput,
   EventUpdateInput
 } from "@monorepo/types/schemas";
-import type {Sigs} from "@monorepo/types";
+import type { Sigs } from "@monorepo/types";
+import { EventState } from "@monorepo/types/const";
 
 type EventInput = EventCreateInput | EventUpdateInput;
 
@@ -22,6 +23,7 @@ export function toDB(
 ): Omit<PrismaEvent, "id" | "createdAt" | "updatedAt"> {
   return {
     organizerSig: input.organizerSig!,
+    state: input.state || EventState.Draft,
     heroTitle: input.hero!.title,
     heroTagsCsv: input.hero?.tags?.join(",") || "",
     regEnabled: input.registration?.enabled ?? true,
@@ -46,6 +48,7 @@ export function toModel(dbEvent: PrismaEvent): EventModel {
   return {
     id: dbEvent.id,
     organizerSig: dbEvent.organizerSig as Sigs,
+    state: dbEvent.state as EventModel["state"],
     hero: {
       title: dbEvent.heroTitle,
       tags: dbEvent.heroTagsCsv
@@ -85,6 +88,7 @@ export function toSearch(dbEvent: PrismaEvent): SearchEventModel {
   return {
     id: dbEvent.id,
     organizerSig: dbEvent.organizerSig as Sigs,
+    state: dbEvent.state as SearchEventModel["state"],
     heroTitle: dbEvent.heroTitle,
     date: dbEvent.date,
     time: time,

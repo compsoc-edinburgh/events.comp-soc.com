@@ -1,13 +1,41 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import requireAuth from "../hooks/require-auth";
 import { EventCreateSchema, EventUpdateSchema } from "@monorepo/types/schemas";
 import z from "zod";
 import requireRole from "../hooks/require-role";
 import { EventMapper } from "../mappers/event.mapper";
+import { EventState, UserRole } from "@monorepo/types/const";
+import { getAuth } from "@clerk/fastify";
+
+const privilegedRoles: UserRole[] = [UserRole.Committee, UserRole.SigsLeader];
+
+const canViewDrafts = (role: UserRole | null) => {
+  if (!role) return false;
+  return privilegedRoles.includes(role);
+};
+
+async function getUserRole(request: FastifyRequest): Promise<UserRole | null> {
+  const { userId } = getAuth(request);
+
+  if (!userId) {
+    return null;
+  }
+
+  const user = await request.server.prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true }
+  });
+
+  return (user?.role as UserRole) ?? null;
+}
 
 export default async function eventsRoutes(app: FastifyInstance) {
-  app.get("/", async (_, reply) => {
+  app.get("/", async (request, reply) => {
+    const role = await getUserRole(request);
+    const includeDrafts = canViewDrafts(role);
+
     const events = await app.prisma.event.findMany({
+      where: includeDrafts ? undefined : { state: EventState.Uploaded },
       orderBy: {
         date: "desc"
       }
@@ -26,6 +54,13 @@ export default async function eventsRoutes(app: FastifyInstance) {
 
     if (!event) {
       return reply.code(404).send({ error: "Event not found" });
+    }
+
+    if (event.state === EventState.Draft) {
+      const role = await getUserRole(request);
+      if (!canViewDrafts(role)) {
+        return reply.code(404).send({ error: "Event not found" });
+      }
     }
 
     const eventOutput = EventMapper.toModel(event);

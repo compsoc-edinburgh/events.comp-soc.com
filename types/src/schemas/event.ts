@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { FormSchema } from "./form";
-import { Sigs } from "../const";
+import { EventState, Sigs } from "../const";
 
 const TimeSchema = z.object({
   start: z.string().min(1, "Start time is required"),
@@ -27,7 +27,8 @@ const LocationSchema = z.object({
 });
 
 export const EventCreateSchema = z.object({
-  organizerSig: z.nativeEnum(Sigs),
+  organizerSig: z.enum(Sigs),
+  state: z.enum(EventState).default(EventState.Draft),
   hero: HeroSchema,
   registration: RegistrationSchema.optional(),
   aboutMarkdown: z.string().min(1, "About markdown is required"),

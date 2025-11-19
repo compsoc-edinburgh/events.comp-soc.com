@@ -2,12 +2,14 @@ import { describe, it, expect } from "vitest";
 import { EventMapper } from "./event.mapper";
 import type { Event as PrismaEvent } from "../../generated/prisma/client";
 import type { EventCreateInput } from "@monorepo/types/schemas";
+import { EventState } from "@monorepo/types/const";
 
 describe("EventMapper", () => {
   describe("toDB", () => {
     it("should map event input to database format", () => {
       const input: EventCreateInput = {
         organizerSig: "edinburghAI",
+        state: EventState.Uploaded,
         hero: {
           title: "AI Workshop",
           tags: ["AI", "Machine Learning"]
@@ -34,6 +36,7 @@ describe("EventMapper", () => {
 
       expect(result).toEqual({
         organizerSig: "edinburghAI",
+        state: EventState.Uploaded,
         heroTitle: "AI Workshop",
         heroTagsCsv: "AI,Machine Learning",
         regEnabled: true,
@@ -54,6 +57,7 @@ describe("EventMapper", () => {
     it("should handle optional fields with defaults", () => {
       const input: EventCreateInput = {
         organizerSig: "gameDevSig",
+        state: EventState.Draft,
         hero: {
           title: "Game Jam"
         },
@@ -75,6 +79,7 @@ describe("EventMapper", () => {
       expect(result.locationDesc).toBe("");
       expect(result.mapEmbedUrl).toBe("");
       expect(result.mapTitle).toBe("");
+      expect(result.state).toBe(EventState.Draft);
     });
   });
 
@@ -83,6 +88,7 @@ describe("EventMapper", () => {
       const dbEvent: PrismaEvent = {
         id: "event-123",
         organizerSig: "edinburghAI",
+        state: EventState.Uploaded,
         heroTitle: "AI Workshop",
         heroTagsCsv: "AI,Machine Learning",
         regEnabled: true,
@@ -106,6 +112,7 @@ describe("EventMapper", () => {
       expect(result).toEqual({
         id: "event-123",
         organizerSig: "edinburghAI",
+        state: EventState.Uploaded,
         hero: {
           title: "AI Workshop",
           tags: ["AI", "Machine Learning"]
@@ -135,6 +142,7 @@ describe("EventMapper", () => {
       const dbEvent: PrismaEvent = {
         id: "event-123",
         organizerSig: "gameDevSig",
+        state: EventState.Draft,
         heroTitle: "Game Jam",
         heroTagsCsv: "",
         regEnabled: false,
@@ -165,6 +173,7 @@ describe("EventMapper", () => {
       const dbEvent: PrismaEvent = {
         id: "event-123",
         organizerSig: "edinburghAI",
+        state: EventState.Uploaded,
         heroTitle: "AI Workshop",
         heroTagsCsv: "AI,ML",
         regEnabled: true,
@@ -188,6 +197,7 @@ describe("EventMapper", () => {
       expect(result).toEqual({
         id: "event-123",
         organizerSig: "edinburghAI",
+        state: EventState.Draft,
         heroTitle: "AI Workshop",
         date: "2025-12-01",
         time: { start: "18:00", end: "20:00" },
