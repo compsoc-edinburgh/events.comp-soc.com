@@ -1,12 +1,21 @@
 import { Sigs } from "@monorepo/types/const";
 import { ALL_SIGS, getSigColors } from "../lib/sigs";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "../lib/utils";
 
 interface SIGsCarouselProps {
   organizer?: Sigs;
+  isScrollable?: boolean;
+  selectable?: boolean;
+  onSelect?: (sig: Sigs) => void;
 }
 
-export const SIGsCarousel = ({ organizer = Sigs.Compsoc }: SIGsCarouselProps) => {
+export const SIGsCarousel = ({
+  organizer = Sigs.Compsoc,
+  isScrollable = false,
+  selectable = false,
+  onSelect
+}: SIGsCarouselProps) => {
   const organizerColors = getSigColors(organizer);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const organizerRef = useRef<HTMLDivElement>(null);
@@ -51,31 +60,38 @@ export const SIGsCarousel = ({ organizer = Sigs.Compsoc }: SIGsCarouselProps) =>
     }
   }, [orderedSigs]);
 
+  const handleSelect = (sigId: string) => {
+    if (!selectable) return;
+    onSelect?.(sigId as Sigs);
+  };
+
   return (
     <div className="mb-6 sm:mb-8 w-full">
       <div className="relative">
-        {/* Left fade gradient */}
         <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-16 bg-linear-to-r from-neutral-900 to-transparent z-10 pointer-events-none" />
-
-        {/* Right fade gradient */}
         <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 bg-linear-to-l from-neutral-900 to-transparent z-10 pointer-events-none" />
 
         <div
           ref={scrollContainerRef}
-          className="flex justify-start overflow-x-hidden pb-2 scrollbar-hide"
-        >
-          <div className="flex items-center gap-2 sm:gap-4">
+          className={cn(
+            "flex justify-start pb-2 scrollbar-hide",
+            isScrollable ? "overflow-x-auto" : "overflow-x-hidden"
+          )}>
+          <div className="flex items-center gap-2 sm:gap-4 pr-8">
             {orderedSigs.map((sig) => {
               const isOrganizer = sig.id === organizer;
               return (
                 <div
                   key={sig.id}
                   ref={isOrganizer ? organizerRef : null}
-                  className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all whitespace-nowrap ${
+                  onClick={() => handleSelect(sig.id)}
+                  className={cn(
+                    "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all whitespace-nowrap",
+                    selectable ? "cursor-pointer" : "cursor-default",
                     isOrganizer
                       ? ""
-                      : "opacity-30 hover:opacity-50 bg-neutral-800 border border-neutral-700"
-                  }`}
+                      : "opacity-30 bg-neutral-800 border border-neutral-700 hover:opacity-60"
+                  )}
                   style={
                     isOrganizer
                       ? {
@@ -85,8 +101,7 @@ export const SIGsCarousel = ({ organizer = Sigs.Compsoc }: SIGsCarouselProps) =>
                           borderStyle: "solid"
                         }
                       : undefined
-                  }
-                >
+                  }>
                   <img
                     src={sig.logo}
                     alt={`${sig.name} logo`}
@@ -94,8 +109,7 @@ export const SIGsCarousel = ({ organizer = Sigs.Compsoc }: SIGsCarouselProps) =>
                   />
                   <span
                     className="text-xs sm:text-sm font-medium"
-                    style={isOrganizer ? { color: organizerColors.text } : { color: "#a3a3a3" }}
-                  >
+                    style={isOrganizer ? { color: organizerColors.text } : { color: "#a3a3a3" }}>
                     {sig.name}
                   </span>
                 </div>

@@ -14,7 +14,7 @@ export function SearchBar({ value, onChange }: Props) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search events..."
-        className="w-full bg-neutral-800/80 border border-neutral-700 rounded-lg py-2 pl-9 pr-3 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-neutral-500 focus:outline-none"
+        className="w-full bg-neutral-800/80 border border-neutral-700 rounded-lg py-2.5 pl-9 pr-3 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-neutral-500 focus:outline-none"
       />
     </label>
   );
