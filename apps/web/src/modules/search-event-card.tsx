@@ -2,6 +2,7 @@ import { formatTime } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
 import { SigBadge } from "../components/sig-badge";
 import type { SearchEvent } from "@monorepo/types";
+import { EventState } from "@monorepo/types/const";
 
 function SearchEventCard({ event }: { event: SearchEvent }) {
   const navigate = useNavigate();
@@ -20,8 +21,13 @@ function SearchEventCard({ event }: { event: SearchEvent }) {
       }}
       onClick={handleClick}
     >
-      <div className="text-neutral-400 text-xs sm:text-sm mb-1 sm:mb-2">
+      <div className="flex items-center justify-between text-neutral-400 text-xs sm:text-sm mb-1 sm:mb-2">
         <span className="font-medium">{time}</span>
+        {event.state === EventState.Draft && (
+          <span className="ml-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-200">
+            Draft
+          </span>
+        )}
       </div>
 
       <h3 className="font-semibold text-base sm:text-lg md:text-xl leading-tight group-hover:text-white mb-2">

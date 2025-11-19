@@ -10,6 +10,8 @@ import { LoadingState } from "../../modules/states/loading";
 import { ErrorState } from "../../modules/states/error";
 import { EmptyState } from "../../modules/states/empty";
 import RegistrationWindow from "../../modules/registration-window";
+import { EventState } from "@monorepo/types/const";
+import { formatTime } from "../../lib/utils.ts";
 
 function Details() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -58,11 +60,28 @@ function Details() {
     );
   }
 
+  const dateString = new Date(event.date).toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "short"
+  });
+
+  const time = [event.time.start, event.time.end]
+    .filter(Boolean)
+    .map((time) => (time ? formatTime(time) : null))
+    .join(" - ");
+
   return (
     <div className="relative min-h-screen text-white bg-neutral-900">
       <main className="flex flex-col items-center justify-center px-4 sm:px-6 pb-10">
         <div className="max-w-2xl w-full">
           <SIGsCarousel organizer={event.organizerSig} />
+
+          {event.state === EventState.Draft && (
+            <div className="mt-6 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+              This event is still a draft — only committee members can see it until you upload.
+            </div>
+          )}
 
           <h1 className="font-bold text-2xl sm:text-3xl md:text-4xl leading-tight">
             {event.hero.title}
@@ -75,6 +94,11 @@ function Details() {
               ))}
             </div>
           )}
+
+          <div className="mt-8 sm:mt-12 rounded-xl border border-neutral-800 bg-neutral-800/20 p-4 space-y-1">
+            <p className="font-semibold text-white">{dateString}</p>
+            <p className="text-neutral-300">{time}</p>
+          </div>
 
           {registration?.enabled && (
             <Register
