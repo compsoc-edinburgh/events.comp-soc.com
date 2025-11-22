@@ -1,3 +1,6 @@
+/**
+ * All Sigs that are currently in Comp-Soc.
+ */
 export const Sigs = {
   Compsoc: "compsoc",
   ProjectShare: "projectShare",
@@ -10,7 +13,7 @@ export const Sigs = {
   SigInt: "sigInt",
   GameDevSig: "gameDevSig",
   EdinburghAI: "edinburghAI",
-  QuantSig: "quantSig"
+  QuantSig: "quantSig",
 } as const;
 
 export type Sigs = (typeof Sigs)[keyof typeof Sigs];

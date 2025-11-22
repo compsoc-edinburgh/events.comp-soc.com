@@ -1,21 +1,21 @@
-import type { Event as PrismaEvent } from "../../generated/prisma/client";
+import type { Sigs } from "@monorepo/types";
+import { EventState } from "@monorepo/types/const";
 import type {
   Event as EventModel,
-  SearchEvent as SearchEventModel
+  SearchEvent as SearchEventModel,
 } from "@monorepo/types/models";
 import type {
   EventCreateInput,
-  EventUpdateInput
+  EventUpdateInput,
 } from "@monorepo/types/schemas";
-import type { Sigs } from "@monorepo/types";
-import { EventState } from "@monorepo/types/const";
+import type { Event as PrismaEvent } from "../../generated/prisma/client";
 
 type EventInput = EventCreateInput | EventUpdateInput;
 
 export const EventMapper = {
   toDB,
   toModel,
-  toSearch
+  toSearch,
 };
 
 export function toDB(
@@ -37,7 +37,7 @@ export function toDB(
     mapTitle: input.location?.mapTitle || "",
     date: input.date!,
     time: input.time!,
-    form: input.form || null
+    form: input.form || null,
   };
 }
 
@@ -53,7 +53,7 @@ export function toModel(dbEvent: PrismaEvent): EventModel {
       title: dbEvent.heroTitle,
       tags: dbEvent.heroTagsCsv
         ? dbEvent.heroTagsCsv.split(",").filter(Boolean)
-        : undefined
+        : [],
     },
     registration:
       dbEvent.regEnabled ||
@@ -63,22 +63,25 @@ export function toModel(dbEvent: PrismaEvent): EventModel {
         ? {
             enabled: dbEvent.regEnabled,
             title: dbEvent.regTitle,
-            description: dbEvent.regDescription || undefined,
-            buttonText: dbEvent.regButtonText
+            description: dbEvent.regDescription || null,
+            buttonText: dbEvent.regButtonText,
           }
-        : undefined,
+        : null,
     aboutMarkdown: dbEvent.aboutMarkdown,
     location: {
       name: dbEvent.locationName,
-      description: dbEvent.locationDesc || undefined,
-      mapUrl: dbEvent.mapEmbedUrl || undefined,
-      mapTitle: dbEvent.mapTitle || undefined
+      description: dbEvent.locationDesc || null,
+      mapUrl: dbEvent.mapEmbedUrl || null,
+      mapTitle: dbEvent.mapTitle || null,
     },
-    form: form || undefined,
+    form: form || null,
     date: dbEvent.date,
-    time: time,
+    time: {
+      start: time.start,
+      end: time.end || null,
+    },
     createdAt: dbEvent.createdAt.toISOString(),
-    updatedAt: dbEvent.updatedAt.toISOString()
+    updatedAt: dbEvent.updatedAt.toISOString(),
   };
 }
 
@@ -91,7 +94,10 @@ export function toSearch(dbEvent: PrismaEvent): SearchEventModel {
     state: dbEvent.state as SearchEventModel["state"],
     heroTitle: dbEvent.heroTitle,
     date: dbEvent.date,
-    time: time,
-    locationName: dbEvent.locationName
+    time: {
+      start: time.start,
+      end: time.end || null,
+    },
+    locationName: dbEvent.locationName,
   };
 }

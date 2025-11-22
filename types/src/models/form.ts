@@ -1,13 +1,15 @@
+import type { Nullable } from "../utils";
+
 type BaseField = {
   id: string;
   label: string;
-  required?: boolean;
+  required: Nullable<boolean>;
 };
 
 export type TextField = BaseField & {
   type: "text";
-  placeholder?: string;
-  defaultValue?: string;
+  placeholder: Nullable<string>;
+  defaultValue: Nullable<string>;
 };
 
 export type ButtonGroupField = BaseField & {
@@ -16,7 +18,7 @@ export type ButtonGroupField = BaseField & {
     label: string;
     value: string;
   }[];
-  defaultValue?: string;
+  defaultValue: Nullable<string>;
 };
 
 export type SelectField = BaseField & {
@@ -25,7 +27,7 @@ export type SelectField = BaseField & {
     label: string;
     value: string;
   }[];
-  defaultValue?: string;
+  defaultValue: Nullable<string>;
 };
 
 export type FormField = TextField | ButtonGroupField | SelectField;

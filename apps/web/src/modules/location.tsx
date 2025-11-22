@@ -1,5 +1,5 @@
-import SectionHeader from "./section-header";
 import { type Event } from "@monorepo/types/models";
+import SectionHeader from "./section-header";
 
 function Location({ name, description, mapUrl, mapTitle = "Location Map" }: Event["location"]) {
   const mapSrc =
@@ -19,7 +19,7 @@ function Location({ name, description, mapUrl, mapTitle = "Location Map" }: Even
       {mapSrc ? (
         <div className="w-full h-48 sm:h-64 md:h-80 rounded-lg overflow-hidden border border-neutral-800 shadow-md">
           <iframe
-            title={mapTitle}
+            title={mapTitle || "Location Map"}
             width="100%"
             height="100%"
             style={{ border: 0, pointerEvents: "none" }}
