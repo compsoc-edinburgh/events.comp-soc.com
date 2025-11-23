@@ -2,7 +2,7 @@ import { Spinner } from "../../components/spinner.tsx";
 
 export function LoadingState() {
   return (
-    <div className="min-h-[68vh] flex items-center justify-center text-white bg-neutral-900">
+    <div className="min-h-[65vh] flex items-center justify-center text-white">
       <Spinner className="size-8 text-neutral-400" />
     </div>
   );

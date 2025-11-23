@@ -23,7 +23,7 @@ async function getUserRole(request: FastifyRequest): Promise<UserRole | null> {
 
   const user = await request.server.prisma.user.findUnique({
     where: { id: userId },
-    select: { role: true }
+    select: { role: true },
   });
 
   return (user?.role as UserRole) ?? null;
@@ -37,8 +37,8 @@ export default async function eventsRoutes(app: FastifyInstance) {
     const events = await app.prisma.event.findMany({
       where: includeDrafts ? undefined : { state: EventState.Uploaded },
       orderBy: {
-        date: "desc"
-      }
+        date: "asc",
+      },
     });
 
     const searchEvents = events.map(EventMapper.toSearch);
@@ -49,7 +49,7 @@ export default async function eventsRoutes(app: FastifyInstance) {
     const { id } = request.params as { id: string };
 
     const event = await app.prisma.event.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!event) {
@@ -75,13 +75,13 @@ export default async function eventsRoutes(app: FastifyInstance) {
       if (!parseResult.success) {
         return reply.code(400).send({
           error: "Invalid body",
-          issues: z.treeifyError(parseResult.error)
+          issues: z.treeifyError(parseResult.error),
         });
       }
 
       const dbInput = EventMapper.toDB(parseResult.data);
       const event = await app.prisma.event.create({
-        data: dbInput
+        data: dbInput,
       });
 
       const eventOutput = EventMapper.toModel(event);
@@ -96,7 +96,7 @@ export default async function eventsRoutes(app: FastifyInstance) {
       const { id } = request.params as { id: string };
 
       const existingEvent = await app.prisma.event.findUnique({
-        where: { id }
+        where: { id },
       });
 
       if (!existingEvent) {
@@ -107,14 +107,14 @@ export default async function eventsRoutes(app: FastifyInstance) {
       if (!parseResult.success) {
         return reply.code(400).send({
           error: "Invalid body",
-          issues: z.treeifyError(parseResult.error)
+          issues: z.treeifyError(parseResult.error),
         });
       }
 
       const dbInput = EventMapper.toDB(parseResult.data);
       const event = await app.prisma.event.update({
         where: { id },
-        data: dbInput
+        data: dbInput,
       });
 
       const eventOutput = EventMapper.toModel(event);
@@ -130,7 +130,7 @@ export default async function eventsRoutes(app: FastifyInstance) {
 
       try {
         await app.prisma.event.delete({
-          where: { id }
+          where: { id },
         });
 
         return reply.code(204).send();

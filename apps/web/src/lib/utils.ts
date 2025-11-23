@@ -43,27 +43,6 @@ export const formatTime = (time: string) => {
     .padStart(2, "0")} ${period}`;
 };
 
-export function filterEvents(events: SearchEvent[], term: string) {
-  const t = term.trim().toLowerCase();
-  if (!t) return events;
-
-  return events.filter((event) => {
-    const searchable = [
-      event.heroTitle,
-      event.locationName,
-      event.organizerSig,
-      event.date,
-      event.time.start,
-      event.time.end
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return searchable.includes(t);
-  });
-}
-
 export function groupEvents(events: SearchEvent[]) {
   return events.reduce<Record<string, SearchEvent[]>>((groups, event) => {
     const date = event.date;

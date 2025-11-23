@@ -15,12 +15,11 @@ function SearchEventCard({ event }: { event: SearchEvent }) {
   return (
     <div
       key={event.id}
-      className="relative bg-neutral-800 border border-neutral-700 rounded-lg sm:rounded-xl hover:border-neutral-600 hover:bg-neutral-750 transition-all cursor-pointer group p-4 sm:p-5 touch-manipulation"
+      className="relative bg-neutral-800 border border-neutral-700 rounded-lg sm:rounded-xl hover:border-neutral-600 hover:bg-neutral-750 transition-all cursor-pointer group p-4 touch-manipulation"
       style={{
         transitionTimingFunction: "ease-out"
       }}
-      onClick={handleClick}
-    >
+      onClick={handleClick}>
       <div className="flex items-center justify-between text-neutral-400 text-xs sm:text-sm mb-1 sm:mb-2">
         <span className="font-medium">{time}</span>
         {event.state === EventState.Draft && (
@@ -38,7 +37,7 @@ function SearchEventCard({ event }: { event: SearchEvent }) {
         <SigBadge sig={event.organizerSig} size="md" />
       </div>
 
-      <div className="flex items-center gap-1.5 text-xs sm:text-sm text-neutral-400 pt-2">
+      <div className="flex items-center gap-1.5 text-xs sm:text-sm text-neutral-400">
         <span className="leading-snug truncate">{event.locationName}</span>
       </div>
     </div>

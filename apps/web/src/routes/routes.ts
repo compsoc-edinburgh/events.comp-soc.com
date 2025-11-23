@@ -4,6 +4,7 @@ import Details from "./events/details";
 import Create from "./events/create";
 import Manage from "./events/manage";
 import PageLayout from "./page-layout";
+import Auth from "./auth/Auth";
 
 const router = createBrowserRouter([
   {
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
       {
         index: true,
         Component: Search
+      },
+      {
+        path: "auth",
+        Component: Auth
       },
       {
         path: "events/create",

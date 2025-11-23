@@ -8,7 +8,7 @@ export function ErrorState({
   refetch: () => void;
 }) {
   return (
-    <div className="min-h-[68vh] flex flex-col items-center justify-center text-white bg-neutral-900">
+    <div className="min-h-[65vh] flex flex-col items-center justify-center text-white">
       <h1 className="font-bold text-3xl mb-6">{title}</h1>
       <p className="text-neutral-400 text-lg mb-4">{description}</p>
       <button

@@ -1,21 +1,5 @@
-import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import Link from "../../components/link.tsx";
 import { LINKS, SOCIAL_LINKS } from "../../lib/const.ts";
-
-const MadeBy = () => (
-  <p className="text-xs text-neutral-600 text-center select-none mt-4 flex gap-1 items-center justify-center flex-wrap">
-    Made by{" "}
-    <a
-      href="https://danyilbutov.com"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:text-white transition-colors duration-200 flex items-center gap-1"
-    >
-      Danyil Butov
-      <ArrowTopRightIcon className="w-3 h-3" />
-    </a>
-  </p>
-);
 
 function Footer() {
   return (
@@ -43,8 +27,6 @@ function Footer() {
           ))}
         </div>
       </div>
-
-      <MadeBy />
     </footer>
   );
 }
