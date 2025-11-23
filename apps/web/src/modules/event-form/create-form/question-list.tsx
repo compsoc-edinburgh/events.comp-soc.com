@@ -1,5 +1,5 @@
 import type { FormFieldInput } from "@monorepo/types/schemas";
-import { QuestionCard } from "./question-card";
+import { QuestionCard } from "./question-card.tsx";
 
 type QuestionListProps = {
   fields: FormFieldInput[];

@@ -1,7 +1,7 @@
 import { TrashIcon } from "@radix-ui/react-icons";
-import { Button } from "../../components/button";
-import { Checkbox } from "../../components/checkbox";
-import { Input } from "../../components/input";
+import { Button } from "../../../components/button.tsx";
+import { Checkbox } from "../../../components/checkbox.tsx";
+import { Input } from "../../../components/input.tsx";
 import type { FormFieldInput } from "@monorepo/types/schemas";
 
 type QuestionCardProps = {

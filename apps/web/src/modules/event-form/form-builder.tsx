@@ -2,8 +2,8 @@ import { useState } from "react";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { Button } from "../../components/button";
 import type { FormFieldInput, FormInput } from "@monorepo/types/schemas";
-import { QuestionList } from "./question-list";
-import { QuestionCreator } from "./question-creator";
+import { QuestionList } from "./create-form/question-list.tsx";
+import { QuestionCreator } from "./create-form/question-creator.tsx";
 
 type FormBuilderProps = {
   value?: FormInput;
