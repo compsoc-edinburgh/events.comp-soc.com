@@ -1,5 +1,3 @@
-// Shared utilities and types for @society/api and @society/web
-
 export const SOCIETY_NAME = "CompSoc";
 
 export interface Event {
@@ -14,6 +12,6 @@ export function formatEventDate(date: Date): string {
     weekday: "long",
     year: "numeric",
     month: "long",
-    day: "numeric"
+    day: "numeric",
   });
 }

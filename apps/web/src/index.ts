@@ -6,4 +6,3 @@ console.log(`Loading ${SOCIETY_NAME} Events...`);
 export function displayEvent(event: Event): string {
   return `${event.title} - ${formatEventDate(event.date)}`;
 }
-

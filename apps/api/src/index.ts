@@ -1,9 +1,17 @@
-// API entry point
-import { SOCIETY_NAME, type Event } from "@events.comp-soc.com/shared";
+import fastify from "fastify";
 
-console.log(`Starting ${SOCIETY_NAME} API...`);
+const server = fastify({
+  logger: true,
+});
 
-export function getEvents(): Event[] {
-  return [];
-}
+server.get("/ping", async (_, __) => {
+  return "pong\n";
+});
 
+server.listen({ port: 8080 }, (err, address) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log(`Server listening at ${address}`);
+});
