@@ -1,40 +1,13 @@
 {
-  "name": "event.comp-soc.com.api",
-  "type": "module",
+  "name": "@events.comp-soc.com/api",
   "version": "1.0.0",
-  "description": "",
+  "private": true,
+  "main": "src/index.ts",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "build": "swc src -d dist",
-    "start": "node dist/server.js",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage"
+    "dev": "echo 'api dev'",
+    "build": "tsc"
   },
-  "keywords": [],
-  "author": "danyilbutov",
-  "license": "ISC",
   "dependencies": {
-    "@clerk/backend": "^2.22.0",
-    "@clerk/fastify": "^2.6.1",
-    "@fastify/cors": "^11.1.0",
-    "@monorepo/types": "workspace:*",
-    "@prisma/client": "^6.19.0",
-    "dotenv": "^17.2.3",
-    "fastify": "^5.6.2",
-    "zod": "^4.1.12"
-  },
-  "devDependencies": {
-    "@swc/cli": "^0.7.9",
-    "@swc/core": "^1.15.1",
-    "@types/node": "^24.10.1",
-    "@vitest/coverage-v8": "^2.1.8",
-    "eslint": "^9.39.1",
-    "prisma": "^6.19.0",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.3",
-    "vitest": "^2.1.8"
+    "@events.comp-soc.com/shared": "workspace:*"
   }
 }
