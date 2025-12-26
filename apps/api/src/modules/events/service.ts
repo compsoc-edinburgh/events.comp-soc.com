@@ -25,12 +25,8 @@ export const eventService = {
     const event = await eventStore.findById(db, params);
     const isCommittee = role === "committee";
 
-    if (!event) {
-      throw new NotFoundError(`Event with ${params.id} is not found`);
-    }
-
-    if (!isCommittee && event.state === "draft") {
-      throw new UnauthorizedError("You do not have permission to view this event");
+    if (!event || (!isCommittee && event.state === "draft")) {
+      throw new NotFoundError(`Event with ${params.id} not found`);
     }
 
     return event;
@@ -52,7 +48,7 @@ export const eventService = {
     const updated = await eventStore.update(db, data);
 
     if (!updated) {
-      throw new NotFoundError(`Event with ${data.id} is not found`);
+      throw new NotFoundError(`Event with ${data.id} not found`);
     }
 
     return updated;
@@ -66,7 +62,7 @@ export const eventService = {
     const deleted = await eventStore.delete(db, params);
 
     if (!deleted) {
-      throw new NotFoundError(`Event with ${params.id} is not found`);
+      throw new NotFoundError(`Event with ${params.id} not found`);
     }
 
     return deleted;

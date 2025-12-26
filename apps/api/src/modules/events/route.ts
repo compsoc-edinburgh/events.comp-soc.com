@@ -55,9 +55,9 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const params = EventIdSchema.parse(request.params);
 
     const body = { ...params, ...updateBody };
-    const newEvent = await eventService.updateEvent(server.db, body, role);
+    const updatedEvent = await eventService.updateEvent(server.db, body, role);
 
-    return reply.status(200).send(newEvent);
+    return reply.status(200).send(updatedEvent);
   });
 
   server.delete("/:id", async (request, reply) => {
@@ -69,8 +69,8 @@ export const eventRoutes = async (server: FastifyInstance) => {
     }
 
     const params = EventIdSchema.parse(request.params);
-    const newEvent = await eventService.deleteEvent(server.db, params, role);
+    const deletedEvent = await eventService.deleteEvent(server.db, params, role);
 
-    return reply.status(200).send(newEvent);
+    return reply.status(200).send(deletedEvent);
   });
 };
