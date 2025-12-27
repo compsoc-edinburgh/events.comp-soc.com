@@ -21,7 +21,6 @@ export const eventStore = {
       .update(eventsTable)
       .set({
         ...updateData,
-        updatedAt: new Date(),
       })
       .where(eq(eventsTable.id, id))
       .returning();
@@ -52,6 +51,15 @@ export const eventStore = {
 
   async findById(db: SqlContext, params: EventIdParams) {
     const [event] = await db.select().from(eventsTable).where(eq(eventsTable.id, params.id));
-    return event || undefined;
+    return event;
+  },
+
+  async findByIdForUpdate(tx: SqlContext, params: EventIdParams) {
+    const [event] = await tx
+      .select()
+      .from(eventsTable)
+      .where(eq(eventsTable.id, params.id))
+      .for("update");
+    return event;
   },
 };

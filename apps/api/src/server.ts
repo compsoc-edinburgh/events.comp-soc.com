@@ -12,8 +12,8 @@ export function buildServer() {
   server.register(dbPlugin);
   server.register(clerkPlugin);
 
-  server.register(eventRoutes);
-  server.register(userRoutes);
+  server.register(userRoutes, { prefix: "/v1/users" });
+  server.register(eventRoutes, { prefix: "/v1/events" });
 
   server.get("/health", async () => {
     return { status: "ok" };

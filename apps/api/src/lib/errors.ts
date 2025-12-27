@@ -8,6 +8,12 @@ export class AppError extends Error {
   }
 }
 
+export class ConflictError extends AppError {
+  constructor(message = "This resource already exists") {
+    super(409, message);
+  }
+}
+
 export class NotFoundError extends AppError {
   constructor(message = "Resource not found") {
     super(404, message);

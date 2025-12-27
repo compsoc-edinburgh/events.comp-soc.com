@@ -24,7 +24,7 @@ export const UpdateEventSchema = CreateEventSchema.partial().omit({
 export type UpdateEventInput = z.infer<typeof UpdateEventSchema>;
 
 export const EventIdSchema = z.object({
-  id: z.coerce.number().int().positive(),
+  id: z.string().min(1),
 });
 
 export type EventIdParams = z.infer<typeof EventIdSchema>;

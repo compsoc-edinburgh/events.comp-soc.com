@@ -1,8 +1,16 @@
 import { integer, json, pgEnum, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { nanoid } from "nanoid";
 
 export const usersRole = pgEnum("roles", ["user", "committee"]);
 
 export const eventState = pgEnum("eventState", ["draft", "published"]);
+
+export const registrationStatus = pgEnum("registrationStatus", [
+  "pending",
+  "accepted",
+  "waitlist",
+  "rejected",
+]);
 
 export const usersTable = pgTable("users", {
   id: text("id").primaryKey(),
@@ -17,11 +25,13 @@ export const usersTable = pgTable("users", {
 });
 
 export const eventsTable = pgTable("events", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
   organizer: text("organizer").notNull(),
   state: eventState("state").default("draft"),
   title: text("title").notNull(),
-  capacity: integer(),
+  capacity: integer("capacity"),
   date: timestamp("date").notNull(),
   aboutMarkdown: text("about_markdown"),
   locationName: text("location_name"),
@@ -36,15 +46,21 @@ export const eventsTable = pgTable("events", {
 export const registrationsTable = pgTable(
   "registrations",
   {
-    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
     userId: text("user_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
-    eventId: integer("event_id")
+    eventId: text("event_id")
       .notNull()
       .references(() => eventsTable.id, { onDelete: "cascade" }),
+    status: registrationStatus("status").default("pending"),
     formData: json("form_data"),
     createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (t) => ({
     unq: uniqueIndex("unique_user_event").on(t.userId, t.eventId),
