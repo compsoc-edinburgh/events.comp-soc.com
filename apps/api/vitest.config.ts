@@ -1,18 +1,27 @@
 import { defineConfig } from "vitest/config";
+import { config } from "dotenv";
+
+import * as path from "node:path";
+
+config({ path: ".env.test" });
 
 export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    setupFiles: ["./src/tests/setup.ts"],
+    include: ["src/**/*.test.ts"],
+    setupFiles: ["./tests/setup.ts"],
+    // Since we use ONE Docker DB, we cannot run multiple test
+    fileParallelism: false,
     coverage: {
       provider: "v8",
-      exclude: ["node_modules/", "generated/", "dist/", "src/tests/"]
+      include: ["src/**/*.ts"],
+      exclude: ["src/**/*.test.ts", "src/types/**"],
     },
-    server: {
-      deps: {
-        inline: ["@clerk/fastify"]
-      }
-    }
-  }
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 });
