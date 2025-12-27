@@ -1,4 +1,4 @@
-name: API Tests
+name: API
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint:
-    name: Lint & Format Check
+    name: Format checks
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +38,7 @@ jobs:
         run: pnpm format:check
 
   test:
-    name: API Tests
+    name: Route tests
     runs-on: ubuntu-latest
 
     services:
