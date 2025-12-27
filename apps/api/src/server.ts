@@ -6,10 +6,11 @@ import { userRoutes } from "@/modules/users/route";
 import { registrationRoutes } from "./modules/registration/route.js";
 import { errorHandler } from "@/lib/errorHandler";
 import { healthCheck } from "@/modules/health";
+import { loggerConfig } from "@/lib/logger";
 
 export function buildServer() {
   const server = Fastify({
-    logger: true,
+    logger: loggerConfig,
   });
 
   server.register(dbPlugin);
