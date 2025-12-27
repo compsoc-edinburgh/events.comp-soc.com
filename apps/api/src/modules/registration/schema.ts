@@ -18,9 +18,19 @@ export const UpdateRegistrationInputSchema = BaseRegistrationSchema.omit({
 
 export type UpdateRegistrationInput = z.infer<typeof UpdateRegistrationInputSchema>;
 
-export const RegistrationIdSchema = z.object({
-  id: z.coerce.string(),
+export const RegistrationParamsSchema = z.object({
+  userId: z.string(),
+  eventId: z.string(),
 });
 
-export type RegistrationIdParams = z.infer<typeof RegistrationIdSchema>;
+export type RegistrationParams = z.infer<typeof RegistrationParamsSchema>;
+
+export const EventIdParamsSchema = z.object({
+  eventId: z.string(),
+});
+
+export const TargetUserParamsSchema = z.object({
+  eventId: z.string(),
+  targetUserId: z.string(),
+});
 export type RegistrationStatus = (typeof registrationStatus.enumValues)[number];

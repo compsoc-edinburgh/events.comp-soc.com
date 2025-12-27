@@ -1,6 +1,7 @@
 import { SqlContext } from "@/db/db";
 import {
   CreateRegistrationInput,
+  RegistrationParams,
   RegistrationStatus,
   UpdateRegistrationInput,
 } from "@/modules/registration/schema";
@@ -46,9 +47,7 @@ export const registrationService = {
 
   async updateRegistration(
     db: SqlContext,
-    id: string,
-    eventId: string,
-    userId: string,
+    params: RegistrationParams,
     data: UpdateRegistrationInput,
     role: UserRole
   ) {
@@ -57,15 +56,15 @@ export const registrationService = {
     }
 
     return await db.transaction(async (tx) => {
-      const registration = await registrationStore.getByUserAndEvent(tx, userId, eventId);
+      const registration = await registrationStore.getByUserAndEvent(tx, params);
       if (!registration) {
         throw new NotFoundError("Registration not found");
       }
 
       if (data.status === "accepted" && registration.status !== "accepted") {
-        const event = await eventStore.findByIdForUpdate(tx, { id: registration.eventId });
+        const event = await eventStore.findByIdForUpdate(tx, { id: params.eventId });
         if (!event) {
-          throw new NotFoundError(`Event with ${registration.eventId} not found`);
+          throw new NotFoundError(`Event with ${params.eventId} not found`);
         }
 
         if (event.capacity !== null) {
@@ -76,7 +75,28 @@ export const registrationService = {
         }
       }
 
-      return await registrationStore.update(tx, { ...data, id });
+      return await registrationStore.update(tx, params, data);
     });
+  },
+
+  async deleteRegistration(
+    db: SqlContext,
+    params: RegistrationParams,
+    userId: string,
+    role: UserRole
+  ) {
+    const registration = await registrationStore.getByUserAndEvent(db, params);
+    if (!registration) {
+      throw new NotFoundError("Registration not found");
+    }
+
+    const isOwner = params.userId === userId;
+    const isCommittee = role === "committee";
+
+    if (!isOwner && !isCommittee) {
+      throw new UnauthorizedError("You do not have permission to delete this registration");
+    }
+
+    return await registrationStore.delete(db, params);
   },
 };

@@ -1,7 +1,7 @@
 import { eq, and, count, inArray } from "drizzle-orm";
 import {
   CreateRegistrationInput,
-  RegistrationIdParams,
+  RegistrationParams,
   UpdateRegistrationInput,
 } from "@/modules/registration/schema";
 import { SqlContext } from "@/db/db";
@@ -14,15 +14,16 @@ export const registrationStore = {
     return newRegistration;
   },
 
-  async update(db: SqlContext, data: UpdateRegistrationInput & RegistrationIdParams) {
-    const { id, ...updatedData } = data;
-
+  async update(db: SqlContext, params: RegistrationParams, data: UpdateRegistrationInput) {
     const [updatedRegistration] = await db
       .update(registrationsTable)
-      .set({
-        ...updatedData,
-      })
-      .where(eq(registrationsTable.id, id))
+      .set(data)
+      .where(
+        and(
+          eq(registrationsTable.userId, params.userId),
+          eq(registrationsTable.eventId, params.eventId)
+        )
+      )
       .returning();
 
     return updatedRegistration;
@@ -42,19 +43,29 @@ export const registrationStore = {
     return result?.count ?? 0;
   },
 
-  async getByUserAndEvent(db: SqlContext, userId: string, eventId: string) {
-    const result = await db
+  async getByUserAndEvent(db: SqlContext, params: RegistrationParams) {
+    const [registration] = await db
       .select()
       .from(registrationsTable)
-      .where(and(eq(registrationsTable.userId, userId), eq(registrationsTable.eventId, eventId)));
+      .where(
+        and(
+          eq(registrationsTable.userId, params.userId),
+          eq(registrationsTable.eventId, params.eventId)
+        )
+      );
 
-    return result[0];
+    return registration;
   },
 
-  async delete(db: SqlContext, params: RegistrationIdParams) {
+  async delete(db: SqlContext, params: RegistrationParams) {
     const [deletedRegistration] = await db
       .delete(registrationsTable)
-      .where(eq(registrationsTable.id, params.id))
+      .where(
+        and(
+          eq(registrationsTable.userId, params.userId),
+          eq(registrationsTable.eventId, params.eventId)
+        )
+      )
       .returning();
 
     return deletedRegistration;
