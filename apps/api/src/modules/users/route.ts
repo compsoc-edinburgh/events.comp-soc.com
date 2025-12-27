@@ -22,7 +22,11 @@ export const userRoutes = async (server: FastifyInstance) => {
     }
 
     const body = CreateUserSchema.parse(request.body);
-    const newUser = await userService.createUser(server.db, { ...body, id: userId });
+
+    if (userId !== body.id) {
+      return reply.status(403).send({ message: "Forbidden: User ID mismatch" });
+    }
+    const newUser = await userService.createUser(server.db, { ...body });
 
     return reply.status(201).send(newUser);
   });
