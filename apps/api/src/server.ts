@@ -4,6 +4,8 @@ import { clerkPlugin } from "@clerk/fastify";
 import { eventRoutes } from "@/modules/events/route";
 import { userRoutes } from "@/modules/users/route";
 import { registrationRoutes } from "./modules/registration/route.js";
+import { errorHandler } from "@/lib/errorHandler";
+import { healthCheck } from "@/modules/health";
 
 export function buildServer() {
   const server = Fastify({
@@ -17,9 +19,8 @@ export function buildServer() {
   server.register(eventRoutes, { prefix: "/v1/events" });
   server.register(registrationRoutes, { prefix: "/v1/events/:eventId/registrations" });
 
-  server.get("/health", async () => {
-    return { status: "ok" };
-  });
+  server.register(healthCheck);
+  server.setErrorHandler(errorHandler);
 
   return server;
 }

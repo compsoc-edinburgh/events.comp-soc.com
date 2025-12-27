@@ -10,6 +10,10 @@ export const CreateRegistrationInputSchema = BaseRegistrationSchema;
 
 export type CreateRegistrationInput = z.infer<typeof CreateRegistrationInputSchema>;
 
+export const CreateRegistrationBodySchema = BaseRegistrationSchema.pick({
+  formData: true,
+});
+
 export const UpdateRegistrationInputSchema = BaseRegistrationSchema.omit({
   userId: true,
   eventId: true,

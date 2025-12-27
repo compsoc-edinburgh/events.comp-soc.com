@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { getAuth } from "@clerk/fastify";
 import {
+  CreateRegistrationBodySchema,
   EventIdParamsSchema,
   TargetUserParamsSchema,
   UpdateRegistrationInputSchema,
@@ -17,9 +18,11 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     }
 
     const params = EventIdParamsSchema.parse(request.params);
+    const body = CreateRegistrationBodySchema.parse(request.body);
+
     const registration = await registrationService.createRegistration(
       server.db,
-      { userId, eventId: params.eventId },
+      { ...body, userId, eventId: params.eventId },
       role
     );
 
