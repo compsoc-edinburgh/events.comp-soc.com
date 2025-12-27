@@ -172,12 +172,8 @@
           "name": "registrations_user_id_users_id_fk",
           "tableFrom": "registrations",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -185,12 +181,8 @@
           "name": "registrations_event_id_events_id_fk",
           "tableFrom": "registrations",
           "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -259,9 +251,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -273,28 +263,17 @@
     "public.eventState": {
       "name": "eventState",
       "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
+      "values": ["draft", "published"]
     },
     "public.registrationStatus": {
       "name": "registrationStatus",
       "schema": "public",
-      "values": [
-        "pending",
-        "accepted",
-        "waitlist",
-        "rejected"
-      ]
+      "values": ["pending", "accepted", "waitlist", "rejected"]
     },
     "public.roles": {
       "name": "roles",
       "schema": "public",
-      "values": [
-        "user",
-        "committee"
-      ]
+      "values": ["user", "committee"]
     }
   },
   "schemas": {},
