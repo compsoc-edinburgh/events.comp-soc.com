@@ -1,27 +1,28 @@
 import { z } from "zod";
-import { createInsertSchema } from "drizzle-zod";
-import { eventsTable, eventState } from "@/db/schema";
+import { eventState } from "@/db/schema";
 
-const BaseEventSchema = createInsertSchema(eventsTable, {
+const FormSchema = z.record(z.string(), z.unknown()).nullable().optional();
+
+export const CreateEventSchema = z.object({
+  organizer: z.string().min(1, "Organizer is required"),
   title: z.string().min(1, "Title is required"),
   date: z.coerce.date(),
-  capacity: z.number().positive().optional(),
-  form: z.record(z.string(), z.unknown()).optional(),
-});
-
-export const CreateEventSchema = BaseEventSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+  state: z.enum(eventState.enumValues).optional(),
+  capacity: z.number().int().positive().nullable().optional(),
+  aboutMarkdown: z.string().nullable().optional(),
+  locationName: z.string().nullable().optional(),
+  locationMapUrl: z.string().nullable().optional(),
+  form: FormSchema,
 });
 export type CreateEventInput = z.infer<typeof CreateEventSchema>;
 
-export const UpdateEventSchema = BaseEventSchema.partial();
+export const UpdateEventSchema = CreateEventSchema.partial();
 export type UpdateEventInput = z.infer<typeof UpdateEventSchema>;
 
 export const EventIdSchema = z.object({
   id: z.string().min(1),
 });
+
 export type EventIdParams = z.infer<typeof EventIdSchema>;
 
 export const GetEventsQuerySchema = z.object({
@@ -29,4 +30,5 @@ export const GetEventsQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(20),
   state: z.enum(eventState.enumValues).optional(),
 });
+
 export type GetEventsQuery = z.infer<typeof GetEventsQuerySchema>;

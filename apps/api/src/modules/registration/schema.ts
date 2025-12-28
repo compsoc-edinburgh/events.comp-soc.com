@@ -1,24 +1,26 @@
-import { createInsertSchema } from "drizzle-zod";
-import { registrationsTable, registrationStatus } from "@/db/schema";
+import { registrationStatus } from "@/db/schema";
 import { z } from "zod";
 
-const BaseRegistrationSchema = createInsertSchema(registrationsTable).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+const FormDataSchema = z.record(z.string(), z.unknown()).nullable().optional();
+
+export const CreateRegistrationInputSchema = z.object({
+  userId: z.string().min(1),
+  eventId: z.string().min(1),
+  formData: FormDataSchema,
+  status: z.enum(registrationStatus.enumValues).optional(),
 });
 
-export const CreateRegistrationInputSchema = BaseRegistrationSchema;
 export type CreateRegistrationInput = z.infer<typeof CreateRegistrationInputSchema>;
 
 export const CreateRegistrationBodySchema = z.object({
-  formData: z.record(z.string(), z.unknown()).optional(),
+  formData: FormDataSchema,
 });
 
 export const UpdateRegistrationInputSchema = z.object({
   status: z.enum(registrationStatus.enumValues).optional(),
-  formData: z.record(z.string(), z.unknown()).optional(),
+  formData: FormDataSchema,
 });
+
 export type UpdateRegistrationInput = z.infer<typeof UpdateRegistrationInputSchema>;
 
 export const EventIdParamsSchema = z.object({
@@ -34,6 +36,7 @@ export const RegistrationParamsSchema = z.object({
   userId: z.string().min(1),
   eventId: z.string().min(1),
 });
+
 export type RegistrationParams = z.infer<typeof RegistrationParamsSchema>;
 
 export type RegistrationStatus = (typeof registrationStatus.enumValues)[number];
