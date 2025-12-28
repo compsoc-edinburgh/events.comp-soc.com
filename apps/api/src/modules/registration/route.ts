@@ -2,7 +2,9 @@ import { FastifyInstance } from "fastify";
 import { getAuth } from "@clerk/fastify";
 import {
   CreateRegistrationBodySchema,
+  CreateRegistrationInput,
   EventIdParamsSchema,
+  RegistrationParams,
   TargetUserParamsSchema,
   UpdateRegistrationInputSchema,
 } from "@/modules/registration/schema";
@@ -20,12 +22,13 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     const params = EventIdParamsSchema.parse(request.params);
     const body = CreateRegistrationBodySchema.parse(request.body);
 
-    const registration = await registrationService.createRegistration(
-      server.db,
-      { ...body, userId, eventId: params.eventId },
-      role
-    );
+    const mergedBody: CreateRegistrationInput = {
+      userId,
+      eventId: params.eventId,
+      formData: body.formData,
+    };
 
+    const registration = await registrationService.createRegistration(server.db, mergedBody, role);
     return reply.status(201).send(registration);
   });
 
@@ -40,9 +43,14 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     const params = TargetUserParamsSchema.parse(request.params);
     const body = UpdateRegistrationInputSchema.parse(request.body);
 
+    const mergedParams: RegistrationParams = {
+      userId: params.targetUserId,
+      eventId: params.eventId,
+    };
+
     const updatedRegistration = await registrationService.updateRegistration(
       server.db,
-      { userId: params.targetUserId, eventId: params.eventId },
+      mergedParams,
       body,
       role
     );
@@ -60,9 +68,14 @@ export const registrationRoutes = async (server: FastifyInstance) => {
 
     const params = TargetUserParamsSchema.parse(request.params);
 
+    const mergedParams: RegistrationParams = {
+      userId: params.targetUserId,
+      eventId: params.eventId,
+    };
+
     const deletedRegistration = await registrationService.deleteRegistration(
       server.db,
-      { userId: params.targetUserId, eventId: params.eventId },
+      mergedParams,
       userId,
       role
     );
@@ -80,9 +93,14 @@ export const registrationRoutes = async (server: FastifyInstance) => {
 
     const params = EventIdParamsSchema.parse(request.params);
 
+    const mergedParams: RegistrationParams = {
+      userId,
+      eventId: params.eventId,
+    };
+
     const deletedRegistration = await registrationService.deleteRegistration(
       server.db,
-      { userId, eventId: params.eventId },
+      mergedParams,
       userId,
       role
     );
