@@ -1,12 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
 import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
   ArrowUpRight,
+  Bold,
   CalendarIcon,
   ChevronDown,
   CircleUserRound,
+  Filter,
+  Italic,
+  IterationCcw,
+  IterationCw,
   MapPin,
   Minimize2,
   MinusIcon,
+  Settings,
   XIcon,
 } from 'lucide-react'
 
@@ -29,7 +38,7 @@ const events = [
     title: 'Guest Speaker: AI Ethics',
     date: 'Thu, 16 Oct',
     time: '17:30',
-    location: 'Gordon Aikman Theatre',
+    location: 'Gordon Airman Theatre',
     description:
       'Dr. Sarah Miller discusses the implications of LLMs in modern software engineering and the ethical boundaries we face.',
     type: 'Talk',
@@ -60,7 +69,7 @@ function App() {
   return (
     <>
       {/* Top Navbar */}
-      <nav className="sticky top-0 z-50 flex h-11 items-center justify-between px-3 bg-surface border-b border-neutral-800">
+      <nav className="flex h-11 items-center justify-between px-3 bg-surface border-b border-neutral-800">
         <div className="flex gap-5 justify-center items-center">
           <img src="/comp-soc-logo.svg" alt="My Logo" className="w-6 h-6" />
           <div className="text-sm cursor-pointer hover:text-white transition-colors">
@@ -103,8 +112,7 @@ function App() {
           />
         </div>
       </nav>
-
-      <nav className="flex h-9 items-center justify-between px-3 bg-window border-b border-neutral-800 w-full">
+      <nav className="sticky top-0 z-30 flex h-9 items-center justify-between px-3 bg-window border-b border-neutral-800 w-full">
         <div className="flex gap-2 items-center w-20 h-full">
           <XIcon className="w-4 h-4 text-neutral-500 hover:text-neutral-300 transition-colors" />
           <MinusIcon className="w-4 h-4 text-neutral-500 hover:text-neutral-300 transition-colors" />
@@ -115,7 +123,75 @@ function App() {
         </div>
         <div className="w-20" />
       </nav>
+      <nav className="sticky top-9 z-30 flex h-12 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl">
+        <div className="border-neutral-700 border p-1 w-full h-full rounded-sm items-center flex px-3">
+          <div className="flex items-center">
+            <div className="flex gap-3 items-center">
+              <IterationCw className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+              <IterationCcw className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+            </div>
 
+            <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+            <div className="flex items-center justify-between bg-neutral-800/50 border border-neutral-700 px-2 py-1 rounded gap-2 cursor-not-allowed opacity-60 min-w-30">
+              <span className="text-[11px] font-medium text-neutral-300 truncate">
+                IBM Plex Mono
+              </span>
+              <ChevronDown className="w-3 h-3 text-neutral-500" />
+            </div>
+
+            <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+            <div className="flex gap-1 items-center">
+              <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+                <Bold className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+              </button>
+              <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+                <Italic className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+              </button>
+            </div>
+
+            <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+            <div className="flex gap-1 items-center">
+              <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+                <AlignLeft className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+              </button>
+              <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+                <AlignCenter className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+              </button>
+              <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+                <AlignRight className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+              </button>
+            </div>
+
+            <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+            <div className="flex items-center justify-between bg-neutral-800 border border-neutral-600 px-2 py-1 rounded gap-2 cursor-pointer hover:border-neutral-500 transition-colors min-w-27.5">
+              <span className="text-[11px] font-medium text-neutral-200">
+                Find event
+              </span>
+              <ChevronDown className="w-3 h-3 text-neutral-400" />
+            </div>
+
+            <div className="ml-2 flex items-center gap-2 px-2 py-1 hover:bg-neutral-800 rounded cursor-pointer transition-colors group">
+              <Filter className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-200" />
+              <span className="text-[11px] font-medium text-neutral-400 group-hover:text-neutral-200">
+                Filter by SIG
+              </span>
+            </div>
+          </div>
+
+          <div className="grow" />
+
+          <div className="flex items-center">
+            <div className="w-px h-4 bg-neutral-700 mx-4" />
+            <button className="p-1.5 hover:bg-neutral-800 rounded transition-colors group">
+              <Settings className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+            </button>
+          </div>
+        </div>
+      </nav>
       <div className="bg-background min-h-screen flex items-center justify-center flex-col">
         <div className="flex gap-5 text-sm w-1/2 mb-px mt-5 justify-center">
           <div className="py-1 px-3 text-neutral-500 hover:text-neutral-300 cursor-pointer transition-colors">
