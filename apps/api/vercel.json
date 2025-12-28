@@ -1,14 +1,14 @@
 {
-  "builds": [
-    {
-      "src": "dist/app.js",
-      "use": "@vercel/node"
+  "buildCommand": "pnpm build",
+  "functions": {
+    "dist/app.js": {
+      "runtime": "@vercel/node@3"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "dist/app.js"
+      "source": "/(.*)",
+      "destination": "/dist/app.js"
     }
   ]
 }
