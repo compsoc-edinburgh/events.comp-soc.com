@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
-import { eventsTable } from "@/db/schema";
+import { eventsTable } from "../../db/schema";
 
 const BaseEventSchema = createInsertSchema(eventsTable, {
   title: (schema) => schema.min(1, "Title is required"),

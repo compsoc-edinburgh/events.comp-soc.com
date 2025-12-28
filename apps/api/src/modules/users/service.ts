@@ -1,7 +1,7 @@
-import { SqlContext } from "@/db/db";
-import { CreateUserInput, UpdateUserInput, UserIdParams, UserRole } from "@/modules/users/schema";
-import { userStore } from "@/modules/users/store";
-import { NotFoundError, UnauthorizedError } from "@/lib/errors";
+import { SqlContext } from "../../db/db";
+import { CreateUserInput, UpdateUserInput, UserIdParams, UserRole } from "./schema";
+import { NotFoundError, UnauthorizedError } from "../../lib/errors";
+import { userStore } from "./store";
 
 export const userService = {
   async getUserById(db: SqlContext, params: UserIdParams, requesterId?: string, role?: UserRole) {

@@ -1,12 +1,12 @@
 import Fastify from "fastify";
 import dbPlugin from "./plugins/db.js";
 import { clerkPlugin } from "@clerk/fastify";
-import { eventRoutes } from "@/modules/events/route";
-import { userRoutes } from "@/modules/users/route";
-import { registrationRoutes } from "./modules/registration/route.js";
-import { errorHandler } from "@/lib/errorHandler";
-import { healthCheck } from "@/modules/health";
-import { loggerConfig } from "@/lib/logger";
+import { loggerConfig } from "./lib/logger";
+import { userRoutes } from "./modules/users/route";
+import { eventRoutes } from "./modules/events/route";
+import { registrationRoutes } from "./modules/registration/route";
+import { healthCheck } from "./modules/health";
+import { errorHandler } from "./lib/errorHandler";
 
 export function buildServer() {
   const server = Fastify({
