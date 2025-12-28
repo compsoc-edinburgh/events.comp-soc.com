@@ -1,13 +1,13 @@
-import { SqlContext } from "@/db/db";
+import { SqlContext } from "#db/db";
 import {
   CreateEventInput,
   EventIdParams,
   GetEventsQuery,
   UpdateEventInput,
-} from "@/modules/events/schema";
-import { eventStore } from "./store";
-import { UserRole } from "@/modules/users/schema";
-import { NotFoundError, UnauthorizedError } from "@/lib/errors";
+} from "#modules/events/schema";
+import { eventStore } from "#modules/events/store";
+import { UserRole } from "#modules/users/schema";
+import { NotFoundError, UnauthorizedError } from "#lib/errors";
 
 export const eventService = {
   async getEvents(db: SqlContext, query: GetEventsQuery, role?: UserRole) {

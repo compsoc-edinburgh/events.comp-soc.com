@@ -1,4 +1,4 @@
-import { usersRole } from "@/db/schema";
+import { usersRole } from "#db/schema";
 import { z } from "zod";
 
 export const CreateUserSchema = z.object({

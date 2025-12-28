@@ -1,6 +1,6 @@
-import { SqlContext } from "@/db/db";
-import { CreateUserInput, UpdateUserInput, UserIdParams } from "@/modules/users/schema";
-import { usersTable } from "@/db/schema";
+import { SqlContext } from "#db/db";
+import { CreateUserInput, UpdateUserInput, UserIdParams } from "#modules/users/schema";
+import { usersTable } from "#db/schema";
 import { eq } from "drizzle-orm";
 
 export const userStore = {

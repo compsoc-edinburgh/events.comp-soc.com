@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { eventState } from "@/db/schema";
+import { eventState } from "#db/schema";
 
 const FormSchema = z.record(z.string(), z.unknown()).nullable().optional();
 

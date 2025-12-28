@@ -1,14 +1,14 @@
-import { SqlContext } from "@/db/db";
+import { SqlContext } from "#db/db";
 import {
   CreateRegistrationInput,
   RegistrationParams,
   RegistrationStatus,
   UpdateRegistrationInput,
-} from "@/modules/registration/schema";
-import { registrationStore } from "@/modules/registration/store";
-import { ConflictError, NotFoundError, UnauthorizedError } from "@/lib/errors";
-import { eventStore } from "@/modules/events/store";
-import { UserRole } from "@/modules/users/schema";
+} from "#modules/registration/schema";
+import { registrationStore } from "#modules/registration/store";
+import { ConflictError, NotFoundError, UnauthorizedError } from "#lib/errors";
+import { eventStore } from "#modules/events/store";
+import { UserRole } from "#modules/users/schema";
 
 export const registrationService = {
   async createRegistration(db: SqlContext, data: CreateRegistrationInput, role: UserRole) {

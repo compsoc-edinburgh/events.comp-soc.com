@@ -3,9 +3,9 @@ import {
   CreateRegistrationInput,
   RegistrationParams,
   UpdateRegistrationInput,
-} from "@/modules/registration/schema";
-import { SqlContext } from "@/db/db";
-import { registrationsTable } from "@/db/schema";
+} from "#modules/registration/schema";
+import { SqlContext } from "#db/db";
+import { registrationsTable } from "#db/schema";
 
 export const registrationStore = {
   async create(db: SqlContext, data: CreateRegistrationInput) {

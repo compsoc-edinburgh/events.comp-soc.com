@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import { db } from "@/db/db";
+import { db } from "#db/db";
 
 declare module "fastify" {
   interface FastifyInstance {

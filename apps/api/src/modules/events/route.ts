@@ -4,8 +4,8 @@ import {
   EventIdSchema,
   GetEventsQuerySchema,
   UpdateEventSchema,
-} from "@/modules/events/schema";
-import { eventService } from "@/modules/events/service";
+} from "#modules/events/schema";
+import { eventService } from "#modules/events/service";
 import { getAuth } from "@clerk/fastify";
 
 export const eventRoutes = async (server: FastifyInstance) => {

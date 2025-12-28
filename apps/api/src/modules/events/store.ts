@@ -1,11 +1,11 @@
-import { eventsTable } from "@/db/schema";
-import { SqlContext } from "@/db/db";
+import { eventsTable } from "#db/schema";
+import { SqlContext } from "#db/db";
 import {
   CreateEventInput,
   EventIdParams,
   GetEventsQuery,
   UpdateEventInput,
-} from "@/modules/events/schema";
+} from "#modules/events/schema";
 import { desc, eq } from "drizzle-orm";
 
 export const eventStore = {
