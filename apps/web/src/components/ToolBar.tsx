@@ -1,0 +1,95 @@
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  ChevronDown,
+  Filter,
+  Italic,
+  IterationCcw,
+  IterationCw,
+  Settings,
+} from 'lucide-react'
+
+export function ToolBar() {
+  return (
+    <nav className="sticky top-9 z-30 flex h-12 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl">
+      <div className="border-neutral-700 border p-1 w-full h-full rounded-sm items-center flex px-3">
+        <div className="flex items-center">
+          <div className="flex gap-3 items-center">
+            <IterationCw className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+            <IterationCcw className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+          </div>
+
+          <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+          <div className="flex items-center justify-between bg-neutral-800/50 border border-neutral-700 px-2 py-1 rounded gap-2 cursor-not-allowed opacity-60 min-w-30">
+            <span className="text-[11px] font-medium text-neutral-300 truncate">
+              IBM Plex Mono
+            </span>
+            <ChevronDown className="w-3 h-3 text-neutral-500" />
+          </div>
+
+          <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+          <div className="flex gap-1 items-center">
+            <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+              <Bold className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+            </button>
+            <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+              <Italic className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+            </button>
+          </div>
+
+          <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+          <div className="flex gap-1 items-center">
+            <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+              <AlignLeft className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+            </button>
+            <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+              <AlignCenter className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+            </button>
+            <button className="p-1 hover:bg-neutral-800 rounded transition-colors group">
+              <AlignRight className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+            </button>
+          </div>
+
+          <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+          <div className="flex items-center justify-between bg-neutral-800 border border-neutral-600 px-2 py-1 rounded gap-2 cursor-pointer hover:border-neutral-500 transition-colors min-w-27.5">
+            <span className="text-[11px] font-medium text-neutral-200">
+              Find event
+            </span>
+            <ChevronDown className="w-3 h-3 text-neutral-400" />
+          </div>
+
+          <div className="ml-2 flex items-center gap-2 px-2 py-1 hover:bg-neutral-800 rounded cursor-pointer transition-colors group">
+            <Filter className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-200" />
+            <span className="text-[11px] font-medium text-neutral-400 group-hover:text-neutral-200">
+              Filter by SIG
+            </span>
+          </div>
+        </div>
+
+        <div className="grow" />
+
+        <div className="flex items-center">
+          <div className="flex items-center h-full">
+            <button className="bg-red-900 rounded-sm p-0 cursor-pointer group mt-1">
+              <span className="block px-1.5 py-0.5 rounded-sm text-sm bg-red-600 text-white -translate-y-1 group-active:-translate-y-0.5 transition-transform">
+                Share
+              </span>
+            </button>
+          </div>
+
+          <div className="w-px h-4 bg-neutral-700 mx-4" />
+
+          <button className="p-1.5 hover:bg-neutral-800 rounded transition-colors group">
+            <Settings className="w-4 h-4 text-neutral-400 group-hover:text-white" />
+          </button>
+        </div>
+      </div>
+    </nav>
+  )
+}
