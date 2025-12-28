@@ -2,16 +2,16 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,400&display=swap');
 
 @theme {
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'IBM Plex Serif', ui-serif, Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
-  --color-background: #0D0D0D;
-  --color-surface: #1A1A1A;
+  --color-background: #0d0d0d;
+  --color-surface: #1a1a1a;
   --color-window: #121212;
-  --color-subnavbar: #1E1E1E;
-  --color-accent: #F54E00;
-  --color-accent-soft: #FF9000;
+  --color-subnavbar: #1e1e1e;
+  --color-accent: #f54e00;
+  --color-accent-soft: #ff9000;
   --color-border-dark: #000000;
 }
 
@@ -22,6 +22,9 @@ body {
   line-height: 1.6;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   @apply font-semibold tracking-tight;
 }
