@@ -5,8 +5,8 @@ import {
   EventIdParamsSchema,
   TargetUserParamsSchema,
   UpdateRegistrationInputSchema,
-} from "@/modules/registration/schema";
-import { registrationService } from "@/modules/registration/service";
+} from "./schema";
+import { registrationService } from "./service";
 
 export const registrationRoutes = async (server: FastifyInstance) => {
   server.post("/", async (request, reply) => {

@@ -1,7 +1,7 @@
-import { SqlContext } from "@/db/db";
-import { CreateUserInput, UpdateUserInput, UserIdParams } from "@/modules/users/schema";
-import { usersTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { SqlContext } from "../../db/db";
+import { CreateUserInput, UpdateUserInput, UserIdParams } from "./schema";
+import { usersTable } from "../../db/schema";
 
 export const userStore = {
   async create(db: SqlContext, data: CreateUserInput) {

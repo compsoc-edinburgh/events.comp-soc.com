@@ -1,6 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
-import { registrationsTable, registrationStatus } from "@/db/schema";
 import { z } from "zod";
+import { registrationsTable, registrationStatus } from "../../db/schema";
 
 export const BaseRegistrationSchema = createInsertSchema(registrationsTable).omit({
   id: true,
