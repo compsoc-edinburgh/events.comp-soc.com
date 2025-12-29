@@ -28,3 +28,117 @@ h3,
 h4 {
   @apply font-semibold tracking-tight;
 }
+
+.prose-event {
+  @apply text-[#E4E4E4] leading-relaxed max-w-none;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-white font-semibold mt-8 mb-4 first:mt-0;
+  }
+
+  h1 {
+    @apply text-3xl tracking-tight;
+  }
+  h2 {
+    @apply text-2xl tracking-tight border-b border-neutral-800/50 pb-2 mb-6;
+  }
+  h3 {
+    @apply text-xl;
+  }
+  h4 {
+    @apply text-lg;
+  }
+
+  p {
+    @apply text-neutral-400 my-5 first:mt-0 last:mb-0 text-[15px] leading-7;
+  }
+
+  strong {
+    @apply text-neutral-200 font-semibold;
+  }
+
+  em {
+    @apply text-neutral-300 italic;
+  }
+
+  a {
+    @apply text-[--color-accent] hover:text-[--color-accent-soft] decoration-neutral-700 hover:decoration-[--color-accent] transition-all;
+  }
+
+  ul,
+  ol {
+    @apply my-6 pl-6 space-y-3;
+  }
+
+  ul {
+    @apply list-none;
+    li {
+      @apply relative;
+      &::before {
+        content: '*';
+        @apply absolute -left-6 text-[--color-accent] text-sm top-0.5 opacity-70;
+      }
+    }
+  }
+
+  ol {
+    @apply list-decimal marker:text-[--color-accent] marker:text-sm;
+  }
+
+  li {
+    @apply text-neutral-400 text-[15px];
+  }
+
+  blockquote {
+    @apply border-l-2 border-[--color-accent] pl-6 py-1 my-8 italic text-neutral-300 bg-neutral-900/30 rounded-r-sm;
+    p {
+      @apply my-2;
+    }
+  }
+
+  code {
+    @apply font-mono text-neutral-200 bg-neutral-800/80 px-1.5 py-0.5 rounded text-[13px] border border-neutral-700/50;
+  }
+
+  pre {
+    @apply bg-window border border-neutral-800/80 rounded-lg p-5 my-8 overflow-x-auto shadow-inner;
+
+    code {
+      @apply bg-transparent p-0 text-neutral-300 border-none text-[13px] leading-6;
+    }
+  }
+
+  hr {
+    @apply border-neutral-800/50 my-10;
+  }
+
+  img {
+    @apply rounded-lg my-8 border border-neutral-800 shadow-2xl;
+  }
+
+  table {
+    @apply w-full my-8 border-collapse text-sm;
+
+    th,
+    td {
+      @apply border border-neutral-800/50 px-4 py-3 text-left;
+    }
+
+    th {
+      @apply bg-neutral-900/50 text-neutral-200 font-semibold;
+    }
+
+    td {
+      @apply text-neutral-400;
+    }
+
+    tr:nth-child(even) {
+      @apply bg-neutral-900/20;
+    }
+  }
+}

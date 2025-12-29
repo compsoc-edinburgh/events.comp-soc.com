@@ -14,7 +14,7 @@ interface EventCardProps {
   event: Event
 }
 
-export function EventCard({ event }: EventCardProps) {
+function EventCard({ event }: EventCardProps) {
   return (
     <div className="group relative bg-surface border border-neutral-800 hover:border-neutral-600 rounded-md p-5 transition-all duration-200 hover:shadow-lg hover:bg-neutral-800/30 cursor-pointer">
       <div className="flex justify-between items-start">
@@ -51,3 +51,5 @@ export function EventCard({ event }: EventCardProps) {
     </div>
   )
 }
+
+export default EventCard

@@ -1,15 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CalendarIcon } from 'lucide-react'
-import {
-  EventCard,
-  TabNavigation,
-  ToolBar,
-  TopNavbar,
-  WindowBar,
-} from '../components'
-import type { Event } from '../components'
+import type { Event } from '@/components/module/event-card.tsx'
+import EventCard from '@/components/module/event-card.tsx'
+import Window from '@/components/module/layout/window/window.tsx'
+import Sheet from '@/components/module/layout/sheet.tsx'
+import { SearchToolbarContent } from '@/components/module/layout/toolbar-content.tsx'
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/')({
+  component: App,
+})
 
 const events: Array<Event> = [
   {
@@ -56,44 +55,34 @@ const events: Array<Event> = [
 
 function App() {
   return (
-    <>
-      <TopNavbar />
-      <WindowBar />
-      <ToolBar />
-
-      <div className="bg-background min-h-screen flex items-center justify-center flex-col">
-        <TabNavigation />
-
-        <div className="relative z-10 -mt-px bg-surface flex flex-col w-1/2 border-neutral-800 border rounded-md mb-20">
-          <div className="p-8 h-full">
-            <div className="text-2xl font-bold gap-2 items-center flex text-white">
-              Search Events
-            </div>
-            <div>
-              <div className="flex gap-2 items-center mt-1.5 text-neutral-400 text-sm">
-                <CalendarIcon className="w-4 h-4" strokeWidth={1.5} /> 21
-                Upcoming Events
-              </div>
-            </div>
-
-            <div className="h-px bg-neutral-800 my-5" />
-
-            <div className="bg-neutral-900/50 p-4 rounded border-neutral-800 border text-neutral-400 text-sm leading-relaxed">
-              <span className="text-neutral-200 font-medium">
-                Welcome to the Compsoc Events Hub.
-              </span>{' '}
-              This is your central destination for all activities organised by
-              the Society and our Special Interest Groups (SIGs).
-            </div>
-
-            <div className="mt-8 grid gap-4">
-              {events.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
+    <Window activeTab="/" toolbarContent={<SearchToolbarContent />}>
+      <Sheet>
+        <div className="text-2xl font-bold gap-2 items-center flex text-white">
+          Search Events
+        </div>
+        <div>
+          <div className="flex gap-2 items-center mt-1.5 text-neutral-400 text-sm">
+            <CalendarIcon className="w-4 h-4" strokeWidth={1.5} /> 21 Upcoming
+            Events
           </div>
         </div>
-      </div>
-    </>
+
+        <div className="h-px bg-neutral-800 my-5" />
+
+        <div className="bg-neutral-900/50 p-4 rounded border-neutral-800 border text-neutral-400 text-sm leading-relaxed">
+          <span className="text-neutral-200 font-medium">
+            Welcome to the Compsoc Events Hub.
+          </span>{' '}
+          This is your central destination for all activities organised by the
+          Society and our Special Interest Groups (SIGs).
+        </div>
+
+        <div className="mt-8 grid gap-4">
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </div>
+      </Sheet>
+    </Window>
   )
 }

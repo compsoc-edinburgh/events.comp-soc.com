@@ -3,6 +3,9 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import appCss from '../styles.css?url'
+import type { ReactNode } from 'react'
+import { WindowBar } from '@/components/module/layout/window/window-bar.tsx'
+import MainNavigation from '@/components/module/layout/main-navigation.tsx'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -29,13 +32,16 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
         <HeadContent />
+        <title>CompSoc Events</title>
       </head>
       <body className="bg-background">
+        <MainNavigation />
+        <WindowBar />
         {children}
         <TanStackDevtools
           config={{
