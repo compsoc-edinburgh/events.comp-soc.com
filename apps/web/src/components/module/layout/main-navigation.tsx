@@ -1,23 +1,41 @@
-export function TopNavbar() {
+import { Link } from '@tanstack/react-router'
+import { mainNavLinks } from '@/config/navigation'
+
+function MainNavigation() {
   return (
     <nav className="flex h-11 items-center justify-between px-3 bg-surface border-b border-neutral-800">
       <div className="flex gap-5 justify-center items-center">
         <img src="/comp-soc-logo.svg" alt="My Logo" className="w-6 h-6" />
-        <div className="text-sm cursor-pointer hover:text-white transition-colors">
-          CompSoc
-        </div>
-        <div className="text-sm text-neutral-400 hover:text-white transition-colors cursor-pointer">
-          About
-        </div>
-        <div className="text-sm text-neutral-400 hover:text-white transition-colors cursor-pointer">
-          Team
-        </div>
-        <div className="text-sm text-neutral-400 hover:text-white transition-colors cursor-pointer">
-          News
-        </div>
-        <div className="text-sm text-neutral-400 hover:text-white transition-colors cursor-pointer">
-          Discord
-        </div>
+        {mainNavLinks.map((link, index) => {
+          const isFirst = index === 0
+          const baseClasses =
+            'text-sm cursor-pointer hover:text-white transition-colors'
+          const colorClasses = isFirst ? '' : 'text-neutral-400'
+
+          if (link.external) {
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${baseClasses} ${colorClasses}`}
+              >
+                {link.label}
+              </a>
+            )
+          }
+
+          return (
+            <Link
+              key={link.href}
+              to={link.href}
+              className={`${baseClasses} ${colorClasses}`}
+            >
+              {link.label}
+            </Link>
+          )
+        })}
       </div>
       <div className="flex items-center gap-4">
         <div className="flex gap-3 text-xs font-medium text-neutral-500 tabular-nums">
@@ -46,3 +64,5 @@ export function TopNavbar() {
     </nav>
   )
 }
+
+export default MainNavigation
