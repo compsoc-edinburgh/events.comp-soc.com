@@ -8,6 +8,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeStringify from 'rehype-stringify'
 import { visit } from 'unist-util-visit'
 import { toString } from 'hast-util-to-string'
+import type { Element } from 'hast'
 
 export type MarkdownHeading = {
   id: string
@@ -34,10 +35,10 @@ export async function renderMarkdown(content: string): Promise<MarkdownResult> {
       properties: { className: ['anchor'] },
     })
     .use(() => (tree) => {
-      visit(tree, 'element', (node: any) => {
+      visit(tree, 'element', (node: Element) => {
         if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(node.tagName)) {
           headings.push({
-            id: node.properties?.id || '',
+            id: String(node.properties?.id) || '',
             text: toString(node),
             level: parseInt(node.tagName.charAt(1), 10),
           })

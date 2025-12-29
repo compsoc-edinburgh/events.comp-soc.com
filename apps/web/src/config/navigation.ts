@@ -12,7 +12,7 @@ export interface NavLink {
 export const docsNavTabs: Array<NavTab> = [
   { label: 'Create', path: '/events/create' },
   { label: 'Search', path: '/' },
-  { label: 'Event', path: '/events' },
+  { label: 'Event', path: '/' },
   { label: 'Drafts', path: '/events/draft' },
 ]
 
