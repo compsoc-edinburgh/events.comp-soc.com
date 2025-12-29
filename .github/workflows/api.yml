@@ -38,7 +38,7 @@ jobs:
         run: pnpm format:check
 
       - name: Type Check
-        run: pnpm type-check
+        run: pnpm typecheck
 
       - name: Security Audit
         run: pnpm audit --audit-level=critical
