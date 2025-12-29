@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach } from "vitest";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { db } from "../src/db/db";
-import { setMockAuth } from "../src/lib/mock-auth";
+import { db } from "../src/db/db.js";
+import { setMockAuth } from "../src/lib/mock-auth.js";
 
 beforeAll(async () => {
   await migrate(db, { migrationsFolder: "./drizzle" });
