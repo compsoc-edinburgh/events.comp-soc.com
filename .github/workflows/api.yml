@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint:
-    name: Format checks
+    name: Lint, Typecheck & Audit
     runs-on: ubuntu-latest
 
     steps:
@@ -36,6 +36,12 @@ jobs:
 
       - name: Check formatting
         run: pnpm format:check
+
+      - name: Type Check
+        run: pnpm typecheck
+
+      - name: Security Audit
+        run: pnpm audit --audit-level=critical
 
   test:
     name: Route tests

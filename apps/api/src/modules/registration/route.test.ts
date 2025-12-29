@@ -1,10 +1,10 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { activeMockAuthState, setMockAuth } from "@/lib/mock-auth";
-import { FastifyInstance } from "fastify";
-import { buildServer } from "@/server";
-import { db } from "@/db/db";
 import { sql } from "drizzle-orm";
-import { eventsTable, registrationsTable, usersTable } from "@/db/schema";
+import { FastifyInstance } from "fastify";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { db } from "../../db/db.js";
+import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
+import { buildServer } from "../../server.js";
+import { activeMockAuthState, setMockAuth } from "../../lib/mock-auth.js";
 
 vi.mock("@clerk/fastify", () => {
   return {

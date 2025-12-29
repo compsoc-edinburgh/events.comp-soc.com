@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
-import { SqlContext } from "../../db/db";
-import { CreateEventInput, EventIdParams, GetEventsQuery, UpdateEventInput } from "./schema";
-import { eventsTable } from "../../db/schema";
+import { SqlContext } from "../../db/db.js";
+import { CreateEventInput, EventIdParams, GetEventsQuery, UpdateEventInput } from "./schema.js";
+import { eventsTable } from "../../db/schema.js";
 
 export const eventStore = {
   async create(db: SqlContext, data: CreateEventInput) {

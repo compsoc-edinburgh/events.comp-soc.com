@@ -1,8 +1,6 @@
 import { defineConfig } from "vitest/config";
 import { config } from "dotenv";
 
-import * as path from "node:path";
-
 config({ path: ".env.test" });
 
 export default defineConfig({
@@ -17,11 +15,6 @@ export default defineConfig({
       provider: "v8",
       include: ["src/**/*.ts"],
       exclude: ["src/**/*.test.ts", "src/types/**"],
-    },
-  },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
     },
   },
 });

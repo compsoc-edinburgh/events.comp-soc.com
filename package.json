@@ -10,7 +10,8 @@
     "lint": "eslint apps/",
     "lint:fix": "eslint apps/ --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r type-check"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

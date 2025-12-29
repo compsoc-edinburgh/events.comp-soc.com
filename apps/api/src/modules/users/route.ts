@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { getAuth } from "@clerk/fastify";
-import { CreateUserSchema, UpdateUserSchema, UserIdSchema } from "./schema";
-import { userService } from "./service";
+import { CreateUserSchema, UpdateUserSchema, UserIdSchema } from "./schema.js";
+import { userService } from "./service.js";
 
 export const userRoutes = async (server: FastifyInstance) => {
   server.get("/:id", async (request, reply) => {

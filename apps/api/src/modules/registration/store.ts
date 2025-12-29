@@ -1,7 +1,7 @@
 import { eq, and, count, inArray } from "drizzle-orm";
-import { CreateRegistrationInput, RegistrationParams, UpdateRegistrationInput } from "./schema";
-import { SqlContext } from "../../db/db";
-import { registrationsTable } from "../../db/schema";
+import { CreateRegistrationInput, RegistrationParams, UpdateRegistrationInput } from "./schema.js";
+import { SqlContext } from "../../db/db.js";
+import { registrationsTable } from "../../db/schema.js";
 
 export const registrationStore = {
   async create(db: SqlContext, data: CreateRegistrationInput) {

@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: events_api
+    ports:
+      - "3000:3000"
+    env_file:
+      - apps/api/.env
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped

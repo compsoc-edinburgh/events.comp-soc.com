@@ -1,4 +1,4 @@
-import { PinoLoggerOptions } from "fastify/types/logger";
+import { PinoLoggerOptions } from "fastify/types/logger.js";
 
 export const loggerConfig: PinoLoggerOptions = {
   level: process.env.NODE_ENV === "test" ? "warn" : "info",

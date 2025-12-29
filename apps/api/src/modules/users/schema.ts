@@ -1,6 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { usersRole, usersTable } from "../../db/schema";
+import { usersRole, usersTable } from "../../db/schema.js";
 
 export const BaseUserSchema = createInsertSchema(usersTable, {
   id: z.string().min(1, "User ID is required"),
