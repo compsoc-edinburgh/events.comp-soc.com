@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CalendarIcon, ClockIcon, MapPinIcon } from 'lucide-react'
-import Window from '@/components/module/layout/window.tsx'
+import Window from '@/components/module/layout/window/window.tsx'
 import Sheet from '@/components/module/layout/sheet.tsx'
 
 export const Route = createFileRoute('/events/$eventId')({

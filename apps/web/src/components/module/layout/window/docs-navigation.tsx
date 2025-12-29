@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { docsNavTabs } from '@/config/navigation'
+import { docsNavTabs } from '@/config/navigation.ts'
 
 interface DocsNavigationProps {
   activeTab?: string

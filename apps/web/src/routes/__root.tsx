@@ -4,7 +4,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import appCss from '../styles.css?url'
 import type { ReactNode } from 'react'
-import { WindowBar } from '@/components/module/layout/window-bar.tsx'
+import { WindowBar } from '@/components/module/layout/window/window-bar.tsx'
 import MainNavigation from '@/components/module/layout/main-navigation.tsx'
 
 export const Route = createRootRoute({

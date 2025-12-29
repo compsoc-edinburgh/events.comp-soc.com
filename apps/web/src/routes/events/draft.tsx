@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { FileTextIcon } from 'lucide-react'
 import type { Event } from '@/components/module/event-card.tsx'
-import Window from '@/components/module/layout/window.tsx'
+import Window from '@/components/module/layout/window/window.tsx'
 import Sheet from '@/components/module/layout/sheet.tsx'
 import { SearchToolbarContent } from '@/components/module/layout/toolbar-content.tsx'
 import EventCard from '@/components/module/event-card.tsx'
