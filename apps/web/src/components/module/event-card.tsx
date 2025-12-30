@@ -1,13 +1,16 @@
 import { ArrowUpRight, CalendarIcon, MapPin } from 'lucide-react'
+import type { Sigs } from '@/config/sigs.ts'
+import { SigBadge } from '@/components/sigs-badge.tsx'
 
 export interface Event {
   id: number
   title: string
-  date: string
+  date: Date
   time: string
   location: string
-  description: string
   type: string
+  sig: Sigs
+  pinned?: boolean
 }
 
 interface EventCardProps {
@@ -20,6 +23,7 @@ function EventCard({ event }: EventCardProps) {
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center gap-2 mb-2">
+            <SigBadge sig={event.sig} size="sm" />
             <span className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 border border-neutral-800 px-1.5 py-0.5 rounded">
               {event.type}
             </span>
@@ -35,8 +39,12 @@ function EventCard({ event }: EventCardProps) {
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-3.5 h-3.5" />
           <span>
-            {event.date} •{' '}
-            <span className="text-neutral-500">{event.time}</span>
+            {event.date.toLocaleDateString('en-GB', {
+              weekday: 'short',
+              day: 'numeric',
+              month: 'short',
+            })}{' '}
+            • <span className="text-neutral-500">{event.time}</span>
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -44,10 +52,6 @@ function EventCard({ event }: EventCardProps) {
           <span>{event.location}</span>
         </div>
       </div>
-
-      <p className="mt-4 text-sm text-neutral-500 line-clamp-2 group-hover:text-neutral-400 transition-colors">
-        {event.description}
-      </p>
     </div>
   )
 }

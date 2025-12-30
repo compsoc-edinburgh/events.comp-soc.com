@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PlusCircleIcon } from 'lucide-react'
 import Window from '@/components/module/layout/window/window.tsx'
 import Sheet from '@/components/module/layout/sheet.tsx'
 
@@ -16,19 +15,12 @@ function CreateRoute() {
         </div>
         <div>
           <div className="flex gap-2 items-center mt-1.5 text-neutral-400 text-sm">
-            <PlusCircleIcon className="w-4 h-4" strokeWidth={1.5} /> New event
+            Fill in the details below to create a new event. You can either
+            publish it or save it as a draft.
           </div>
         </div>
 
         <div className="h-px bg-neutral-800 my-5" />
-
-        <div className="bg-neutral-900/50 p-4 rounded border-neutral-800 border text-neutral-400 text-sm leading-relaxed">
-          <span className="text-neutral-200 font-medium">
-            Create a new event.
-          </span>{' '}
-          Fill in the details below to create a new event for the Compsoc
-          community.
-        </div>
 
         <div className="mt-6 flex flex-col gap-4 w-full">
           <div className="flex flex-col gap-2">
