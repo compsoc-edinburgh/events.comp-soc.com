@@ -55,7 +55,7 @@ function MainNavigation() {
           </span>
         </div>
 
-        <button className="bg-primary-dark rounded-sm p-0 cursor-pointer group mt-1">
+        <button className="bg-red-900 rounded-sm p-0 cursor-pointer group mt-1">
           <span className="block px-2 py-1 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5">
             Sign Up
           </span>

@@ -29,7 +29,7 @@
   --color-accent-soft: #ef4444;
   --color-accent-foreground: #ffffff;
 
-  --color-destructive: #dc2626;
+  --color-destructive: oklch(71.2% 0.194 13.428);
   --color-ring: #dc2626;
 }
 
@@ -48,7 +48,7 @@ h4 {
 }
 
 .prose-event {
-  @apply text-[#E4E4E4] leading-relaxed max-w-none;
+  @apply text-neutral-400 leading-relaxed max-w-none;
 
   h1,
   h2,
@@ -56,18 +56,21 @@ h4 {
   h4,
   h5,
   h6 {
-    @apply text-white font-semibold mt-8 mb-4 first:mt-0;
+    @apply text-neutral-100 font-semibold mt-8 mb-4 first:mt-0;
   }
 
   h1 {
     @apply text-3xl tracking-tight;
   }
+
   h2 {
-    @apply text-2xl tracking-tight border-b border-neutral-800/50 pb-2 mb-6;
+    @apply text-2xl tracking-tight border-b border-neutral-800/70 pb-2 mb-6;
   }
+
   h3 {
     @apply text-xl;
   }
+
   h4 {
     @apply text-lg;
   }
@@ -85,7 +88,8 @@ h4 {
   }
 
   a {
-    @apply text-accent-soft hover:text-primary decoration-neutral-700 hover:decoration-primary transition-all;
+    @apply text-neutral-200 underline underline-offset-4 decoration-neutral-700
+    hover:text-neutral-100 hover:decoration-neutral-500 transition-colors;
   }
 
   ul,
@@ -95,17 +99,19 @@ h4 {
 
   ul {
     @apply list-none;
+
     li {
       @apply relative;
+
       &::before {
-        content: '*';
-        @apply absolute -left-6 text-primary text-sm top-0.5 opacity-70;
+        content: '•';
+        @apply absolute -left-6 text-neutral-500 text-sm top-0.5;
       }
     }
   }
 
   ol {
-    @apply list-decimal marker:text-primary marker:text-sm;
+    @apply list-decimal marker:text-neutral-500 marker:text-sm;
   }
 
   li {
@@ -113,26 +119,32 @@ h4 {
   }
 
   blockquote {
-    @apply border-l-2 border-primary pl-6 py-1 my-8 italic text-neutral-300 bg-neutral-900/30 rounded-r-sm;
+    @apply border-l-2 border-neutral-700 pl-6 py-1 my-8
+    italic text-neutral-300 bg-neutral-900/40 rounded-r-sm;
+
     p {
       @apply my-2;
     }
   }
 
   code {
-    @apply font-mono text-neutral-200 bg-neutral-800/80 px-1.5 py-0.5 rounded text-[13px] border border-neutral-700/50;
+    @apply font-mono text-neutral-200 bg-neutral-800/80
+    px-1.5 py-0.5 rounded text-[13px]
+    border border-neutral-700/60;
   }
 
   pre {
-    @apply bg-window border border-neutral-800/80 rounded-lg p-5 my-8 overflow-x-auto shadow-inner;
+    @apply bg-neutral-900 border border-neutral-800
+    rounded-lg p-5 my-8 overflow-x-auto shadow-inner;
 
     code {
-      @apply bg-transparent p-0 text-neutral-300 border-none text-[13px] leading-6;
+      @apply bg-transparent p-0 text-neutral-300
+      border-none text-[13px] leading-6;
     }
   }
 
   hr {
-    @apply border-neutral-800/50 my-10;
+    @apply border-neutral-800/60 my-10;
   }
 
   img {
@@ -144,11 +156,11 @@ h4 {
 
     th,
     td {
-      @apply border border-neutral-800/50 px-4 py-3 text-left;
+      @apply border border-neutral-800/60 px-4 py-3 text-left;
     }
 
     th {
-      @apply bg-neutral-900/50 text-neutral-200 font-semibold;
+      @apply bg-neutral-900/60 text-neutral-200 font-semibold;
     }
 
     td {
@@ -156,7 +168,7 @@ h4 {
     }
 
     tr:nth-child(even) {
-      @apply bg-neutral-900/20;
+      @apply bg-neutral-900/30;
     }
   }
 }
