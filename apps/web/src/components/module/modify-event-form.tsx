@@ -51,6 +51,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip.tsx'
 import { Switch } from '@/components/ui/switch.tsx'
+import { ButtonGroup } from '@/components/ui/button-group.tsx'
 
 export const eventSchema = z
   .object({
@@ -99,6 +100,22 @@ function ModifyEventForm({
 }) {
   const [open, setOpen] = useState(false)
 
+  const getDefaultCustomFields = (): Array<CustomField> => [
+    {
+      id: `field-${Date.now()}-1`,
+      type: 'select',
+      label: 'University Year',
+      required: true,
+      options: ['1', '2', '3', '4', 'Masters', 'PhD'],
+    },
+    {
+      id: `field-${Date.now()}-2`,
+      type: 'textarea',
+      label: 'Dietary Requirements',
+      required: false,
+    },
+  ]
+
   const form = useForm({
     defaultValues: {
       title: '',
@@ -141,6 +158,11 @@ function ModifyEventForm({
     form.setFieldValue('customFields', [...customFields, newField])
   }
 
+  const addDefaultFields = () => {
+    const defaultFields = getDefaultCustomFields()
+    form.setFieldValue('customFields', [...customFields, ...defaultFields])
+  }
+
   const removeCustomField = (id: string) => {
     form.setFieldValue(
       'customFields',
@@ -155,6 +177,43 @@ function ModifyEventForm({
         field.id === id ? { ...field, ...updates } : field,
       ),
     )
+  }
+
+  const addOption = (fieldId: string) => {
+    const field = customFields.find((f) => f.id === fieldId)
+    if (field) {
+      const currentOptions = field.options || []
+      updateCustomField(fieldId, {
+        options: [...currentOptions, ''],
+      })
+    }
+  }
+
+  const updateOption = (
+    fieldId: string,
+    optionIndex: number,
+    value: string,
+  ) => {
+    const field = customFields.find((f) => f.id === fieldId)
+    if (field) {
+      const newOptions = [...(field.options || [])]
+      newOptions[optionIndex] = value
+      updateCustomField(fieldId, {
+        options: newOptions,
+      })
+    }
+  }
+
+  const removeOption = (fieldId: string, optionIndex: number) => {
+    const field = customFields.find((f) => f.id === fieldId)
+    if (field) {
+      const newOptions = (field.options || []).filter(
+        (_, i) => i !== optionIndex,
+      )
+      updateCustomField(fieldId, {
+        options: newOptions,
+      })
+    }
   }
 
   return (
@@ -473,17 +532,34 @@ function ModifyEventForm({
 
             {registrationFormEnabled && (
               <div className="mt-6 space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
                   <div>
                     <h4 className="text-sm font-medium">Custom Fields</h4>
                     <p className="text-sm text-muted-foreground">
                       Add custom fields to your registration form
                     </p>
                   </div>
-                  <Button type="button" size="sm" onClick={addCustomField}>
-                    <PlusIcon className="mr-2 h-4 w-4" />
-                    Add Field
-                  </Button>
+                  <div className="flex gap-2">
+                    <ButtonGroup>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={addDefaultFields}
+                      >
+                        Default
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addCustomField}
+                      >
+                        <PlusIcon className="mr-2 h-4 w-4" />
+                        Field
+                      </Button>
+                    </ButtonGroup>
+                  </div>
                 </div>
 
                 {customFields.map((field) => (
@@ -491,17 +567,6 @@ function ModifyEventForm({
                     key={field.id}
                     className="rounded-lg border border-border p-4 space-y-4"
                   >
-                    <div className="flex justify-end w-full">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => removeCustomField(field.id)}
-                      >
-                        <XIcon className="h-4 w-4" />
-                      </Button>
-                    </div>
-
                     <div className="grid gap-4">
                       <Field>
                         <FieldLabel>Field Type</FieldLabel>
@@ -540,24 +605,51 @@ function ModifyEventForm({
                       </Field>
 
                       {field.type === 'select' && (
-                        <Field>
-                          <FieldLabel>Options</FieldLabel>
-                          <Textarea
-                            value={field.options?.join('\n') || ''}
-                            onChange={(e) =>
-                              updateCustomField(field.id, {
-                                options: e.target.value
-                                  .split('\n')
-                                  .filter((opt) => opt.trim()),
-                              })
-                            }
-                            placeholder="Enter each option on a new line"
-                            rows={4}
-                          />
-                          <FieldDescription>
-                            Enter each option on a separate line
-                          </FieldDescription>
-                        </Field>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <FieldLabel>Options</FieldLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addOption(field.id)}
+                            >
+                              <PlusIcon className="mr-2 h-3 w-3" />
+                              Option
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            {(field.options || []).map((option, index) => (
+                              <div key={index} className="flex gap-2">
+                                <Input
+                                  value={option}
+                                  onChange={(e) =>
+                                    updateOption(
+                                      field.id,
+                                      index,
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder={`Option ${index + 1}`}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeOption(field.id, index)}
+                                >
+                                  <XIcon className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            {(!field.options || field.options.length === 0) && (
+                              <p className="text-sm text-muted-foreground">
+                                No options added yet. Click "Add Option" to get
+                                started.
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       )}
 
                       <Field orientation="horizontal">
@@ -572,6 +664,14 @@ function ModifyEventForm({
                         <FieldLabel className="font-normal">
                           Required field
                         </FieldLabel>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeCustomField(field.id)}
+                        >
+                          Remove
+                        </Button>
                       </Field>
                     </div>
                   </div>
@@ -580,8 +680,8 @@ function ModifyEventForm({
                 {customFields.length === 0 && (
                   <div className="rounded-lg border border-border border-dashed p-8 text-center">
                     <p className="text-sm text-muted-foreground">
-                      No custom fields added yet. Click "Add Field" to get
-                      started.
+                      No custom fields added yet. Click "Use Default" for preset
+                      fields or "Add Field" to create your own.
                     </p>
                   </div>
                 )}
@@ -590,11 +690,11 @@ function ModifyEventForm({
           </FieldGroup>
         </FieldSet>
 
-        <Field orientation="horizontal">
-          <Button type="submit" form="event-form">
+        <Field orientation="horizontal" className="flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button type="submit" form="event-form" className="w-full sm:w-auto">
             Submit
           </Button>
-          <Button variant="outline" type="button" onClick={() => form.reset()}>
+          <Button variant="outline" type="button" onClick={() => form.reset()} className="w-full sm:w-auto">
             Clear
           </Button>
         </Field>

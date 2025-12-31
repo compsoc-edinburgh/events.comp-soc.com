@@ -17,7 +17,7 @@ function EventRoute() {
   return (
     <Window activeTab="/events">
       <Sheet>
-        <div className="text-2xl font-bold gap-2 items-center flex text-white">
+        <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           Intro to Rust Workshop
         </div>
         <div>
@@ -26,20 +26,20 @@ function EventRoute() {
           </span>
         </div>
 
-        <div className="my-8 flex gap-10">
-          <div>
-            <div className="flex gap-2 items-center">
-              <MapPin className="w-5 h-5" />
+        <div className="my-6 sm:my-8 flex flex-col sm:flex-row gap-4 sm:gap-10">
+          <div className="flex-1 sm:flex-none">
+            <div className="flex gap-2 items-center text-sm sm:text-base">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
               Location
             </div>
-            <div className="font-bold mt-2 ml-7">Remote</div>
+            <div className="font-bold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">Remote</div>
           </div>
-          <div>
-            <div className="flex gap-2 items-center">
-              <ClockIcon className="w-5 h-5" />
+          <div className="flex-1 sm:flex-none">
+            <div className="flex gap-2 items-center text-sm sm:text-base">
+              <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               Date
             </div>
-            <div className="font-bold mt-2 ml-7">Mon 29 Dec 14:30</div>
+            <div className="font-bold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">Mon 29 Dec 14:30</div>
           </div>
         </div>
 
@@ -87,13 +87,13 @@ See you there! 🦀
           />
         </div>
 
-        <div className="mt-6 flex gap-3">
-          <button className="bg-primary-dark rounded-sm p-0 cursor-pointer group">
-            <span className="block px-4 py-2 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <button className="bg-primary-dark rounded-sm p-0 cursor-pointer group w-full sm:w-auto">
+            <span className="block px-4 py-2 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5 text-center">
               Register Now
             </span>
           </button>
-          <button className="px-4 py-2 text-sm text-neutral-400 hover:text-white transition-colors border border-neutral-700 rounded hover:border-neutral-500">
+          <button className="px-4 py-2 text-sm text-neutral-400 hover:text-white transition-colors border border-neutral-700 rounded hover:border-neutral-500 w-full sm:w-auto">
             Add to Calendar
           </button>
         </div>

@@ -13,7 +13,7 @@ function CreateRoute() {
   return (
     <Window activeTab="/events/create">
       <Sheet>
-        <div className="text-2xl font-bold gap-2 items-center flex text-white">
+        <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           Create Event
         </div>
         <div>
