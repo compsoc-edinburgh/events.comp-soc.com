@@ -25,6 +25,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",
+    "@tanstack/react-form": "^1.27.7",
     "@tanstack/react-router": "^1.132.0",
     "@tanstack/react-router-devtools": "^1.132.0",
     "@tanstack/react-router-ssr-query": "^1.131.7",
@@ -55,7 +56,8 @@
     "tailwindcss": "^4.0.6",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
-    "vite-tsconfig-paths": "^6.0.2"
+    "vite-tsconfig-paths": "^6.0.2",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@tanstack/devtools-vite": "^0.3.11",
