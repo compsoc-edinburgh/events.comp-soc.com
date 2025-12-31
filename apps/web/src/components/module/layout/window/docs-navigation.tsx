@@ -7,7 +7,7 @@ interface DocsNavigationProps {
 
 function DocsNavigation({ activeTab }: DocsNavigationProps) {
   return (
-    <div className="flex gap-5 text-sm w-1/2 mb-px mt-5 justify-center">
+    <div className="flex gap-5 text-sm w-1/2 mb-px mt-2 justify-center">
       {docsNavTabs.map((tab) => {
         const isActive = activeTab === tab.path
 

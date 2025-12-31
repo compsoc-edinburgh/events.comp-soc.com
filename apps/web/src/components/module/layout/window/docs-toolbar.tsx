@@ -71,8 +71,8 @@ function DocsToolbar({ children }: DocsToolbarProps) {
 
         <div className="flex items-center">
           <div className="flex items-center h-full">
-            <button className="bg-red-900 rounded-sm p-0 cursor-pointer group mt-1">
-              <span className="block px-1.5 py-0.5 rounded-sm text-sm bg-red-600 text-white -translate-y-1 group-active:-translate-y-0.5 transition-transform">
+            <button className="bg-primary-dark rounded-sm p-0 cursor-pointer group mt-1">
+              <span className="block px-1.5 py-0.5 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 group-active:-translate-y-0.5 transition-transform">
                 Share
               </span>
             </button>

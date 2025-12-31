@@ -10,9 +10,27 @@
   --color-surface: #1a1a1a;
   --color-window: #121212;
   --color-subnavbar: #1e1e1e;
-  --color-accent: #f54e00;
-  --color-accent-soft: #ff9000;
-  --color-border-dark: #000000;
+
+  --color-foreground: #e4e4e4;
+  --color-muted: #262626;
+  --color-muted-foreground: #737373;
+  --color-popover: #1a1a1a;
+  --color-popover-foreground: #e4e4e4;
+  --color-border: #262626;
+  --color-input: #262626;
+
+  --color-primary: #dc2626;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #262626;
+  --color-secondary-foreground: #e4e4e4;
+
+  --color-accent: #b91c1c;
+  --color-accent-soft: #ef4444;
+  --color-accent-foreground: #ffffff;
+
+  --color-destructive: #dc2626;
+  --color-ring: #dc2626;
 }
 
 body {
@@ -67,7 +85,7 @@ h4 {
   }
 
   a {
-    @apply text-[--color-accent] hover:text-[--color-accent-soft] decoration-neutral-700 hover:decoration-[--color-accent] transition-all;
+    @apply text-accent-soft hover:text-primary decoration-neutral-700 hover:decoration-primary transition-all;
   }
 
   ul,
@@ -81,13 +99,13 @@ h4 {
       @apply relative;
       &::before {
         content: '*';
-        @apply absolute -left-6 text-[--color-accent] text-sm top-0.5 opacity-70;
+        @apply absolute -left-6 text-primary text-sm top-0.5 opacity-70;
       }
     }
   }
 
   ol {
-    @apply list-decimal marker:text-[--color-accent] marker:text-sm;
+    @apply list-decimal marker:text-primary marker:text-sm;
   }
 
   li {
@@ -95,7 +113,7 @@ h4 {
   }
 
   blockquote {
-    @apply border-l-2 border-[--color-accent] pl-6 py-1 my-8 italic text-neutral-300 bg-neutral-900/30 rounded-r-sm;
+    @apply border-l-2 border-primary pl-6 py-1 my-8 italic text-neutral-300 bg-neutral-900/30 rounded-r-sm;
     p {
       @apply my-2;
     }

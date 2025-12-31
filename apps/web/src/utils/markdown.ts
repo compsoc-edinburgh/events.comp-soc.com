@@ -38,7 +38,7 @@ export async function renderMarkdown(content: string): Promise<MarkdownResult> {
       visit(tree, 'element', (node: Element) => {
         if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(node.tagName)) {
           headings.push({
-            id: String(node.properties?.id) || '',
+            id: String(node.properties.id) || '',
             text: toString(node),
             level: parseInt(node.tagName.charAt(1), 10),
           })
