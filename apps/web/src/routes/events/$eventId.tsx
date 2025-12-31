@@ -88,8 +88,8 @@ See you there! 🦀
         </div>
 
         <div className="mt-6 flex gap-3">
-          <button className="bg-red-900 rounded-sm p-0 cursor-pointer group">
-            <span className="block px-4 py-2 rounded-sm text-sm bg-red-600 text-white -translate-y-1 transition-transform group-active:-translate-y-0.5">
+          <button className="bg-primary-dark rounded-sm p-0 cursor-pointer group">
+            <span className="block px-4 py-2 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5">
               Register Now
             </span>
           </button>

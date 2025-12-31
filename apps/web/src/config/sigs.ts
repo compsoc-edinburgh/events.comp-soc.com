@@ -72,7 +72,7 @@ export const ALL_SIGS: Array<SIGInfo> = [
   },
   {
     id: Sigs.ProjectShare,
-    name: 'ProjectShare',
+    name: 'Project Share',
     logo: '/sigs/projectshare.png',
     colors: SIG_COLORS[Sigs.ProjectShare],
   },
