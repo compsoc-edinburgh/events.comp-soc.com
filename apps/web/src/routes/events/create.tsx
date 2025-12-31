@@ -154,8 +154,8 @@ function CreateRoute() {
                           endMonth={addYears(new Date(), 3)}
                           startMonth={new Date()}
                           captionLayout="dropdown"
-                          onSelect={(date) => {
-                            setDate(date)
+                          onSelect={(selected) => {
+                            setDate(selected)
                             setOpen(false)
                           }}
                         />
