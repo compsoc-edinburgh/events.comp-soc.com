@@ -127,7 +127,7 @@ function App() {
   return (
     <Window activeTab="/" toolbarContent={<SearchToolbarContent />}>
       <Sheet>
-        <div className="text-2xl font-bold gap-2 items-center flex text-white">
+        <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           Search Events
         </div>
         <div>
@@ -139,7 +139,7 @@ function App() {
 
         <div className="h-px bg-neutral-800 my-5" />
 
-        <div className="bg-neutral-900/50 p-4 rounded border-neutral-800 border text-neutral-400 text-sm leading-relaxed">
+        <div className="bg-neutral-900/50 p-3 sm:p-4 rounded border-neutral-800 border text-neutral-400 text-xs sm:text-sm leading-relaxed">
           <span className="text-neutral-200 font-medium">
             Welcome to the Compsoc Events Hub.
           </span>{' '}

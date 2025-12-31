@@ -36,7 +36,7 @@ function DraftRoute() {
   return (
     <Window activeTab="/events/draft" toolbarContent={<SearchToolbarContent />}>
       <Sheet>
-        <div className="text-2xl font-bold gap-2 items-center flex text-white">
+        <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           Draft Events
         </div>
         <div>
@@ -48,7 +48,7 @@ function DraftRoute() {
 
         <div className="h-px bg-neutral-800 my-5" />
 
-        <div className="bg-neutral-900/50 p-4 rounded border-neutral-800 border text-neutral-400 text-sm leading-relaxed">
+        <div className="bg-neutral-900/50 p-3 sm:p-4 rounded border-neutral-800 border text-neutral-400 text-xs sm:text-sm leading-relaxed">
           <span className="text-neutral-200 font-medium">
             Your draft events.
           </span>{' '}
