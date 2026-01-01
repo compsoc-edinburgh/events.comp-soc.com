@@ -1,6 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { registrationsTable, registrationStatus } from "../../db/schema.js";
+import { registrationsTable } from "../../db/schema.js";
 
 export const BaseRegistrationSchema = createInsertSchema(registrationsTable).omit({
   id: true,
@@ -37,4 +37,3 @@ export const TargetUserParamsSchema = z.object({
   eventId: z.string(),
   targetUserId: z.string(),
 });
-export type RegistrationStatus = (typeof registrationStatus.enumValues)[number];

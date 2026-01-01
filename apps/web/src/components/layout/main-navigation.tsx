@@ -185,11 +185,13 @@ function MainNavigation() {
     <>
       <nav className="flex h-11 items-center justify-between px-3 bg-surface border-b border-neutral-800">
         <div className="flex gap-5 justify-center items-center">
-          <img
-            src="/comp-soc-logo.svg"
-            alt="Company Logo"
-            className="w-6 h-6"
-          />
+          <Link to="/">
+            <img
+              src="/comp-soc-logo.svg"
+              alt="Company Logo"
+              className="w-6 h-6 hover:scale-105 duration-150"
+            />
+          </Link>
 
           <div className="gap-5 md:flex hidden">
             {mainNavLinks.map((link, index) => (

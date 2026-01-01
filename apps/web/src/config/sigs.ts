@@ -1,19 +1,8 @@
-export const Sigs = {
-  Compsoc: 'compsoc',
-  ProjectShare: 'projectShare',
-  BitSig: 'bitSig',
-  Evp: 'evp',
-  CloudSig: 'cloudSig',
-  Tardis: 'tardis',
-  CCSig: 'CCSig',
-  TypeSig: 'typeSig',
-  SigInt: 'sigInt',
-  GameDevSig: 'gameDevSig',
-  EdinburghAI: 'edinburghAI',
-  QuantSig: 'quantSig',
-} as const
+import { SigId } from '@events.comp-soc.com/shared'
+import type { Nullable } from '@events.comp-soc.com/shared'
 
-export type Sigs = (typeof Sigs)[keyof typeof Sigs]
+export const Sigs = SigId
+export type Sigs = SigId
 
 export interface SIGColors {
   border: string
@@ -138,8 +127,8 @@ export const ALL_SIGS: Array<SIGInfo> = [
   },
 ]
 
-export const getSigById = (sigId: string): SIGInfo | undefined => {
-  return ALL_SIGS.find((sig) => sig.id === sigId)
+export const getSigById = (sigId: string): Nullable<SIGInfo> => {
+  return ALL_SIGS.find((sig) => sig.id === sigId) ?? null
 }
 
 export const getSigColors = (sigId: Sigs): SIGColors => {

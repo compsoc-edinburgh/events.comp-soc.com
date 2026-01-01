@@ -1,12 +1,37 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CalendarIcon } from 'lucide-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import EventCard from '@/components/event-card.tsx'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { SEARCH_EVENTS } from '@/config/mocks.ts'
+import { eventsQueryOptions } from '@/lib/data/event.ts'
 
 export const Route = createFileRoute('/')({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(eventsQueryOptions())
+  },
   component: App,
+  pendingComponent: () => (
+    <Window activeTab="/">
+      <Sheet>
+        <div className="animate-pulse">
+          <div className="h-8 w-48 bg-neutral-800 rounded mb-4" />
+          <div className="h-4 w-32 bg-neutral-900 rounded mb-8" />
+
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-32 w-full bg-neutral-900/50 border border-neutral-800 rounded"
+              />
+            ))}
+          </div>
+        </div>
+      </Sheet>
+    </Window>
+  ),
+  pendingMs: 0,
 })
 
 function getStartOfWeek(date: Date): Date {
@@ -47,6 +72,9 @@ const nextEvents = SEARCH_EVENTS.filter(
 )
 
 function App() {
+  const postsQuery = useSuspenseQuery(eventsQueryOptions())
+  console.log(postsQuery.data)
+
   return (
     <Window activeTab="/">
       <Sheet>

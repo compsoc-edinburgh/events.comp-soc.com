@@ -25,7 +25,7 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => PAGE_METADATA,
   shellComponent: RootDocument,
-  notFoundComponent: () => NotFound,
+  notFoundComponent: NotFound,
 })
 
 function RootDocument({ children }: { children: ReactNode }) {

@@ -8,7 +8,7 @@ import { SigBadge } from '@/components/sigs-badge.tsx'
 import { Sigs } from '@/config/sigs.ts'
 import { Button } from '@/components/ui/button.tsx'
 
-export const Route = createFileRoute('/events/$eventId')({
+export const Route = createFileRoute('/events/$eventId/')({
   component: EventRoute,
 })
 

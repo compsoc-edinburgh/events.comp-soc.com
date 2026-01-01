@@ -1,9 +1,9 @@
-import type { Event } from '@/components/event-card.tsx'
+import type { EventCardData } from '@/components/event-card.tsx'
 import { Sigs } from '@/config/sigs.ts'
 
 const today = new Date()
 
-export const SEARCH_EVENTS: Array<Event> = [
+export const SEARCH_EVENTS: Array<EventCardData> = [
   {
     id: 1,
     title: 'Annual General Meeting',
@@ -78,7 +78,7 @@ export const SEARCH_EVENTS: Array<Event> = [
   },
 ]
 
-export const DRAFT_EVENTS: Array<Event> = [
+export const DRAFT_EVENTS: Array<EventCardData> = [
   {
     id: 101,
     title: 'Machine Learning Workshop',

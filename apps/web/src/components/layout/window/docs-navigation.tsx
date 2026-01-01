@@ -20,7 +20,9 @@ function DocsNavigation({ activeTab }: DocsNavigationProps) {
       {docsNavTabs.map((tab) => {
         const isActive = activeTab === tab.path
         const isDisabled =
-          tab.isClosedToCheck || (tab.requireCommittee && !isCommittee)
+          tab.isClosedToCheck ||
+          (tab.requireCommittee && !isCommittee) ||
+          (tab.requireAuth && !user)
 
         if (isActive) {
           return (

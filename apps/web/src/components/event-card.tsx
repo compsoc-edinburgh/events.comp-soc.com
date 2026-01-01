@@ -1,21 +1,21 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowUpRight, CalendarIcon, MapPin } from 'lucide-react'
-import type { Sigs } from '@/config/sigs.ts'
+import type { SigId } from '@events.comp-soc.com/shared'
 import { SigBadge } from '@/components/sigs-badge.tsx'
 
-export interface Event {
-  id: number
+export interface EventCardData {
+  id: number | string
   title: string
   date: Date
   time: string
   location: string
   type: string
-  sig: Sigs
+  sig: SigId
   pinned?: boolean
 }
 
 interface EventCardProps {
-  event: Event
+  event: EventCardData
 }
 
 function EventCard({ event }: EventCardProps) {

@@ -1,6 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { usersRole, usersTable } from "../../db/schema.js";
+import { usersTable } from "../../db/schema.js";
 
 export const BaseUserSchema = createInsertSchema(usersTable, {
   id: z.string().min(1, "User ID is required"),
@@ -25,4 +25,3 @@ export const UserIdSchema = z.object({
 });
 
 export type UserIdParams = z.infer<typeof UserIdSchema>;
-export type UserRole = (typeof usersRole.enumValues)[number];

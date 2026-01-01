@@ -1,15 +1,16 @@
 import { integer, json, pgEnum, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
+import { UserRole, EventState, RegistrationStatus } from "@events.comp-soc.com/shared";
 
-export const usersRole = pgEnum("roles", ["user", "committee"]);
+export const usersRole = pgEnum("roles", [UserRole.User, UserRole.Committee]);
 
-export const eventState = pgEnum("eventState", ["draft", "published"]);
+export const eventState = pgEnum("eventState", [EventState.Draft, EventState.Published]);
 
 export const registrationStatus = pgEnum("registrationStatus", [
-  "pending",
-  "accepted",
-  "waitlist",
-  "rejected",
+  RegistrationStatus.Pending,
+  RegistrationStatus.Accepted,
+  RegistrationStatus.Waitlist,
+  RegistrationStatus.Rejected,
 ]);
 
 export const usersTable = pgTable("users", {
