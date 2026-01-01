@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useUser } from '@clerk/clerk-react'
-import { Role } from '@events.comp-soc.com/shared'
+import { UserRole } from '@events.comp-soc.com/shared/dist'
 import { docsNavTabs } from '@/config/navigation'
 import { cn } from '@/lib/utils'
 
@@ -10,7 +10,8 @@ interface DocsNavigationProps {
 
 function DocsNavigation({ activeTab }: DocsNavigationProps) {
   const { user, isLoaded } = useUser()
-  const isCommittee = isLoaded && user?.publicMetadata.role === Role.Committee
+  const isCommittee =
+    isLoaded && user?.publicMetadata.role === UserRole.Committee
 
   return (
     <nav

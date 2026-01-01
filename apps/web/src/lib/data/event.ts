@@ -3,8 +3,6 @@ import axios from 'redaxios'
 import { queryOptions } from '@tanstack/react-query'
 import type { Event } from '@events.comp-soc.com/shared'
 
-export type { Event } from '@events.comp-soc.com/shared'
-
 export const fetchEvents = createServerFn({ method: 'GET' }).handler(
   async () => {
     const baseUrl = process.env.API_BASE_URL

@@ -14,10 +14,16 @@ export type EventState = (typeof EventState)[keyof typeof EventState];
 /**
  * JSON value type for dynamic form data
  */
-export type JsonValue = { [key: string]: JsonValue };
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
 
 /**
- * Core Event entity - matches API response
+ * Core Event entity
  */
 export interface Event {
   id: string;

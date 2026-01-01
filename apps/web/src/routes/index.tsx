@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CalendarIcon } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
 import EventCard from '@/components/event-card.tsx'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
@@ -72,9 +71,6 @@ const nextEvents = SEARCH_EVENTS.filter(
 )
 
 function App() {
-  const postsQuery = useSuspenseQuery(eventsQueryOptions())
-  console.log(postsQuery.data)
-
   return (
     <Window activeTab="/">
       <Sheet>

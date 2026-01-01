@@ -6,10 +6,7 @@ dist
 .git
 .gitignore
 .env
-.env.local
 .env.*.local
-**/.env.local
-
 # IDE
 .idea
 *.swp
