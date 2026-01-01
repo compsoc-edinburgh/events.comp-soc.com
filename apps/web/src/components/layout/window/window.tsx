@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import DocsNavigation from '@/components/module/layout/window/docs-navigation.tsx'
-import DocsToolbar from '@/components/module/layout/window/docs-toolbar.tsx'
+import DocsNavigation from '@/components/layout/window/docs-navigation.tsx'
+import DocsToolbar from '@/components/layout/window/docs-toolbar.tsx'
 
 interface WindowProps {
   children: ReactNode

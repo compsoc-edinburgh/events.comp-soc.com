@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ClockIcon, MapPin } from 'lucide-react'
-import Window from '@/components/module/layout/window/window.tsx'
-import Sheet from '@/components/module/layout/sheet.tsx'
+import Window from '@/components/layout/window/window.tsx'
+import Sheet from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
-import GoogleMapsCard from '@/components/module/google-maps-card.tsx'
+import GoogleMapsCard from '@/components/google-maps-card.tsx'
 
 export const Route = createFileRoute('/events/$eventId')({
   component: EventRoute,

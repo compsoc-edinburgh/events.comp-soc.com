@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import Window from '@/components/module/layout/window/window.tsx'
-import Sheet from '@/components/module/layout/sheet.tsx'
+import Window from '@/components/layout/window/window.tsx'
+import Sheet from '@/components/layout/sheet.tsx'
 
 import { Separator } from '@/components/ui/separator.tsx'
-import ModifyEventForm from '@/components/module/modify-event-form.tsx'
+import ModifyEventForm from '@/components/modify-event-form.tsx'
 
 export const Route = createFileRoute('/events/create')({
   component: CreateRoute,
