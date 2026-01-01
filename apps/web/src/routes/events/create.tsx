@@ -3,7 +3,7 @@ import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 
 import { Separator } from '@/components/ui/separator.tsx'
-import ModifyEventForm from '@/components/modify-event-form.tsx'
+import ModifyEventForm from '@/components/forms/modify-event-form.tsx'
 
 export const Route = createFileRoute('/events/create')({
   component: CreateRoute,

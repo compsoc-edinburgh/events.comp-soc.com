@@ -704,24 +704,22 @@ function ModifyEventForm({
           <Button type="submit" form="event-form" className="w-full sm:w-auto">
             Publish
           </Button>
-          <ButtonGroup>
-            <Button
-              type="submit"
-              variant="outline"
-              form="event-form"
-              className="w-full sm:w-auto"
-            >
-              Save
-            </Button>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => form.reset()}
-              className="w-full sm:w-auto"
-            >
-              Clear
-            </Button>
-          </ButtonGroup>
+          <Button
+            type="submit"
+            variant="outline"
+            form="event-form"
+            className="w-full sm:w-auto"
+          >
+            Save
+          </Button>
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => form.reset()}
+            className="w-full sm:w-auto"
+          >
+            Clear
+          </Button>
         </Field>
       </FieldGroup>
     </form>
