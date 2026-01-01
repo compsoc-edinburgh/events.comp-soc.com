@@ -1,14 +1,28 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import {
+  HeadContent,
+  Scripts,
+  createRootRouteWithContext,
+} from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
+import ClerkProvider from '../integrations/clerk/provider'
+
+import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+
 import appCss from '../styles.css?url'
 import type { ReactNode } from 'react'
+
+import type { QueryClient } from '@tanstack/react-query'
 import { WindowBar } from '@/components/module/layout/window/window-bar.tsx'
 import MainNavigation from '@/components/module/layout/main-navigation.tsx'
 import { Toaster } from '@/components/ui/sooner.tsx'
 
-export const Route = createRootRoute({
+interface MyRouterContext {
+  queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
     meta: [
       {
@@ -19,7 +33,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Compsoc events',
+        title: 'TanStack Start Starter',
       },
     ],
     links: [
@@ -44,7 +58,7 @@ export const Route = createRootRoute({
           </div>
           <div className="p-6 text-center">
             <p className="text-sm text-neutral-400">
-              CompSocOS isn’t ready to display this page yet.
+              CompSocOS isn't ready to display this page yet.
             </p>
           </div>
         </div>
@@ -61,21 +75,24 @@ function RootDocument({ children }: { children: ReactNode }) {
         <title>CompSoc Events</title>
       </head>
       <body className="bg-background">
-        <Toaster />
-        <MainNavigation />
-        <WindowBar />
-        {children}
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        <ClerkProvider>
+          <Toaster />
+          <MainNavigation />
+          <WindowBar />
+          {children}
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+              TanStackQueryDevtools,
+            ]}
+          />
+        </ClerkProvider>
         <Scripts />
       </body>
     </html>

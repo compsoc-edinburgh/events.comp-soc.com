@@ -1,9 +1,10 @@
 import parse, { Element, domToReact } from 'html-react-parser'
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import type { Nullable } from '@events.comp-soc.com/shared'
 import type { DOMNode, HTMLReactParserOptions } from 'html-react-parser'
-import type { MarkdownResult } from '@/utils/markdown.ts'
-import { renderMarkdown } from '@/utils/markdown.ts'
+import type { MarkdownResult } from '@/lib/markdown.ts'
+import { renderMarkdown } from '@/lib/markdown.ts'
 
 type MarkdownProps = {
   content: string
@@ -11,7 +12,7 @@ type MarkdownProps = {
 }
 
 export function Markdown({ content, className }: MarkdownProps) {
-  const [result, setResult] = useState<MarkdownResult | null>(null)
+  const [result, setResult] = useState<Nullable<MarkdownResult>>(null)
 
   useEffect(() => {
     renderMarkdown(content).then(setResult)

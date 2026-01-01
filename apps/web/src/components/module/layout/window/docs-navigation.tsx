@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { docsNavTabs } from '@/config/navigation.ts'
-import { cn } from '@/utils/utils.ts'
+import { cn } from '@/lib/utils.ts'
 
 interface DocsNavigationProps {
   activeTab?: string
