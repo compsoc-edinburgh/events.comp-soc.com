@@ -1,7 +1,10 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { MenuIcon, XIcon } from 'lucide-react'
+import { SignOutButton, useAuth } from '@clerk/clerk-react'
 import { mainNavLinks } from '@/config/navigation.ts'
+import { Spinner } from '@/components/ui/spinner.tsx'
+import { Button } from '@/components/ui/button.tsx'
 
 const DateTimeDisplay = () => {
   const date = new Date().toLocaleDateString('en-GB', {
@@ -99,11 +102,13 @@ const NavLink = ({
 }
 
 const SignUpButton = () => (
-  <button className="bg-red-900 rounded-sm p-0 cursor-pointer group mt-1">
-    <span className="block px-2 py-1 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5">
-      Sign Up
-    </span>
-  </button>
+  <Link to={'/sign-in/$'}>
+    <button className="bg-red-900 rounded-sm p-0 cursor-pointer group mt-1">
+      <span className="block px-2 py-1 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5">
+        Sign Up
+      </span>
+    </button>
+  </Link>
 )
 
 const MobileMenuToggle = ({
@@ -158,6 +163,7 @@ const MobileMenu = ({
 }
 
 function MainNavigation() {
+  const { userId, isLoaded } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev)
@@ -197,7 +203,17 @@ function MainNavigation() {
             <DateTimeDisplay />
           </div>
 
-          <SignUpButton />
+          {isLoaded ? (
+            !userId ? (
+              <SignUpButton />
+            ) : (
+              <Button variant="outline" size="sm">
+                <SignOutButton />
+              </Button>
+            )
+          ) : (
+            <Spinner className="text-neutral-700" />
+          )}
 
           <MobileMenuToggle
             isOpen={mobileMenuOpen}

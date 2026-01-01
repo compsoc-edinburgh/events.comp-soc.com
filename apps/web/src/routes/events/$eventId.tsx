@@ -1,9 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ClockIcon, MapPin } from 'lucide-react'
+import { ClockIcon, MapPin, UserIcon } from 'lucide-react'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
-import GoogleMapsCard from '@/components/google-maps-card.tsx'
+import GoogleMaps from '@/components/google-maps.tsx'
+import { SigBadge } from '@/components/sigs-badge.tsx'
+import { Sigs } from '@/config/sigs.ts'
+import { Button } from '@/components/ui/button.tsx'
 
 export const Route = createFileRoute('/events/$eventId')({
   component: EventRoute,
@@ -11,7 +14,6 @@ export const Route = createFileRoute('/events/$eventId')({
 
 function EventRoute() {
   const { eventId } = Route.useParams()
-
   console.log(eventId)
 
   return (
@@ -20,13 +22,14 @@ function EventRoute() {
         <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           Intro to Rust Workshop
         </div>
-        <div>
+        <div className="flex gap-2 mt-1">
+          <SigBadge sig={Sigs.CCSig} size="sm" />
           <span className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 border border-neutral-800 px-1.5 py-0.5 rounded">
             Workshop
           </span>
         </div>
 
-        <div className="my-6 sm:my-8 flex flex-col sm:flex-row gap-4 sm:gap-10">
+        <div className="my-6 sm:my-8 flex flex-col sm:flex-row gap-4 sm:gap-8">
           <div className="flex-1 sm:flex-none">
             <div className="flex gap-2 items-center text-sm sm:text-base">
               <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -43,6 +46,15 @@ function EventRoute() {
             </div>
             <div className="font-bold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">
               Mon 29 Dec 14:30
+            </div>
+          </div>
+          <div className="flex-1 sm:flex-none">
+            <div className="flex gap-2 items-center text-sm sm:text-base">
+              <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              Capacity
+            </div>
+            <div className="font-bold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">
+              150 Students
             </div>
           </div>
         </div>
@@ -85,21 +97,15 @@ See you there! 🦀
         <div className="my-5">
           <div className="text-base text-neutral-400">Location</div>
           <div className="h-px bg-neutral-800" />
-          <GoogleMapsCard
+          <GoogleMaps
             locationURL="https://www.google.com/maps/place/University+of+Birmingham"
             locationName="University of Birmingham"
           />
         </div>
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          <button className="bg-primary-dark rounded-sm p-0 cursor-pointer group w-full sm:w-auto">
-            <span className="block px-4 py-2 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5 text-center">
-              Register Now
-            </span>
-          </button>
-          <button className="px-4 py-2 text-sm text-neutral-400 hover:text-white transition-colors border border-neutral-700 rounded hover:border-neutral-500 w-full sm:w-auto">
-            Add to Calendar
-          </button>
+          <Button>Register Now</Button>
+          <Button variant="outline">Add to Calendar</Button>
         </div>
       </Sheet>
     </Window>

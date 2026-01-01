@@ -2,6 +2,7 @@ export interface NavTab {
   label: string
   path: string
   isClosedToCheck: boolean
+  requireCommittee: boolean
 }
 
 export interface NavLink {
@@ -11,10 +12,30 @@ export interface NavLink {
 }
 
 export const docsNavTabs: Array<NavTab> = [
-  { label: 'Create', path: '/events/create', isClosedToCheck: false },
-  { label: 'Search', path: '/', isClosedToCheck: false },
-  { label: 'Event', path: '/events', isClosedToCheck: true },
-  { label: 'Drafts', path: '/events/draft', isClosedToCheck: false },
+  {
+    label: 'Create',
+    path: '/events/create',
+    isClosedToCheck: false,
+    requireCommittee: true,
+  },
+  {
+    label: 'Search',
+    path: '/',
+    isClosedToCheck: false,
+    requireCommittee: false,
+  },
+  {
+    label: 'Event',
+    path: '/events',
+    isClosedToCheck: true,
+    requireCommittee: false,
+  },
+  {
+    label: 'Drafts',
+    path: '/events/draft',
+    isClosedToCheck: false,
+    requireCommittee: true,
+  },
 ]
 
 export const mainNavLinks: Array<NavLink> = [

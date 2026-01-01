@@ -1,4 +1,4 @@
-function NotFoundLayout() {
+function NotFound() {
   return (
     <div className="w-full h-[85vh] flex items-center justify-center">
       <div className="max-w-105 rounded-lg border border-neutral-800 bg-neutral-900/80 shadow-xl">
@@ -20,4 +20,4 @@ function NotFoundLayout() {
   )
 }
 
-export default NotFoundLayout
+export default NotFound
