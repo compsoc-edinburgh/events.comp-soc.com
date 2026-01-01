@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { docsNavTabs } from '@/config/navigation.ts'
+import { cn } from '@/utils/utils.ts'
 
 interface DocsNavigationProps {
   activeTab?: string
@@ -22,7 +23,17 @@ function DocsNavigation({ activeTab }: DocsNavigationProps) {
           <Link
             key={tab.path}
             to={tab.path}
-            className="py-1 px-2 sm:px-3 text-neutral-500 hover:text-neutral-300 cursor-pointer transition-colors whitespace-nowrap shrink-0 text-xs sm:text-sm"
+            onClick={(e) => {
+              if (tab.isClosedToCheck) {
+                e.preventDefault()
+              }
+            }}
+            className={cn(
+              'py-1 px-2 sm:px-3 text-xs sm:text-sm whitespace-nowrap shrink-0 transition-colors',
+              tab.isClosedToCheck
+                ? 'text-neutral-700 cursor-auto'
+                : 'text-neutral-500 hover:text-neutral-300 cursor-pointer',
+            )}
           >
             {tab.label}
           </Link>

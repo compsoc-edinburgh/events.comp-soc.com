@@ -4,7 +4,6 @@ import type { Event } from '@/components/module/event-card.tsx'
 import EventCard from '@/components/module/event-card.tsx'
 import Window from '@/components/module/layout/window/window.tsx'
 import Sheet from '@/components/module/layout/sheet.tsx'
-import { SearchToolbarContent } from '@/components/module/layout/toolbar-content.tsx'
 import { Sigs } from '@/config/sigs.ts'
 
 export const Route = createFileRoute('/')({
@@ -51,7 +50,6 @@ const events: Array<Event> = [
     location: 'Appleton Tower, LT1',
     type: 'Meeting',
     sig: Sigs.Compsoc,
-    pinned: true,
   },
   {
     id: 2,
@@ -61,7 +59,6 @@ const events: Array<Event> = [
     location: 'Bayes Centre',
     type: 'Hackathon',
     sig: Sigs.Compsoc,
-    pinned: true,
   },
   {
     id: 3,
@@ -119,13 +116,12 @@ const events: Array<Event> = [
   },
 ]
 
-const pinnedEvents = events.filter((e) => e.pinned)
 const thisWeekEvents = events.filter((e) => !e.pinned && isThisWeek(e.date))
 const nextEvents = events.filter((e) => !e.pinned && isAfterThisWeek(e.date))
 
 function App() {
   return (
-    <Window activeTab="/" toolbarContent={<SearchToolbarContent />}>
+    <Window activeTab="/">
       <Sheet>
         <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           Search Events
@@ -146,21 +142,6 @@ function App() {
           This is your central destination for all activities organised by the
           Society and our Special Interest Groups (SIGs).
         </div>
-
-        {pinnedEvents.length > 0 && (
-          <div className="mt-8">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-lg font-semibold text-neutral-500">
-                Pinned Events
-              </h2>
-            </div>
-            <div className="grid gap-4">
-              {pinnedEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          </div>
-        )}
 
         {thisWeekEvents.length > 0 && (
           <div className="mt-8">

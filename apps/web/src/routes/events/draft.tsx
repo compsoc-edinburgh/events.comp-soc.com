@@ -3,27 +3,26 @@ import { FileTextIcon } from 'lucide-react'
 import type { Event } from '@/components/module/event-card.tsx'
 import Window from '@/components/module/layout/window/window.tsx'
 import Sheet from '@/components/module/layout/sheet.tsx'
-import { SearchToolbarContent } from '@/components/module/layout/toolbar-content.tsx'
 import EventCard from '@/components/module/event-card.tsx'
+import { Sigs } from '@/config/sigs.ts'
 
 const draftEvents: Array<Event> = [
   {
     id: 101,
-    title: 'Machine Learning Workshop (Draft)',
-    date: 'TBD',
+    title: 'Machine Learning Workshop',
+    date: new Date(),
     time: 'TBD',
     location: 'TBD',
-    description:
-      'An introduction to ML fundamentals. Still working on speaker confirmation.',
+    sig: Sigs.TypeSig,
     type: 'Workshop',
   },
   {
     id: 102,
-    title: 'Networking Event (Draft)',
-    date: 'Nov 2025',
+    title: 'Networking Event',
+    date: new Date(),
     time: 'Evening',
     location: 'Teviot',
-    description: 'Industry networking event - awaiting sponsor confirmation.',
+    sig: Sigs.Compsoc,
     type: 'Social',
   },
 ]
@@ -34,7 +33,7 @@ export const Route = createFileRoute('/events/draft')({
 
 function DraftRoute() {
   return (
-    <Window activeTab="/events/draft" toolbarContent={<SearchToolbarContent />}>
+    <Window activeTab="/events/draft">
       <Sheet>
         <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           Draft Events

@@ -28,9 +28,9 @@ export const eventsTable = pgTable("events", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => nanoid()),
+  title: text("title").notNull(),
   organizer: text("organizer").notNull(),
   state: eventState("state").default("draft"),
-  title: text("title").notNull(),
   capacity: integer("capacity"),
   date: timestamp("date").notNull(),
   aboutMarkdown: text("about_markdown"),

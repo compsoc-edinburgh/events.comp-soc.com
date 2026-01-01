@@ -7,6 +7,7 @@ export const getRouter = () => {
     context: {},
 
     scrollRestoration: true,
+    notFoundMode: 'root',
     defaultPreloadStaleTime: 0,
   })
 }

@@ -32,14 +32,18 @@ function EventRoute() {
               <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
               Location
             </div>
-            <div className="font-bold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">Remote</div>
+            <div className="font-bold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">
+              Remote
+            </div>
           </div>
           <div className="flex-1 sm:flex-none">
             <div className="flex gap-2 items-center text-sm sm:text-base">
               <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               Date
             </div>
-            <div className="font-bold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">Mon 29 Dec 14:30</div>
+            <div className="font-bold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">
+              Mon 29 Dec 14:30
+            </div>
           </div>
         </div>
 

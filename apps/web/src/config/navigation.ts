@@ -1,6 +1,7 @@
 export interface NavTab {
   label: string
   path: string
+  isClosedToCheck: boolean
 }
 
 export interface NavLink {
@@ -10,10 +11,10 @@ export interface NavLink {
 }
 
 export const docsNavTabs: Array<NavTab> = [
-  { label: 'Create', path: '/events/create' },
-  { label: 'Search', path: '/' },
-  { label: 'Event', path: '/events' },
-  { label: 'Drafts', path: '/events/draft' },
+  { label: 'Create', path: '/events/create', isClosedToCheck: false },
+  { label: 'Search', path: '/', isClosedToCheck: false },
+  { label: 'Event', path: '/events', isClosedToCheck: true },
+  { label: 'Drafts', path: '/events/draft', isClosedToCheck: false },
 ]
 
 export const mainNavLinks: Array<NavLink> = [

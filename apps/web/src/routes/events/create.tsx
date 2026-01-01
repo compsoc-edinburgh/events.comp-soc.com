@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import Window from '@/components/module/layout/window/window.tsx'
 import Sheet from '@/components/module/layout/sheet.tsx'
 
@@ -10,6 +10,8 @@ export const Route = createFileRoute('/events/create')({
 })
 
 function CreateRoute() {
+  const navigate = useNavigate({ from: '/events/create' })
+
   return (
     <Window activeTab="/events/create">
       <Sheet>
@@ -27,7 +29,12 @@ function CreateRoute() {
 
         <ModifyEventForm
           onFormSubmit={(value) => {
-            console.log(value)
+            void navigate({
+              to: '/events/$eventId',
+              params: {
+                eventId: value.title,
+              },
+            })
           }}
         />
       </Sheet>
