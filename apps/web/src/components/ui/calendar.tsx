@@ -11,7 +11,7 @@ import type { ComponentProps } from 'react'
 import type { DayButton } from 'react-day-picker'
 
 import { Button, buttonVariants } from '@/components/ui/button'
-import { cn } from '@/utils/utils.ts'
+import { cn } from '@/lib/utils.ts'
 
 function Calendar({
   className,

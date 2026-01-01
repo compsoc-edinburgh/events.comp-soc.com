@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { MenuIcon, XIcon } from 'lucide-react'
-import { mainNavLinks } from '@/config/navigation'
+import { mainNavLinks } from '@/config/navigation.ts'
 
 function MainNavigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

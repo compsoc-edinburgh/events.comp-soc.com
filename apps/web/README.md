@@ -39,6 +39,18 @@ pnpm format
 pnpm check
 ```
 
+## Setting up Clerk
+
+- Set the `VITE_CLERK_PUBLISHABLE_KEY` in your `.env.local`.
+
+## Shadcn
+
+Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
+
+```bash
+pnpm dlx shadcn@latest add button
+```
+
 ## Routing
 
 This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.

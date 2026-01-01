@@ -1,32 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { FileTextIcon } from 'lucide-react'
-import type { Event } from '@/components/module/event-card.tsx'
-import Window from '@/components/module/layout/window/window.tsx'
-import Sheet from '@/components/module/layout/sheet.tsx'
-import { SearchToolbarContent } from '@/components/module/layout/toolbar-content.tsx'
-import EventCard from '@/components/module/event-card.tsx'
-
-const draftEvents: Array<Event> = [
-  {
-    id: 101,
-    title: 'Machine Learning Workshop (Draft)',
-    date: 'TBD',
-    time: 'TBD',
-    location: 'TBD',
-    description:
-      'An introduction to ML fundamentals. Still working on speaker confirmation.',
-    type: 'Workshop',
-  },
-  {
-    id: 102,
-    title: 'Networking Event (Draft)',
-    date: 'Nov 2025',
-    time: 'Evening',
-    location: 'Teviot',
-    description: 'Industry networking event - awaiting sponsor confirmation.',
-    type: 'Social',
-  },
-]
+import Window from '@/components/layout/window/window.tsx'
+import Sheet from '@/components/layout/sheet.tsx'
+import EventCard from '@/components/event-card.tsx'
+import { DRAFT_EVENTS } from '@/config/mocks.ts'
 
 export const Route = createFileRoute('/events/draft')({
   component: DraftRoute,
@@ -34,7 +11,7 @@ export const Route = createFileRoute('/events/draft')({
 
 function DraftRoute() {
   return (
-    <Window activeTab="/events/draft" toolbarContent={<SearchToolbarContent />}>
+    <Window activeTab="/events/draft">
       <Sheet>
         <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           Draft Events
@@ -42,7 +19,7 @@ function DraftRoute() {
         <div>
           <div className="flex gap-2 items-center mt-1.5 text-neutral-400 text-sm">
             <FileTextIcon className="w-4 h-4" strokeWidth={1.5} />{' '}
-            {draftEvents.length} Drafts
+            {DRAFT_EVENTS.length} Drafts
           </div>
         </div>
 
@@ -57,8 +34,8 @@ function DraftRoute() {
         </div>
 
         <div className="mt-8 grid gap-4">
-          {draftEvents.length > 0 ? (
-            draftEvents.map((event) => (
+          {DRAFT_EVENTS.length > 0 ? (
+            DRAFT_EVENTS.map((event) => (
               <EventCard key={event.id} event={event} />
             ))
           ) : (

@@ -1,35 +1,31 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import {
+  HeadContent,
+  Scripts,
+  createRootRouteWithContext,
+} from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
-import appCss from '../styles.css?url'
+import ClerkProvider from '../integrations/clerk/provider'
+
+import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import type { ReactNode } from 'react'
-import { WindowBar } from '@/components/module/layout/window/window-bar.tsx'
-import MainNavigation from '@/components/module/layout/main-navigation.tsx'
 
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'Compsoc events',
-      },
-    ],
-    links: [
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
-    ],
-  }),
+import type { QueryClient } from '@tanstack/react-query'
+import { WindowBar } from '@/components/layout/window/window-bar.tsx'
+import MainNavigation from '@/components/layout/main-navigation.tsx'
+import { Toaster } from '@/components/ui/sooner.tsx'
+import NotFoundLayout from '@/components/not-found-layout.tsx'
+import { PAGE_METADATA } from '@/config/meta.ts'
 
+interface MyRouterContext {
+  queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<MyRouterContext>()({
+  head: () => PAGE_METADATA,
   shellComponent: RootDocument,
+  notFoundComponent: () => NotFoundLayout,
 })
 
 function RootDocument({ children }: { children: ReactNode }) {
@@ -40,20 +36,24 @@ function RootDocument({ children }: { children: ReactNode }) {
         <title>CompSoc Events</title>
       </head>
       <body className="bg-background">
-        <MainNavigation />
-        <WindowBar />
-        {children}
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        <ClerkProvider>
+          <Toaster />
+          <MainNavigation />
+          <WindowBar />
+          {children}
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+              TanStackQueryDevtools,
+            ]}
+          />
+        </ClerkProvider>
         <Scripts />
       </body>
     </html>

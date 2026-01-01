@@ -110,9 +110,10 @@ function ModifyEventForm({
     },
     {
       id: `field-${Date.now()}-2`,
-      type: 'textarea',
+      type: 'select',
       label: 'Dietary Requirements',
-      required: false,
+      options: ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Halal'],
+      required: true,
     },
   ]
 
@@ -341,6 +342,7 @@ function ModifyEventForm({
                       <PopoverContent>
                         <Calendar
                           mode="single"
+                          startMonth={new Date()}
                           selected={field.state.value}
                           onSelect={(selected) => {
                             if (selected) {
@@ -397,7 +399,12 @@ function ModifyEventForm({
                     <Tabs defaultValue="edit">
                       <TabsList>
                         <TabsTrigger value="edit">Edit</TabsTrigger>
-                        <TabsTrigger value="preview">Preview</TabsTrigger>
+                        <TabsTrigger
+                          value="preview"
+                          disabled={field.state.value.length === 0}
+                        >
+                          Preview
+                        </TabsTrigger>
                       </TabsList>
                       <TabsContent value="edit">
                         <Textarea
@@ -690,13 +697,31 @@ function ModifyEventForm({
           </FieldGroup>
         </FieldSet>
 
-        <Field orientation="horizontal" className="flex-col sm:flex-row gap-2 sm:gap-3">
+        <Field
+          orientation="horizontal"
+          className="flex-col sm:flex-row gap-2 sm:gap-3"
+        >
           <Button type="submit" form="event-form" className="w-full sm:w-auto">
-            Submit
+            Publish
           </Button>
-          <Button variant="outline" type="button" onClick={() => form.reset()} className="w-full sm:w-auto">
-            Clear
-          </Button>
+          <ButtonGroup>
+            <Button
+              type="submit"
+              variant="outline"
+              form="event-form"
+              className="w-full sm:w-auto"
+            >
+              Save
+            </Button>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => form.reset()}
+              className="w-full sm:w-auto"
+            >
+              Clear
+            </Button>
+          </ButtonGroup>
         </Field>
       </FieldGroup>
     </form>
