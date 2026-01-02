@@ -1,5 +1,5 @@
 import { useAuth, useUser } from '@clerk/clerk-react'
-import { UserRole } from '@events.comp-soc.com/shared/dist'
+import { UserRole } from '@events.comp-soc.com/shared'
 
 export function useCommitteeAuth() {
   const { userId, isLoaded: isAuthLoaded } = useAuth()

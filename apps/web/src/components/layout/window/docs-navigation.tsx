@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useUser } from '@clerk/clerk-react'
-import { UserRole } from '@events.comp-soc.com/shared/dist'
+import { UserRole } from '@events.comp-soc.com/shared'
 import { docsNavTabs } from '@/config/navigation'
 import { cn } from '@/lib/utils'
 
