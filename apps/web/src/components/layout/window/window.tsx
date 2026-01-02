@@ -12,7 +12,7 @@ function Window({ children, activeTab, toolbarContent }: WindowProps) {
   return (
     <>
       <DocsToolbar>{toolbarContent}</DocsToolbar>
-      <div className="bg-background min-h-screen flex items-center flex-col">
+      <div className="bg-background min-h-[70vh] flex items-center flex-col">
         <DocsNavigation activeTab={activeTab} />
         {children}
       </div>

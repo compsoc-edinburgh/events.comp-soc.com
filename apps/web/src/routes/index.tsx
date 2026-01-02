@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, ServerCrash } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import EventCard from '@/components/event-card.tsx'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { eventsQueryOptions } from '@/lib/data/event.ts'
+import { StatusCard } from '@/components/ui/status-card.tsx'
 
 export const Route = createFileRoute('/')({
   loader: async ({ context }) => {
@@ -14,14 +15,19 @@ export const Route = createFileRoute('/')({
   errorComponent: ({ error, reset }) => (
     <Window activeTab="/">
       <Sheet>
-        <div className="text-center py-12">
-          <h2 className="text-lg font-semibold text-white">
-            Unable to load events
-          </h2>
-          <p className="text-neutral-400 mt-2">{error.message}</p>
-          <button onClick={reset} className="mt-4 text-sm underline">
-            Try again
-          </button>
+        <div className="flex items-center justify-center h-[70vh]">
+          <StatusCard
+            title="Oops.. Something happened with events"
+            message={
+              error.message ||
+              'The events API decided to take an unscheduled coffee break.'
+            }
+            icon={<ServerCrash className="w-10 h-10" strokeWidth={1.5} />}
+            action={{
+              label: 'Retry',
+              onClick: reset,
+            }}
+          />
         </div>
       </Sheet>
     </Window>
