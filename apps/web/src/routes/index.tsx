@@ -51,7 +51,7 @@ export const Route = createFileRoute('/')({
       </Sheet>
     </Window>
   ),
-  pendingMs: 0,
+  pendingMs: 200,
 })
 
 function App() {

@@ -32,6 +32,31 @@
   --color-ring: #dc2626;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[--color-background];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[--color-muted] rounded-full border-2 border-[--color-background];
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-[--color-muted-foreground];
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted) var(--color-background);
+}
+
 body {
   @apply m-0 font-sans bg-[--color-background] text-[#E4E4E4];
   -webkit-font-smoothing: antialiased;
