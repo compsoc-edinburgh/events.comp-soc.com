@@ -1,5 +1,5 @@
-import type { SigId } from "./sigs";
-import { Nullable } from "./utility";
+import type { SigId } from "./sigs.js";
+import { Nullable } from "./utility.js";
 
 /**
  * Event publication state

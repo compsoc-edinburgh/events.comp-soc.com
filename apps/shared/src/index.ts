@@ -1,11 +1,11 @@
 // Core domain types
-export * from "./event";
-export * from "./user";
-export * from "./registration";
+export * from "./event.js";
+export * from "./user.js";
+export * from "./registration.js";
 
 // Enums and constants
-export * from "./role";
-export * from "./sigs";
+export * from "./role.js";
+export * from "./sigs.js";
 
 // Utility types
-export * from "./utility";
+export * from "./utility.js";

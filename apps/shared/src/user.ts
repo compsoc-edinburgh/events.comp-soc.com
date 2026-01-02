@@ -1,5 +1,5 @@
-import type { UserRole } from "./role";
-import type { Nullable } from "./utility";
+import type { UserRole } from "./role.js";
+import type { Nullable } from "./utility.js";
 
 /**
  * Core User entity - matches API response

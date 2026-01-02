@@ -1,5 +1,5 @@
-import type { JsonValue } from "./event";
-import type { Nullable } from "./utility";
+import type { JsonValue } from "./event.js";
+import type { Nullable } from "./utility.js";
 
 /**
  * Registration status for event registrations

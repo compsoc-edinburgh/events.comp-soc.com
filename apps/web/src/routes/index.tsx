@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CalendarIcon } from 'lucide-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import EventCard from '@/components/event-card.tsx'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
-import { SEARCH_EVENTS } from '@/config/mocks.ts'
 import { eventsQueryOptions } from '@/lib/data/event.ts'
 
 export const Route = createFileRoute('/')({
@@ -11,6 +11,21 @@ export const Route = createFileRoute('/')({
     await context.queryClient.ensureQueryData(eventsQueryOptions())
   },
   component: App,
+  errorComponent: ({ error, reset }) => (
+    <Window activeTab="/">
+      <Sheet>
+        <div className="text-center py-12">
+          <h2 className="text-lg font-semibold text-white">
+            Unable to load events
+          </h2>
+          <p className="text-neutral-400 mt-2">{error.message}</p>
+          <button onClick={reset} className="mt-4 text-sm underline">
+            Try again
+          </button>
+        </div>
+      </Sheet>
+    </Window>
+  ),
   pendingComponent: () => (
     <Window activeTab="/">
       <Sheet>
@@ -33,44 +48,9 @@ export const Route = createFileRoute('/')({
   pendingMs: 0,
 })
 
-function getStartOfWeek(date: Date): Date {
-  const d = new Date(date)
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  d.setDate(diff)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-function getEndOfWeek(date: Date): Date {
-  const start = getStartOfWeek(date)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 6)
-  end.setHours(23, 59, 59, 999)
-  return end
-}
-
-function isThisWeek(date: Date): boolean {
-  const now = new Date()
-  const startOfWeek = getStartOfWeek(now)
-  const endOfWeek = getEndOfWeek(now)
-  return date >= startOfWeek && date <= endOfWeek
-}
-
-function isAfterThisWeek(date: Date): boolean {
-  const now = new Date()
-  const endOfWeek = getEndOfWeek(now)
-  return date > endOfWeek
-}
-
-const thisWeekEvents = SEARCH_EVENTS.filter(
-  (e) => !e.pinned && isThisWeek(e.date),
-)
-const nextEvents = SEARCH_EVENTS.filter(
-  (e) => !e.pinned && isAfterThisWeek(e.date),
-)
-
 function App() {
+  const { data: events } = useSuspenseQuery(eventsQueryOptions())
+
   return (
     <Window activeTab="/">
       <Sheet>
@@ -79,8 +59,8 @@ function App() {
         </div>
         <div>
           <div className="flex gap-2 items-center mt-1.5 text-neutral-400 text-sm">
-            <CalendarIcon className="w-4 h-4" strokeWidth={1.5} />{' '}
-            {SEARCH_EVENTS.length} Upcoming Events
+            <CalendarIcon className="w-4 h-4" strokeWidth={1.5} /> 5 Upcoming
+            Events
           </div>
         </div>
 
@@ -94,7 +74,7 @@ function App() {
           Society and our Special Interest Groups (SIGs).
         </div>
 
-        {thisWeekEvents.length > 0 && (
+        {events.length > 0 && (
           <div className="mt-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-lg font-semibold text-neutral-500">
@@ -102,14 +82,14 @@ function App() {
               </h2>
             </div>
             <div className="grid gap-4">
-              {thisWeekEvents.map((event) => (
+              {events.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
           </div>
         )}
 
-        {nextEvents.length > 0 && (
+        {events.length > 0 && (
           <div className="mt-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-lg font-semibold text-neutral-500">
@@ -117,7 +97,7 @@ function App() {
               </h2>
             </div>
             <div className="grid gap-4">
-              {nextEvents.map((event) => (
+              {events.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>

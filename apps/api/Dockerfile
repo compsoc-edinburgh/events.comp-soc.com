@@ -18,7 +18,10 @@ COPY apps/api ./apps/api
 COPY apps/shared ./apps/shared
 COPY tsconfig.base.json ./
 
-# Build the API
+# Build shared first, then API
+WORKDIR /app/apps/shared
+RUN pnpm build
+
 WORKDIR /app/apps/api
 RUN pnpm build
 
@@ -39,13 +42,13 @@ RUN pnpm install --frozen-lockfile --prod
 
 # Copy built artifacts
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/shared/src ./apps/shared/src
+COPY --from=builder /app/apps/shared/dist ./apps/shared/dist
 
 WORKDIR /app/apps/api
 
-EXPOSE 3000
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
 CMD ["node", "dist/app.js"]
