@@ -35,7 +35,7 @@ describe("Event route", () => {
         title: "Draft event",
         state: "draft",
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
       });
 
@@ -44,7 +44,7 @@ describe("Event route", () => {
         title: "Published event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
       });
     });
@@ -108,7 +108,7 @@ describe("Event route", () => {
         title: `Event ${i + 1}`,
         state: "published" as const,
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(2025, 0, i + 1),
       }));
 
@@ -160,7 +160,7 @@ describe("Event route", () => {
   describe("POST /v1/events", () => {
     const validEventData = {
       title: "New Event",
-      organizer: "project_share",
+      organizer: "projectShare",
       date: new Date().toISOString(),
       aboutMarkdown: "Event description",
     };
@@ -224,7 +224,7 @@ describe("Event route", () => {
         url: "/v1/events",
         payload: {
           title: "", // Invalid: empty title
-          organizer: "project_share",
+          organizer: "projectShare",
           date: "not-a-date", // Invalid date format
         },
       });
@@ -257,7 +257,7 @@ describe("Event route", () => {
         title: "Existing Event",
         state: "draft",
         aboutMarkdown: "Original description",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
       });
     });
@@ -336,7 +336,7 @@ describe("Event route", () => {
         title: "Event To Delete",
         state: "draft",
         aboutMarkdown: "Will be deleted",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
       });
     });
