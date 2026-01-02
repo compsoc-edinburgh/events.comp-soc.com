@@ -14,7 +14,7 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const role = sessionClaims?.metadata?.role;
 
     const query = GetEventsQuerySchema.parse(request.query);
-    const events = await eventService.getEvents(server.db, query, role);
+    const events = await eventService.getEvents(server.db, query, role ?? null);
 
     return reply.status(200).send(events);
   });
@@ -24,7 +24,7 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const role = sessionClaims?.metadata?.role;
 
     const params = EventIdSchema.parse(request.params);
-    const events = await eventService.getEventById(server.db, params, role);
+    const events = await eventService.getEventById(server.db, params, role ?? null);
 
     return reply.status(200).send(events);
   });

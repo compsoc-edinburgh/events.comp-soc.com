@@ -11,10 +11,8 @@ interface WindowProps {
 function Window({ children, activeTab, toolbarContent }: WindowProps) {
   return (
     <>
-      <div className="md:block hidden">
-        <DocsToolbar>{toolbarContent}</DocsToolbar>
-      </div>
-      <div className="bg-background min-h-screen flex items-center flex-col">
+      <DocsToolbar>{toolbarContent}</DocsToolbar>
+      <div className="bg-background min-h-[70vh] flex items-center flex-col">
         <DocsNavigation activeTab={activeTab} />
         {children}
       </div>

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm --filter \"@events.comp-soc.com/shared\" build && cd apps/web && pnpm run build && mv .vercel/output ../../.vercel/output",
+  "installCommand": "pnpm install",
+  "framework": null
+}

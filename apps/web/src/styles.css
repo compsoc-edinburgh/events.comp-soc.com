@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,400&display=swap');
 
 @theme {
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
@@ -31,6 +30,31 @@
 
   --color-destructive: oklch(71.2% 0.194 13.428);
   --color-ring: #dc2626;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[--color-background];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[--color-muted] rounded-full border-2 border-[--color-background];
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-[--color-muted-foreground];
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted) var(--color-background);
 }
 
 body {

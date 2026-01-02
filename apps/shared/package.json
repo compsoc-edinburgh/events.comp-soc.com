@@ -1,8 +1,19 @@
 {
   "name": "@events.comp-soc.com/shared",
   "version": "1.0.0",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc"
   }

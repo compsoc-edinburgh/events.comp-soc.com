@@ -1,24 +1,27 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowUpRight, CalendarIcon, MapPin } from 'lucide-react'
-import type { Sigs } from '@/config/sigs.ts'
+import type { Event } from '@events.comp-soc.com/shared'
 import { SigBadge } from '@/components/sigs-badge.tsx'
-
-export interface Event {
-  id: number
-  title: string
-  date: Date
-  time: string
-  location: string
-  type: string
-  sig: Sigs
-  pinned?: boolean
-}
 
 interface EventCardProps {
   event: Event
 }
 
 function EventCard({ event }: EventCardProps) {
+  const dateObj = new Date(event.date)
+
+  const formattedDate = dateObj.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+
+  const formattedTime = dateObj.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+
   return (
     <Link
       to="/events/$eventId"
@@ -29,12 +32,9 @@ function EventCard({ event }: EventCardProps) {
         <div className="flex justify-between items-start gap-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 sm:gap-2 mb-2 flex-wrap">
-              <SigBadge sig={event.sig} size="sm" />
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold text-neutral-500 border border-neutral-800 px-1 sm:px-1.5 py-0.5 rounded">
-                {event.type}
-              </span>
+              <SigBadge sig={event.organizer} size="sm" />
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-neutral-100 group-hover:text-white mb-1 break-words">
+            <h3 className="text-base sm:text-lg font-bold text-neutral-100 group-hover:text-white mb-1 wrap-break-word">
               {event.title}
             </h3>
           </div>
@@ -45,17 +45,12 @@ function EventCard({ event }: EventCardProps) {
           <div className="flex items-center gap-1.5 sm:gap-2">
             <CalendarIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
             <span className="truncate">
-              {event.date.toLocaleDateString('en-GB', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-              })}{' '}
-              • <span className="text-neutral-500">{event.time}</span>
+              {formattedDate} - {formattedTime}
             </span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-            <span className="truncate">{event.location}</span>
+            <span className="truncate">{event.locationName}</span>
           </div>
         </div>
       </div>

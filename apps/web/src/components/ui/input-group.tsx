@@ -6,7 +6,6 @@ import type { VariantProps } from 'class-variance-authority'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils.ts'
 
 function InputGroup({ className, ...props }: ComponentProps<'div'>) {
@@ -142,27 +141,10 @@ function InputGroupInput({ className, ...props }: ComponentProps<'input'>) {
   )
 }
 
-function InputGroupTextarea({
-  className,
-  ...props
-}: ComponentProps<'textarea'>) {
-  return (
-    <Textarea
-      data-slot="input-group-control"
-      className={cn(
-        'flex-1 resize-none rounded-none border-0 bg-transparent py-3 shadow-none focus-visible:ring-0',
-        className,
-      )}
-      {...props}
-    />
-  )
-}
-
 export {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupText,
   InputGroupInput,
-  InputGroupTextarea,
 }

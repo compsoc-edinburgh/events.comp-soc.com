@@ -31,14 +31,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared package
+        run: pnpm --filter "@events.comp-soc.com/shared" build
+
       - name: Run ESLint
-        run: pnpm lint
+        run: pnpm lint -- apps/api/
 
       - name: Check formatting
-        run: pnpm format:check
+        run: pnpm format:check -- "apps/api/**"
 
       - name: Type Check
-        run: pnpm typecheck
+        run: pnpm --filter "@events.comp-soc.com/api" type-check
 
       - name: Security Audit
         run: pnpm audit --audit-level=critical
@@ -79,6 +82,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build shared package
+        run: pnpm --filter "@events.comp-soc.com/shared" build
 
       - name: Run database migrations
         working-directory: apps/api

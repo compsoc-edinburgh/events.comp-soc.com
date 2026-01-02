@@ -15,7 +15,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { WindowBar } from '@/components/layout/window/window-bar.tsx'
 import MainNavigation from '@/components/layout/main-navigation.tsx'
 import { Toaster } from '@/components/ui/sooner.tsx'
-import NotFoundLayout from '@/components/not-found-layout.tsx'
+import NotFound from '@/components/not-found.tsx'
 import { PAGE_METADATA } from '@/config/meta.ts'
 
 interface MyRouterContext {
@@ -25,7 +25,7 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => PAGE_METADATA,
   shellComponent: RootDocument,
-  notFoundComponent: () => NotFoundLayout,
+  notFoundComponent: NotFound,
 })
 
 function RootDocument({ children }: { children: ReactNode }) {

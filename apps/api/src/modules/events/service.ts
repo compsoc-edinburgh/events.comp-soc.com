@@ -1,26 +1,31 @@
 import { eventStore } from "./store.js";
 import { SqlContext } from "../../db/db.js";
 import { CreateEventInput, EventIdParams, GetEventsQuery, UpdateEventInput } from "./schema.js";
-import { UserRole } from "../users/schema.js";
 import { NotFoundError, UnauthorizedError } from "../../lib/errors.js";
+import {
+  UserRole as UserRoleConst,
+  EventState,
+  Nullable,
+  UserRole,
+} from "@events.comp-soc.com/shared";
 
 export const eventService = {
-  async getEvents(db: SqlContext, query: GetEventsQuery, role?: UserRole) {
-    const isCommittee = role === "committee";
+  async getEvents(db: SqlContext, query: GetEventsQuery, role: Nullable<UserRole>) {
+    const isCommittee = role === UserRoleConst.Committee;
 
     const safeQuery = {
       ...query,
-      state: isCommittee ? query.state : ("published" as const),
+      state: isCommittee ? query.state : EventState.Published,
     };
 
     return eventStore.get(db, safeQuery);
   },
 
-  async getEventById(db: SqlContext, params: EventIdParams, role?: UserRole) {
+  async getEventById(db: SqlContext, params: EventIdParams, role: Nullable<UserRole>) {
     const event = await eventStore.findById(db, params);
-    const isCommittee = role === "committee";
+    const isCommittee = role === UserRoleConst.Committee;
 
-    if (!event || (!isCommittee && event.state === "draft")) {
+    if (!event || (!isCommittee && event.state === EventState.Draft)) {
       throw new NotFoundError(`Event with ${params.id} not found`);
     }
 
@@ -28,7 +33,7 @@ export const eventService = {
   },
 
   async createEvent(db: SqlContext, data: CreateEventInput, role: UserRole) {
-    if (role !== "committee") {
+    if (role !== UserRoleConst.Committee) {
       throw new UnauthorizedError("Only committee can create an event");
     }
 
@@ -36,7 +41,7 @@ export const eventService = {
   },
 
   async updateEvent(db: SqlContext, data: UpdateEventInput & EventIdParams, role: UserRole) {
-    if (role !== "committee") {
+    if (role !== UserRoleConst.Committee) {
       throw new UnauthorizedError("Only committee members can update events");
     }
 
@@ -50,7 +55,7 @@ export const eventService = {
   },
 
   async deleteEvent(db: SqlContext, params: EventIdParams, role: UserRole) {
-    if (role !== "committee") {
+    if (role !== UserRoleConst.Committee) {
       throw new UnauthorizedError("Only committee can delete an event");
     }
 

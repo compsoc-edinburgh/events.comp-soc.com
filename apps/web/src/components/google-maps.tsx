@@ -5,7 +5,7 @@ interface GoogleMapsCardProps {
   locationName?: string
 }
 
-function GoogleMapsCard({ locationURL, locationName }: GoogleMapsCardProps) {
+function GoogleMaps({ locationURL, locationName }: GoogleMapsCardProps) {
   // Convert Google Maps URL to embeddable format (no API key required)
   const getEmbedUrl = (url: string): string => {
     // If it's already an embed URL, return as is
@@ -37,7 +37,7 @@ function GoogleMapsCard({ locationURL, locationName }: GoogleMapsCardProps) {
       <div className="relative aspect-video w-full">
         <iframe
           src={embedUrl}
-          className="absolute inset-0 w-full h-full grayscale-40 contrast-[1.1] brightness-[0.8]"
+          className="absolute inset-0 w-full h-full"
           style={{ border: 0 }}
           allowFullScreen
           loading="lazy"
@@ -66,4 +66,4 @@ function GoogleMapsCard({ locationURL, locationName }: GoogleMapsCardProps) {
   )
 }
 
-export default GoogleMapsCard
+export default GoogleMaps

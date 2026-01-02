@@ -44,7 +44,7 @@ describe("Registration route", () => {
         title: "Published Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
         capacity: null,
       });
@@ -54,7 +54,7 @@ describe("Registration route", () => {
         title: "Draft Event",
         state: "draft",
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
         capacity: null,
       });
@@ -64,7 +64,7 @@ describe("Registration route", () => {
         title: "Limited Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
         capacity: 2,
       });
@@ -192,7 +192,7 @@ describe("Registration route", () => {
         title: "Test Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
         capacity: 2,
       });
@@ -303,7 +303,7 @@ describe("Registration route", () => {
         title: "Test Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
       });
 
@@ -404,7 +404,7 @@ describe("Registration route", () => {
         title: "Test Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "project_share",
+        organizer: "projectShare",
         date: new Date(),
       });
 

@@ -9,7 +9,7 @@ export const userRoutes = async (server: FastifyInstance) => {
     const role = sessionClaims?.metadata?.role;
 
     const params = UserIdSchema.parse(request.params);
-    const user = await userService.getUserById(server.db, params, userId ?? undefined, role);
+    const user = await userService.getUserById(server.db, params, userId ?? null, role ?? null);
 
     return reply.status(200).send(user);
   });

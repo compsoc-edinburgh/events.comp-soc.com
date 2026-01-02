@@ -17,7 +17,7 @@ interface DocsToolbarProps {
 
 function DocsToolbar({ children }: DocsToolbarProps) {
   return (
-    <nav className="sticky top-9 z-30 flex h-12 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl">
+    <nav className="hidden sticky md:flex top-9 z-30 h-12 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl">
       <div className="border-neutral-700 border p-1 w-full h-full rounded-sm items-center flex px-3">
         <div className="flex items-center">
           <div className="sm:flex hidden gap-3 items-center">
@@ -70,14 +70,6 @@ function DocsToolbar({ children }: DocsToolbarProps) {
         <div className="grow" />
 
         <div className="flex items-center">
-          <div className="flex items-center h-full">
-            <button className="bg-red-900 rounded-sm p-0 cursor-pointer group mt-1">
-              <span className="block px-1.5 py-0.5 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 group-active:-translate-y-0.5 transition-transform">
-                Share
-              </span>
-            </button>
-          </div>
-
           <div className="w-px h-4 bg-neutral-700 mx-4" />
 
           <button className="p-1.5 hover:bg-neutral-800 rounded transition-colors group">
