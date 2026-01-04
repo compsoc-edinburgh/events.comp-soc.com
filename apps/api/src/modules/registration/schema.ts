@@ -33,4 +33,3 @@ export const RegistrationEventIdSchema = z.object({
 export type CreateRegistration = z.infer<typeof CreateRegistrationSchema>;
 export type UpdateRegistration = z.infer<typeof UpdateRegistrationSchema>;
 export type RegistrationParams = z.infer<typeof RegistrationParamsSchema>;
-export type RegistrationEventIdS = z.infer<typeof RegistrationEventIdSchema>;

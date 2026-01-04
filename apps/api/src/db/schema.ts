@@ -7,6 +7,7 @@ import {
   timestamp,
   uniqueIndex,
   index,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import {
   CustomField,
@@ -79,5 +80,8 @@ export const registrationsTable = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => [uniqueIndex("unique_user_event").on(table.userId, table.eventId)]
+  (table) => [
+    primaryKey({ columns: [table.userId, table.eventId] }),
+    uniqueIndex("unique_user_event").on(table.userId, table.eventId),
+  ]
 );

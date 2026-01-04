@@ -24,7 +24,8 @@ CREATE TABLE "registrations" (
 	"status" "registrationStatus" DEFAULT 'pending',
 	"form_data" json,
 	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"updated_at" timestamp DEFAULT now(),
+	CONSTRAINT "registrations_user_id_event_id_pk" PRIMARY KEY("user_id","event_id")
 );
 --> statement-breakpoint
 CREATE TABLE "users" (

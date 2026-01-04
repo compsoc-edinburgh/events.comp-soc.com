@@ -6,7 +6,7 @@ import {
   RegistrationUpdateContractSchema,
 } from "./schemas";
 
-export type CreateRegistrationRequestSchema = z.infer<typeof RegistrationContractSchema>;
+export type CreateRegistrationRequest = z.infer<typeof RegistrationContractSchema>;
 export type UpdateRegistrationRequest = z.infer<typeof RegistrationUpdateContractSchema>;
 export type Registration = z.infer<typeof RegistrationResponseSchema>;
 
