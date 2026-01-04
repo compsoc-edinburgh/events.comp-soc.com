@@ -1,39 +1,36 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { registrationsTable } from "../../db/schema.js";
+import { RegistrationStatus } from "@events.comp-soc.com/shared";
 
-export const BaseRegistrationSchema = createInsertSchema(registrationsTable).omit({
-  id: true,
+export const BaseRegistrationSchema = createInsertSchema(registrationsTable);
+
+export const CreateRegistrationSchema = BaseRegistrationSchema.omit({
+  createdAt: true,
+  updatedAt: true,
 });
 
-export const CreateRegistrationInputSchema = BaseRegistrationSchema;
-
-export type CreateRegistrationInput = z.infer<typeof CreateRegistrationInputSchema>;
-
-export const CreateRegistrationBodySchema = BaseRegistrationSchema.pick({
-  formData: true,
-});
-
-export const UpdateRegistrationInputSchema = BaseRegistrationSchema.omit({
+export const UpdateRegistrationSchema = BaseRegistrationSchema.pick({
   userId: true,
   eventId: true,
-  createdAt: true,
-}).partial();
-
-export type UpdateRegistrationInput = z.infer<typeof UpdateRegistrationInputSchema>;
+})
+  .partial()
+  .extend({
+    eventId: BaseRegistrationSchema.shape.eventId,
+    userId: BaseRegistrationSchema.shape.userId,
+    status: z.enum(RegistrationStatus).default("pending"),
+  });
 
 export const RegistrationParamsSchema = z.object({
-  userId: z.string(),
-  eventId: z.string(),
+  userId: BaseRegistrationSchema.shape.userId,
+  eventId: BaseRegistrationSchema.shape.eventId,
 });
 
+export const RegistrationEventIdSchema = z.object({
+  eventId: BaseRegistrationSchema.shape.eventId,
+});
+
+export type CreateRegistration = z.infer<typeof CreateRegistrationSchema>;
+export type UpdateRegistration = z.infer<typeof UpdateRegistrationSchema>;
 export type RegistrationParams = z.infer<typeof RegistrationParamsSchema>;
-
-export const EventIdParamsSchema = z.object({
-  eventId: z.string(),
-});
-
-export const TargetUserParamsSchema = z.object({
-  eventId: z.string(),
-  targetUserId: z.string(),
-});
+export type RegistrationEventIdS = z.infer<typeof RegistrationEventIdSchema>;

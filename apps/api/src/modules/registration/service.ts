@@ -1,97 +1,132 @@
 import { SqlContext } from "../../db/db.js";
-import { CreateRegistrationInput, RegistrationParams, UpdateRegistrationInput } from "./schema.js";
+import { CreateRegistration, RegistrationParams, UpdateRegistration } from "./schema.js";
 import { eventStore } from "../events/store.js";
 import { RegistrationStatus, UserRole } from "@events.comp-soc.com/shared";
 import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { registrationStore } from "./store.js";
 
 export const registrationService = {
-  async createRegistration(db: SqlContext, data: CreateRegistrationInput, role: UserRole) {
-    const event = await eventStore.findById(db, { id: data.eventId });
-
-    if (!event || (role !== "committee" && event.state === "draft")) {
-      throw new NotFoundError(`Event with ${data.eventId} not found`);
-    }
-
-    if (event.capacity === null) {
-      return await registrationStore.create(db, {
-        ...data,
-        status: "pending",
-      });
-    }
-
+  async createRegistration({
+    db,
+    data,
+    role,
+  }: {
+    db: SqlContext;
+    data: CreateRegistration;
+    role: UserRole;
+  }) {
     return await db.transaction(async (tx) => {
-      const lockedEvent = await eventStore.findByIdForUpdate(tx, {
-        id: data.eventId,
+      const event = await eventStore.findByIdForUpdate({
+        tx,
+        data: { id: data.eventId },
       });
 
-      if (!lockedEvent || (role !== "committee" && lockedEvent.state === "draft")) {
+      if (!event || (role !== "committee" && event.state === "draft")) {
         throw new NotFoundError(`Event with ${data.eventId} not found`);
       }
 
-      const count = await registrationStore.countActiveByEventId(tx, lockedEvent.id);
+      const existing = await registrationStore.getByUserAndEvent({
+        db: tx,
+        data: { userId: data.userId, eventId: data.eventId },
+      });
+      if (existing) {
+        throw new ConflictError("Already registered");
+      }
 
-      const status: RegistrationStatus = count >= lockedEvent.capacity! ? "waitlist" : "pending";
+      let status: RegistrationStatus = "pending";
 
-      return await registrationStore.create(tx, {
-        ...data,
-        status,
+      if (event.capacity !== null) {
+        const currentCount = await registrationStore.countActiveByEventId({
+          db: tx,
+          data: { id: event.id },
+        });
+
+        if (currentCount >= event.capacity) {
+          status = "waitlist";
+        }
+      }
+
+      return await registrationStore.create({
+        db: tx,
+        data: { ...data, status },
       });
     });
   },
 
-  async updateRegistration(
-    db: SqlContext,
-    params: RegistrationParams,
-    data: UpdateRegistrationInput,
-    role: UserRole
-  ) {
+  async updateRegistration({
+    db,
+    data,
+    role,
+  }: {
+    db: SqlContext;
+    data: UpdateRegistration;
+    role: UserRole;
+  }) {
     if (role !== "committee") {
       throw new UnauthorizedError("Only committee members can update registrations");
     }
 
     return await db.transaction(async (tx) => {
-      const registration = await registrationStore.getByUserAndEvent(tx, params);
+      const registration = await registrationStore.getByUserAndEvent({
+        db: tx,
+        data,
+      });
       if (!registration) {
         throw new NotFoundError("Registration not found");
       }
 
       if (data.status === "accepted" && registration.status !== "accepted") {
-        const event = await eventStore.findByIdForUpdate(tx, { id: params.eventId });
+        const event = await eventStore.findByIdForUpdate({
+          tx,
+          data: { id: data.eventId },
+        });
+
         if (!event) {
-          throw new NotFoundError(`Event with ${params.eventId} not found`);
+          throw new NotFoundError(`Event with ${data.eventId} not found`);
         }
 
         if (event.capacity !== null) {
-          const activeCount = await registrationStore.countActiveByEventId(tx, event.id);
+          const activeCount = await registrationStore.countActiveByEventId({
+            db: tx,
+            data: { id: event.id },
+          });
+
           if (activeCount >= event.capacity) {
-            throw new ConflictError("Capacity is full for this event");
+            throw new ConflictError("Cannot accept: Event capacity has been reached");
           }
         }
       }
 
-      return await registrationStore.update(tx, params, data);
+      return await registrationStore.update({
+        db: tx,
+        data,
+      });
     });
   },
 
-  async deleteRegistration(
-    db: SqlContext,
-    params: RegistrationParams,
-    userId: string,
-    role: UserRole
-  ) {
-    const registration = await registrationStore.getByUserAndEvent(db, params);
+  async deleteRegistration({
+    db,
+    data,
+    userId,
+    role,
+  }: {
+    db: SqlContext;
+    data: RegistrationParams;
+    userId: string;
+    role: UserRole;
+  }) {
+    const registration = await registrationStore.getByUserAndEvent({ db, data });
     if (!registration) {
       throw new NotFoundError("Registration not found");
     }
 
-    const isOwner = params.userId === userId;
+    const isOwner = data.userId === userId;
     const isCommittee = role === "committee";
 
     if (!isOwner && !isCommittee) {
       throw new UnauthorizedError("You do not have permission to delete this registration");
     }
 
-    return await registrationStore.delete(db, params);
+    return await registrationStore.delete({ db, data });
   },
 };

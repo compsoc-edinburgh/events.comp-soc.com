@@ -1,8 +1,4 @@
-/**
- * SIG (Special Interest Group) identifiers
- * These are the organizers of events
- */
-export const SigId = {
+export const Sigs = {
   Compsoc: "compsoc",
   ProjectShare: "projectShare",
   BitSig: "bitSig",
@@ -17,9 +13,4 @@ export const SigId = {
   QuantSig: "quantSig",
 } as const;
 
-export type SigId = (typeof SigId)[keyof typeof SigId];
-
-/**
- * List of all valid SIG IDs
- */
-export const ALL_SIG_IDS = Object.values(SigId);
+export type Sigs = (typeof Sigs)[keyof typeof Sigs];

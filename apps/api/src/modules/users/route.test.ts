@@ -41,7 +41,7 @@ describe("User route", () => {
     it("should allow a user to see their own email", async () => {
       setMockAuth({
         userId: "target_user_123",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -71,7 +71,7 @@ describe("User route", () => {
     it("should HIDE email if a regular user fetches someone else", async () => {
       setMockAuth({
         userId: "different_user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -95,7 +95,7 @@ describe("User route", () => {
       expect(response.statusCode).toBe(401);
     });
 
-    it("should create user if logged in and IDs match", async () => {
+    it("should create user", async () => {
       setMockAuth({
         userId: "user_123",
         sessionClaims: { metadata: { role: "member" } },
@@ -104,7 +104,7 @@ describe("User route", () => {
       const response = await app.inject({
         method: "POST",
         url: "/v1/users",
-        payload: { id: "user_123", firstName: "John", lastName: "Doe", email: "john@example.com" },
+        payload: { firstName: "John", lastName: "Doe", email: "john@example.com" },
       });
 
       expect(response.statusCode).toBe(201);
@@ -117,20 +117,9 @@ describe("User route", () => {
       const response = await app.inject({
         method: "POST",
         url: "/v1/users",
-        payload: { id: "user_123", email: "not-an-email" },
+        payload: { firstName: "Test", lastName: "User", email: "not-an-email" },
       });
       expect(response.statusCode).toBe(400);
-    });
-
-    it("should fail with 403 if body ID doesn't match token ID", async () => {
-      setMockAuth({ userId: "real_id", sessionClaims: {} });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/users",
-        payload: { id: "fake_id", firstName: "John", lastName: "Doe", email: "j@b.com" },
-      });
-      expect(response.statusCode).toBe(403);
     });
   });
 
@@ -147,7 +136,7 @@ describe("User route", () => {
     });
 
     it("should fail if a regular user tries to update someone else", async () => {
-      setMockAuth({ userId: "user_123", sessionClaims: { metadata: { role: "user" } } });
+      setMockAuth({ userId: "user_123", sessionClaims: { metadata: { role: "member" } } });
 
       const response = await app.inject({
         method: "PUT",
@@ -177,7 +166,7 @@ describe("User route", () => {
   describe("DELETE /v1/users/:id", () => {
     it("should allow a user to delete their own account", async () => {
       const userId = "delete_me";
-      setMockAuth({ userId, sessionClaims: { metadata: { role: "user" } } });
+      setMockAuth({ userId, sessionClaims: { metadata: { role: "member" } } });
 
       await db
         .insert(usersTable)

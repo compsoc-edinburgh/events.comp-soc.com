@@ -25,3 +25,5 @@ export function AuthWindow({ children, title }: AuthWindowProps) {
     </div>
   )
 }
+
+

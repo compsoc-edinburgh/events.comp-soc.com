@@ -3,18 +3,24 @@ import { getAuth } from "@clerk/fastify";
 import {
   CreateEventSchema,
   EventIdSchema,
-  GetEventsQuerySchema,
+  EventsQueryFilterSchema,
   UpdateEventSchema,
 } from "./schema.js";
 import { eventService } from "./service.js";
+import { EventContractSchema, UpdateEventContractSchema } from "@events.comp-soc.com/shared";
+import { nanoid } from "nanoid";
 
 export const eventRoutes = async (server: FastifyInstance) => {
   server.get("/", async (request, reply) => {
     const { sessionClaims } = getAuth(request);
     const role = sessionClaims?.metadata?.role;
 
-    const query = GetEventsQuerySchema.parse(request.query);
-    const events = await eventService.getEvents(server.db, query, role ?? null);
+    const filters = EventsQueryFilterSchema.parse(request.query);
+    const events = await eventService.getEvents({
+      db: server.db,
+      filters,
+      role: role ?? null,
+    });
 
     return reply.status(200).send(events);
   });
@@ -23,8 +29,12 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const { sessionClaims } = getAuth(request);
     const role = sessionClaims?.metadata?.role;
 
-    const params = EventIdSchema.parse(request.params);
-    const events = await eventService.getEventById(server.db, params, role ?? null);
+    const data = EventIdSchema.parse(request.params);
+    const events = await eventService.getEventById({
+      db: server.db,
+      data,
+      role: role ?? null,
+    });
 
     return reply.status(200).send(events);
   });
@@ -37,8 +47,20 @@ export const eventRoutes = async (server: FastifyInstance) => {
       return reply.status(401).send({ message: "Unauthorised" });
     }
 
-    const body = CreateEventSchema.parse(request.body);
-    const newEvent = await eventService.createEvent(server.db, body, role);
+    const dto = EventContractSchema.parse(request.body);
+    const generatedId = nanoid();
+
+    const data = CreateEventSchema.parse({
+      id: generatedId,
+      ...dto,
+      date: new Date(dto.date),
+    });
+
+    const newEvent = await eventService.createEvent({
+      db: server.db,
+      data,
+      role,
+    });
 
     return reply.status(201).send(newEvent);
   });
@@ -51,11 +73,19 @@ export const eventRoutes = async (server: FastifyInstance) => {
       return reply.status(401).send({ message: "Unauthorised" });
     }
 
-    const updateBody = UpdateEventSchema.parse(request.body);
-    const params = EventIdSchema.parse(request.params);
+    const { id } = EventIdSchema.parse(request.params);
+    const dto = UpdateEventContractSchema.parse(request.body);
 
-    const body = { ...params, ...updateBody };
-    const updatedEvent = await eventService.updateEvent(server.db, body, role);
+    const data = UpdateEventSchema.parse({
+      id,
+      ...dto,
+    });
+
+    const updatedEvent = await eventService.updateEvent({
+      db: server.db,
+      data,
+      role,
+    });
 
     return reply.status(200).send(updatedEvent);
   });
@@ -68,8 +98,12 @@ export const eventRoutes = async (server: FastifyInstance) => {
       return reply.status(401).send({ message: "Unauthorised" });
     }
 
-    const params = EventIdSchema.parse(request.params);
-    const deletedEvent = await eventService.deleteEvent(server.db, params, role);
+    const data = EventIdSchema.parse(request.params);
+    const deletedEvent = await eventService.deleteEvent({
+      db: server.db,
+      data,
+      role,
+    });
 
     return reply.status(200).send(deletedEvent);
   });

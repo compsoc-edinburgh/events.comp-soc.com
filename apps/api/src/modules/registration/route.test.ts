@@ -44,7 +44,7 @@ describe("Registration route", () => {
         title: "Published Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
         capacity: null,
       });
@@ -54,7 +54,7 @@ describe("Registration route", () => {
         title: "Draft Event",
         state: "draft",
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
         capacity: null,
       });
@@ -64,7 +64,7 @@ describe("Registration route", () => {
         title: "Limited Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
         capacity: 2,
       });
@@ -86,7 +86,7 @@ describe("Registration route", () => {
     it("should return 404 if event does not exist", async () => {
       setMockAuth({
         userId: "test-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -101,7 +101,7 @@ describe("Registration route", () => {
     it("should return 404 if regular user tries to register to draft event", async () => {
       setMockAuth({
         userId: "test-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -116,7 +116,7 @@ describe("Registration route", () => {
     it("should register user with pending status when capacity is null", async () => {
       setMockAuth({
         userId: "test-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -136,7 +136,7 @@ describe("Registration route", () => {
     it("should register user with pending status when capacity allows", async () => {
       setMockAuth({
         userId: "test-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -164,7 +164,7 @@ describe("Registration route", () => {
 
       setMockAuth({
         userId: "test-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -192,7 +192,7 @@ describe("Registration route", () => {
         title: "Test Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
         capacity: 2,
       });
@@ -220,7 +220,7 @@ describe("Registration route", () => {
     it("should return 403 if non-committee tries to update registration", async () => {
       setMockAuth({
         userId: "other-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -303,7 +303,7 @@ describe("Registration route", () => {
         title: "Test Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
       });
 
@@ -347,7 +347,7 @@ describe("Registration route", () => {
     it("should allow user to delete their own registration", async () => {
       setMockAuth({
         userId: "test-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -364,7 +364,7 @@ describe("Registration route", () => {
     it("should return 403 if user tries to delete another user's registration", async () => {
       setMockAuth({
         userId: "other-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -404,7 +404,7 @@ describe("Registration route", () => {
         title: "Test Event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
       });
 
@@ -418,7 +418,7 @@ describe("Registration route", () => {
     it("should allow user to delete their own registration via self endpoint", async () => {
       setMockAuth({
         userId: "test-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({

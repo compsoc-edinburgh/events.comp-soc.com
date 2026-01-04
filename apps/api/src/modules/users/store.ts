@@ -1,16 +1,16 @@
 import { eq } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
-import { CreateUserInput, UpdateUserInput, UserIdParams } from "./schema.js";
+import { CreateUser, UpdateUser, UserId } from "./schema.js";
 import { usersTable } from "../../db/schema.js";
 
 export const userStore = {
-  async create(db: SqlContext, data: CreateUserInput) {
+  async create({ db, data }: { db: SqlContext; data: CreateUser }) {
     const [newUser] = await db.insert(usersTable).values(data).returning();
 
     return newUser;
   },
 
-  async update(db: SqlContext, data: UpdateUserInput & UserIdParams) {
+  async update({ db, data }: { db: SqlContext; data: UpdateUser }) {
     const { id, ...updatedData } = data;
 
     const [updatedUser] = await db
@@ -24,17 +24,16 @@ export const userStore = {
     return updatedUser;
   },
 
-  async getById(db: SqlContext, data: UserIdParams) {
-    const result = await db.select().from(usersTable).where(eq(usersTable.id, data.id));
+  async getById({ db, data }: { db: SqlContext; data: UserId }) {
+    const { id } = data;
+    const result = await db.select().from(usersTable).where(eq(usersTable.id, id));
 
     return result[0];
   },
 
-  async delete(db: SqlContext, params: UserIdParams) {
-    const [deletedUser] = await db
-      .delete(usersTable)
-      .where(eq(usersTable.id, params.id))
-      .returning();
+  async delete({ db, data }: { db: SqlContext; data: UserId }) {
+    const { id } = data;
+    const [deletedUser] = await db.delete(usersTable).where(eq(usersTable.id, id)).returning();
 
     return deletedUser;
   },

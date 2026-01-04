@@ -5,6 +5,7 @@ import { buildServer } from "../../server.js";
 import { db } from "../../db/db.js";
 import { sql } from "drizzle-orm";
 import { eventsTable } from "../../db/schema.js";
+import type { CreateEventRequest } from "@events.comp-soc.com/shared";
 
 vi.mock("@clerk/fastify", () => {
   return {
@@ -35,7 +36,7 @@ describe("Event route", () => {
         title: "Draft event",
         state: "draft",
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
       });
 
@@ -44,7 +45,7 @@ describe("Event route", () => {
         title: "Published event",
         state: "published",
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
       });
     });
@@ -71,7 +72,7 @@ describe("Event route", () => {
     it("Regular user can only see published events", async () => {
       setMockAuth({
         userId: "regular-user",
-        sessionClaims: { role: "user" },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -89,7 +90,7 @@ describe("Event route", () => {
     it("should return 404 for draft event if accessed by regular user", async () => {
       setMockAuth({
         userId: "regular-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -108,7 +109,7 @@ describe("Event route", () => {
         title: `Event ${i + 1}`,
         state: "published" as const,
         aboutMarkdown: "markdown",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(2025, 0, i + 1),
       }));
 
@@ -158,11 +159,17 @@ describe("Event route", () => {
   });
 
   describe("POST /v1/events", () => {
-    const validEventData = {
+    const validEventData: CreateEventRequest = {
       title: "New Event",
-      organizer: "projectShare",
+      organiser: "evp",
+      state: "published",
+      priority: "default",
+      capacity: 100,
       date: new Date().toISOString(),
       aboutMarkdown: "Event description",
+      location: "Main Hall",
+      locationURL: null,
+      form: [],
     };
 
     it("should return 401 if user is not authenticated", async () => {
@@ -181,7 +188,7 @@ describe("Event route", () => {
     it("should return 403 if user is not a committee member", async () => {
       setMockAuth({
         userId: "regular-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -209,7 +216,7 @@ describe("Event route", () => {
 
       const data = response.json();
       expect(data.title).toBe(validEventData.title);
-      expect(data.organizer).toBe(validEventData.organizer);
+      expect(data.organiser).toBe(validEventData.organiser);
       expect(data.id).toBeDefined();
     });
 
@@ -223,9 +230,9 @@ describe("Event route", () => {
         method: "POST",
         url: "/v1/events",
         payload: {
-          title: "", // Invalid: empty title
-          organizer: "projectShare",
-          date: "not-a-date", // Invalid date format
+          title: "",
+          organiser: "projectShare",
+          date: "not-a-date",
         },
       });
 
@@ -257,7 +264,7 @@ describe("Event route", () => {
         title: "Existing Event",
         state: "draft",
         aboutMarkdown: "Original description",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
       });
     });
@@ -278,7 +285,7 @@ describe("Event route", () => {
     it("should return 403 if user is not a committee member", async () => {
       setMockAuth({
         userId: "regular-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
@@ -336,7 +343,7 @@ describe("Event route", () => {
         title: "Event To Delete",
         state: "draft",
         aboutMarkdown: "Will be deleted",
-        organizer: "projectShare",
+        organiser: "projectShare",
         date: new Date(),
       });
     });
@@ -356,7 +363,7 @@ describe("Event route", () => {
     it("should return 403 if user is not a committee member", async () => {
       setMockAuth({
         userId: "regular-user",
-        sessionClaims: { metadata: { role: "user" } },
+        sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
