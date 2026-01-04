@@ -1,12 +1,16 @@
 import { FastifyInstance } from "fastify";
 import { getAuth } from "@clerk/fastify";
 import {
-  CreateRegistrationBodySchema,
-  EventIdParamsSchema,
-  TargetUserParamsSchema,
-  UpdateRegistrationInputSchema,
+  CreateRegistrationSchema,
+  RegistrationEventIdSchema,
+  RegistrationParamsSchema,
+  UpdateRegistrationSchema,
 } from "./schema.js";
 import { registrationService } from "./service.js";
+import {
+  RegistrationContractSchema,
+  RegistrationUpdateContractSchema,
+} from "@events.comp-soc.com/shared";
 
 export const registrationRoutes = async (server: FastifyInstance) => {
   server.post("/", async (request, reply) => {
@@ -17,19 +21,25 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       return reply.status(401).send({ message: "Unauthorised" });
     }
 
-    const params = EventIdParamsSchema.parse(request.params);
-    const body = CreateRegistrationBodySchema.parse(request.body);
+    const dto = RegistrationContractSchema.parse(request.body);
+    const params = RegistrationEventIdSchema.parse(request.params);
 
-    const registration = await registrationService.createRegistration(
-      server.db,
-      { ...body, userId, eventId: params.eventId },
-      role
-    );
+    const data = CreateRegistrationSchema.parse({
+      ...dto,
+      userId,
+      eventId: params.eventId,
+    });
+
+    const registration = await registrationService.createRegistration({
+      db: server.db,
+      data,
+      role,
+    });
 
     return reply.status(201).send(registration);
   });
 
-  server.put("/:targetUserId", async (request, reply) => {
+  server.put("/:userId", async (request, reply) => {
     const { userId, sessionClaims } = getAuth(request);
     const role = sessionClaims?.metadata?.role;
 
@@ -37,20 +47,25 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       return reply.status(401).send({ message: "Unauthorised" });
     }
 
-    const params = TargetUserParamsSchema.parse(request.params);
-    const body = UpdateRegistrationInputSchema.parse(request.body);
+    const dto = RegistrationUpdateContractSchema.parse(request.body);
+    const params = RegistrationParamsSchema.parse(request.params);
 
-    const updatedRegistration = await registrationService.updateRegistration(
-      server.db,
-      { userId: params.targetUserId, eventId: params.eventId },
-      body,
-      role
-    );
+    const data = UpdateRegistrationSchema.parse({
+      ...dto,
+      eventId: params.eventId,
+      userId: params.userId,
+    });
+
+    const updatedRegistration = await registrationService.updateRegistration({
+      db: server.db,
+      data,
+      role,
+    });
 
     return reply.status(200).send(updatedRegistration);
   });
 
-  server.delete("/:targetUserId", async (request, reply) => {
+  server.delete("/:userId", async (request, reply) => {
     const { userId, sessionClaims } = getAuth(request);
     const role = sessionClaims?.metadata?.role;
 
@@ -58,14 +73,13 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       return reply.status(401).send({ message: "Unauthorised" });
     }
 
-    const params = TargetUserParamsSchema.parse(request.params);
-
-    const deletedRegistration = await registrationService.deleteRegistration(
-      server.db,
-      { userId: params.targetUserId, eventId: params.eventId },
+    const data = RegistrationParamsSchema.parse(request.params);
+    const deletedRegistration = await registrationService.deleteRegistration({
+      db: server.db,
+      data,
       userId,
-      role
-    );
+      role,
+    });
 
     return reply.status(200).send(deletedRegistration);
   });
@@ -78,14 +92,13 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       return reply.status(401).send({ message: "Unauthorised" });
     }
 
-    const params = EventIdParamsSchema.parse(request.params);
-
-    const deletedRegistration = await registrationService.deleteRegistration(
-      server.db,
-      { userId, eventId: params.eventId },
+    const { eventId } = RegistrationEventIdSchema.parse(request.params);
+    const deletedRegistration = await registrationService.deleteRegistration({
+      db: server.db,
+      data: { eventId, userId },
       userId,
-      role
-    );
+      role,
+    });
 
     return reply.status(200).send(deletedRegistration);
   });

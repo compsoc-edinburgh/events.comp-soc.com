@@ -1,26 +1,29 @@
 import { SqlContext } from "../../db/db.js";
-import { CreateUserInput, UpdateUserInput, UserIdParams } from "./schema.js";
+import { CreateUser, UserId, UpdateUser } from "./schema.js";
 import { NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { userStore } from "./store.js";
-import { UserRole as UserRoleConst, Nullable, UserRole } from "@events.comp-soc.com/shared";
+import { Nullable, UserRole as UserRoleConst, UserRole } from "@events.comp-soc.com/shared";
 
 export const userService = {
-  async getUserById(
-    db: SqlContext,
-    params: UserIdParams,
-    requesterId: Nullable<string>,
-    role: Nullable<UserRole>
-  ) {
-    const user = await userStore.getById(db, params);
+  async getUserById({
+    db,
+    data,
+    role,
+    requesterId,
+  }: {
+    db: SqlContext;
+    data: UserId;
+    role: Nullable<UserRole>;
+    requesterId: Nullable<string>;
+  }) {
+    const { id } = data;
+    const user = await userStore.getById({ db, data: data });
 
     if (!user) {
-      throw new NotFoundError(`User with ${params.id} not found`);
+      throw new NotFoundError(`User with ${id} not found`);
     }
 
-    const isCommittee = role === UserRoleConst.Committee;
-    const isSelf = user.id === requesterId;
-
-    if (isCommittee || isSelf) {
+    if (role === UserRoleConst.Committee || user.id === requesterId) {
       return user;
     }
 
@@ -28,44 +31,61 @@ export const userService = {
     return publicUserData;
   },
 
-  async createUser(db: SqlContext, body: CreateUserInput) {
-    return userStore.create(db, body);
+  async createUser({ db, data }: { db: SqlContext; data: CreateUser }) {
+    return userStore.create({ db, data });
   },
 
-  async updateUser(
-    db: SqlContext,
-    data: UpdateUserInput & UserIdParams,
-    requesterId: string,
-    role: UserRole
-  ) {
+  async updateUser({
+    db,
+    data,
+    role,
+    requesterId,
+  }: {
+    db: SqlContext;
+    data: UpdateUser;
+    role: Nullable<UserRole>;
+    requesterId: Nullable<string>;
+  }) {
+    const { id } = data;
+
     const isCommittee = role === UserRoleConst.Committee;
-    const isSelf = data.id === requesterId;
+    const isSelf = id === requesterId;
 
     if (!isCommittee && !isSelf) {
       throw new UnauthorizedError("You can only update your own profile");
     }
 
-    const updated = await userStore.update(db, data);
-
+    const updated = await userStore.update({ db, data });
     if (!updated) {
-      throw new NotFoundError(`User with ${data.id} not found`);
+      throw new NotFoundError(`User with ${id} not found`);
     }
 
     return updated;
   },
 
-  async deleteUser(db: SqlContext, params: UserIdParams, requesterId: string, role: UserRole) {
+  async deleteUser({
+    db,
+    data,
+    role,
+    requesterId,
+  }: {
+    db: SqlContext;
+    data: UserId;
+    role: Nullable<UserRole>;
+    requesterId: Nullable<string>;
+  }) {
+    const { id } = data;
+
     const isCommittee = role === UserRoleConst.Committee;
-    const isSelf = params.id === requesterId;
+    const isSelf = id === requesterId;
 
     if (!isCommittee && !isSelf) {
       throw new UnauthorizedError("You can only delete your own profile");
     }
 
-    const deleted = await userStore.delete(db, params);
-
+    const deleted = await userStore.delete({ db, data });
     if (!deleted) {
-      throw new NotFoundError(`User with ${params.id} not found`);
+      throw new NotFoundError(`User with ${id} not found`);
     }
 
     return deleted;

@@ -1,5 +1,5 @@
 {
-  "id": "27788f0c-3bb7-4fd9-81c4-2c920fc88c81",
+  "id": "5f44ca68-1f74-4879-a8be-a8fa310f8631",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -14,8 +14,14 @@
           "primaryKey": true,
           "notNull": true
         },
-        "organizer": {
-          "name": "organizer",
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organiser": {
+          "name": "organiser",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -25,14 +31,16 @@
           "type": "eventState",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'draft'"
         },
-        "title": {
-          "name": "title",
-          "type": "text",
+        "priority": {
+          "name": "priority",
+          "type": "eventPriority",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'default'"
         },
         "capacity": {
           "name": "capacity",
@@ -52,14 +60,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "location_name": {
-          "name": "location_name",
+        "location": {
+          "name": "location",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "location_map_url": {
-          "name": "location_map_url",
+        "location_url": {
+          "name": "location_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -85,7 +93,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "state_idx": {
+          "name": "state_idx",
+          "columns": [
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -97,12 +121,6 @@
       "name": "registrations",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "user_id": {
           "name": "user_id",
           "type": "text",
@@ -187,7 +205,12 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "registrations_user_id_event_id_pk": {
+          "name": "registrations_user_id_event_id_pk",
+          "columns": ["user_id", "event_id"]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -226,8 +249,8 @@
           "type": "roles",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false,
-          "default": "'user'"
+          "notNull": true,
+          "default": "'member'"
         },
         "created_at": {
           "name": "created_at",
@@ -260,6 +283,11 @@
     }
   },
   "enums": {
+    "public.eventPriority": {
+      "name": "eventPriority",
+      "schema": "public",
+      "values": ["default", "pinned"]
+    },
     "public.eventState": {
       "name": "eventState",
       "schema": "public",
@@ -273,7 +301,7 @@
     "public.roles": {
       "name": "roles",
       "schema": "public",
-      "values": ["user", "committee"]
+      "values": ["member", "committee"]
     }
   },
   "schemas": {},

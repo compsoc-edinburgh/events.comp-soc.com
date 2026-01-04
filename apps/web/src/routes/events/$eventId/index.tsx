@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ClockIcon, MapPin, UserIcon } from 'lucide-react'
+import { Sigs } from '@events.comp-soc.com/shared'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
 import GoogleMaps from '@/components/google-maps.tsx'
 import { SigBadge } from '@/components/sigs-badge.tsx'
-import { Sigs } from '@/config/sigs.ts'
 import { Button } from '@/components/ui/button.tsx'
 
 export const Route = createFileRoute('/events/$eventId/')({

@@ -1,8 +1,5 @@
-import { SigId } from '@events.comp-soc.com/shared'
+import { Sigs } from '@events.comp-soc.com/shared'
 import type { Nullable } from '@events.comp-soc.com/shared'
-
-export const Sigs = SigId
-export type Sigs = SigId
 
 export interface SIGColors {
   border: string

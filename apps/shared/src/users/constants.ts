@@ -1,8 +1,5 @@
-/**
- * User roles in the system
- */
 export const UserRole = {
-  User: "user",
+  Member: "member",
   Committee: "committee",
 } as const;
 
