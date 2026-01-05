@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
 import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
 import { eventsTable } from "../../db/schema.js";
@@ -41,7 +41,7 @@ export const eventStore = {
       .where(state ? eq(eventsTable.state, state) : undefined)
       .limit(limit)
       .offset(offset)
-      .orderBy(desc(eventsTable.date));
+      .orderBy(eventsTable.date);
   },
 
   async findById({ db, data }: { db: SqlContext; data: EventId }) {

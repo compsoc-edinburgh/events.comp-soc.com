@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { CustomFieldSchema, type EventContractSchema, type EventResponseSchema } from "./schemas";
+import {
+  CustomFieldSchema,
+  type EventContractSchema,
+  type EventResponseSchema,
+} from "./schemas.js";
 
 export type CreateEventRequest = z.infer<typeof EventContractSchema>;
 export type UpdateEventRequest = Partial<CreateEventRequest>;

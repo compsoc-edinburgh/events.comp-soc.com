@@ -15,7 +15,9 @@ export function Markdown({ content, className }: MarkdownProps) {
   const [result, setResult] = useState<Nullable<MarkdownResult>>(null)
 
   useEffect(() => {
-    renderMarkdown(content).then(setResult)
+    const cleanContent = content.replace(/\\n/g, '\n')
+
+    renderMarkdown(cleanContent).then(setResult)
   }, [content])
 
   if (!result) {

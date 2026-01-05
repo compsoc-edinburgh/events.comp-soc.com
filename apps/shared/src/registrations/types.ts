@@ -4,7 +4,7 @@ import {
   RegistrationResponseSchema,
   RegistrationAnswerSchema,
   RegistrationUpdateContractSchema,
-} from "./schemas";
+} from "./schemas.js";
 
 export type CreateRegistrationRequest = z.infer<typeof RegistrationContractSchema>;
 export type UpdateRegistrationRequest = z.infer<typeof RegistrationUpdateContractSchema>;

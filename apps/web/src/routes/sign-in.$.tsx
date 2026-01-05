@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SignIn } from '@clerk/clerk-react'
+import { SignIn } from '@clerk/tanstack-react-start'
 import { dark } from '@clerk/themes'
 import { AuthWindow } from '@/components/layout/auth-window'
 

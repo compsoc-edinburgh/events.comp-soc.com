@@ -1,5 +1,5 @@
 {
-  "projectName": "web",
+  "projectName": "@events.comp-soc.com/web",
   "mode": "file-router",
   "typescript": true,
   "tailwind": true,

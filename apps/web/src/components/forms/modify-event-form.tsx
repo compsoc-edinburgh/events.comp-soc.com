@@ -1,8 +1,15 @@
-import * as z from 'zod'
 import { useState } from 'react'
 import { useForm, useStore } from '@tanstack/react-form'
-import { toast } from 'sonner'
 import { ChevronDownIcon, InfoIcon, PlusIcon, XIcon } from 'lucide-react'
+import {
+  CustomFieldSchema,
+  EventContractSchema,
+  EventPriority,
+  EventState,
+  Sigs,
+} from '@events.comp-soc.com/shared'
+import * as z from 'zod'
+import type { CustomField } from '@events.comp-soc.com/shared'
 import {
   Field,
   FieldDescription,
@@ -53,26 +60,20 @@ import {
 import { Switch } from '@/components/ui/switch.tsx'
 import { ButtonGroup } from '@/components/ui/button-group.tsx'
 
-export const eventSchema = z
+export const EventFormSchema = z
   .object({
     title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
-    organiser: z.string().min(1, 'Organiser is required'),
+    organiser: z.enum(Sigs),
+    state: z.enum(EventState),
+    priority: z.enum(EventPriority),
     date: z.date(),
-    description: z.string(),
+    aboutMarkdown: z.string(),
     capacity: z.string(),
-    locationUrl: z.string(),
+    locationURL: z.string(),
     time: z.string().min(1, 'Time is required'),
     location: z.string().min(1, 'Location is required'),
     registrationFormEnabled: z.boolean(),
-    customFields: z.array(
-      z.object({
-        id: z.string(),
-        type: z.enum(['input', 'textarea', 'select']),
-        label: z.string().min(1, 'Label is required'),
-        required: z.boolean(),
-        options: z.array(z.string()).optional(),
-      }),
-    ),
+    customFields: z.array(CustomFieldSchema),
   })
   .superRefine((form, ctx) => {
     if (form.registrationFormEnabled && form.customFields.length === 0) {
@@ -85,18 +86,35 @@ export const eventSchema = z
     }
   })
 
-type CustomField = {
-  id: string
-  type: 'input' | 'textarea' | 'select'
-  label: string
-  required: boolean
-  options?: Array<string>
-}
+export const FormToRequest = EventFormSchema.transform((form) => {
+  const date = new Date(form.date)
+  const [hours, minutes] = form.time.split(':').map(Number)
+  date.setHours(hours, minutes, 0, 0)
+  const {
+    time: _time,
+    registrationFormEnabled: _registrationFormEnabled,
+    customFields: _customFields,
+    ...data
+  } = form
+
+  return {
+    ...data,
+    capacity: form.capacity ? parseInt(form.capacity, 10) : null,
+    date: date.toISOString(),
+    aboutMarkdown: form.aboutMarkdown || null,
+    locationURL: form.locationURL ? `https://${form.locationURL}` : null,
+    form: form.registrationFormEnabled ? form.customFields : null,
+  }
+}).pipe(EventContractSchema)
 
 function ModifyEventForm({
   onFormSubmit,
+  defaultValues,
+  isModify = false,
 }: {
-  onFormSubmit: (value: z.infer<typeof eventSchema>) => void
+  onFormSubmit: (value: z.infer<typeof EventFormSchema>) => void
+  defaultValues: z.infer<typeof EventFormSchema>
+  isModify?: boolean
 }) {
   const [open, setOpen] = useState(false)
 
@@ -118,23 +136,11 @@ function ModifyEventForm({
   ]
 
   const form = useForm({
-    defaultValues: {
-      title: '',
-      organiser: '',
-      date: new Date(),
-      time: '',
-      location: '',
-      description: '',
-      capacity: '',
-      locationUrl: '',
-      registrationFormEnabled: false,
-      customFields: [] as Array<CustomField>,
-    },
+    defaultValues,
     validators: {
-      onSubmit: eventSchema,
+      onSubmit: EventFormSchema,
     },
     onSubmit: ({ value }) => {
-      toast.success('Form submitted successfully')
       onFormSubmit(value)
     },
   })
@@ -269,7 +275,9 @@ function ModifyEventForm({
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(value) => field.handleChange(value)}
+                      onValueChange={(value) =>
+                        field.handleChange(value as typeof field.state.value)
+                      }
                     >
                       <SelectTrigger aria-invalid={isInvalid}>
                         <SelectValue
@@ -285,6 +293,44 @@ function ModifyEventForm({
                         ))}
                       </SelectContent>
                     </Select>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )
+              }}
+            />
+
+            <form.Field
+              name="priority"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Priority</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.state.value}
+                      onValueChange={(value) =>
+                        field.handleChange(value as typeof field.state.value)
+                      }
+                    >
+                      <SelectTrigger aria-invalid={isInvalid}>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={EventPriority.Default}>
+                          Default
+                        </SelectItem>
+                        <SelectItem value={EventPriority.Pinned}>
+                          Pinned
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>
+                      Pinned events appear at the top of the events list
+                    </FieldDescription>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}
@@ -389,7 +435,7 @@ function ModifyEventForm({
             />
 
             <form.Field
-              name="description"
+              name="aboutMarkdown"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
@@ -457,7 +503,7 @@ function ModifyEventForm({
             />
 
             <form.Field
-              name="locationUrl"
+              name="locationURL"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
@@ -701,25 +747,33 @@ function ModifyEventForm({
           orientation="horizontal"
           className="flex-col sm:flex-row gap-2 sm:gap-3"
         >
-          <Button type="submit" form="event-form" className="w-full sm:w-auto">
-            Publish
-          </Button>
-          <Button
-            type="submit"
-            variant="outline"
-            form="event-form"
-            className="w-full sm:w-auto"
-          >
-            Save
-          </Button>
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => form.reset()}
-            className="w-full sm:w-auto"
-          >
-            Clear
-          </Button>
+          {isModify ? (
+            <Button
+              type="submit"
+              form="event-form"
+              className="w-full sm:w-auto"
+            >
+              Update
+            </Button>
+          ) : (
+            <>
+              <Button
+                type="submit"
+                form="event-form"
+                className="w-full sm:w-auto"
+              >
+                Create
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => form.reset()}
+                className="w-full sm:w-auto"
+              >
+                Clear
+              </Button>
+            </>
+          )}
         </Field>
       </FieldGroup>
     </form>

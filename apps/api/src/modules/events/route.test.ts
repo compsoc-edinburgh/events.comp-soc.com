@@ -127,8 +127,8 @@ describe("Event route", () => {
       expect(response.statusCode).toBe(200);
       expect(data).toHaveLength(2);
 
-      expect(data[0].id).toBe("event-5");
-      expect(data[1].id).toBe("event-4");
+      expect(data[0].id).toBe("event-1");
+      expect(data[1].id).toBe("event-2");
     });
 
     it("should return the second page correctly", async () => {
@@ -143,7 +143,7 @@ describe("Event route", () => {
       expect(data).toHaveLength(2);
 
       expect(data[0].id).toBe("event-3");
-      expect(data[1].id).toBe("event-2");
+      expect(data[1].id).toBe("event-4");
     });
 
     it("should return an empty array if page is out of bounds", async () => {
@@ -257,7 +257,7 @@ describe("Event route", () => {
     });
   });
 
-  describe("PUT /v1/events/:id", () => {
+  describe("POST /v1/events/:id", () => {
     beforeEach(async () => {
       await db.insert(eventsTable).values({
         id: "existing-event",
@@ -273,7 +273,7 @@ describe("Event route", () => {
       setMockAuth({ userId: null, sessionClaims: null });
 
       const response = await app.inject({
-        method: "PUT",
+        method: "POST",
         url: "/v1/events/existing-event",
         payload: { title: "Updated Title" },
       });
@@ -289,7 +289,7 @@ describe("Event route", () => {
       });
 
       const response = await app.inject({
-        method: "PUT",
+        method: "POST",
         url: "/v1/events/existing-event",
         payload: { title: "Updated Title" },
       });
@@ -304,7 +304,7 @@ describe("Event route", () => {
       });
 
       const response = await app.inject({
-        method: "PUT",
+        method: "POST",
         url: "/v1/events/existing-event",
         payload: {
           title: "Updated Event Title",
@@ -327,7 +327,7 @@ describe("Event route", () => {
       });
 
       const response = await app.inject({
-        method: "PUT",
+        method: "POST",
         url: "/v1/events/non-existing-event",
         payload: { title: "Updated Title" },
       });

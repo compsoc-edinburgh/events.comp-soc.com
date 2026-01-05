@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { Sigs } from "../core/constants";
-import { EventPriority, EventState } from "./constants";
+import { Sigs } from "../core/constants.js";
+import { EventPriority, EventState } from "./constants.js";
 
 export const CustomFieldSchema = z
   .object({

@@ -30,6 +30,8 @@
 
   --color-destructive: oklch(71.2% 0.194 13.428);
   --color-ring: #dc2626;
+
+  --radius: 0.25rem;
 }
 
 html {

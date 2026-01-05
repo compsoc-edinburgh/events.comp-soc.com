@@ -54,7 +54,7 @@ export const eventsTable = pgTable(
     date: timestamp("date").notNull(),
     aboutMarkdown: text("about_markdown"),
     location: text("location"),
-    locationUrl: text("location_url"),
+    locationURL: text("location_url"),
     form: json("form").$type<Array<CustomField>>(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at")
