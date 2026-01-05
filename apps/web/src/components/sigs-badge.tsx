@@ -1,4 +1,4 @@
-import type { Sigs } from '@/config/sigs.ts'
+import type { Sigs } from '@events.comp-soc.com/shared'
 import { getSigById, getSigColors } from '@/config/sigs.ts'
 
 interface SigBadgeProps {
@@ -34,7 +34,7 @@ export const SigBadge = ({
 
   return (
     <div
-      className={`inline-flex items-center gap-1 sm:gap-1.5 rounded-md border ${sizes.container} ${className}`}
+      className={`inline-flex items-center gap-1 sm:gap-1.5 rounded-sm border ${sizes.container} ${className}`}
       style={{
         backgroundColor: getSigColors(sig).background,
         borderColor: getSigColors(sig).border,
