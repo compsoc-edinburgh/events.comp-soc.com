@@ -1,10 +1,19 @@
 import { createServerFn } from '@tanstack/react-start'
 import axios from 'redaxios'
 import { queryOptions } from '@tanstack/react-query'
-import { EventResponseSchema, EventState } from '@events.comp-soc.com/shared'
+import {
+  EventContractSchema,
+  EventResponseSchema,
+  EventState,
+  UpdateEventContractSchema,
+} from '@events.comp-soc.com/shared'
 import { z } from 'zod'
 import { auth } from '@clerk/tanstack-react-start/server'
-import type { Event } from '@events.comp-soc.com/shared'
+import type {
+  CreateEventRequest,
+  Event,
+  UpdateEventRequest,
+} from '@events.comp-soc.com/shared'
 
 const eventIDSchema = z.object({
   eventId: z.string().min(1, 'EventId is required'),
@@ -81,6 +90,59 @@ export const eventsQueryOptions = (state?: 'draft' | 'published') =>
 
 export const eventQueryOption = (eventId: string) =>
   queryOptions({
-    queryKey: ['event', eventId],
+    queryKey: ['events', eventId],
     queryFn: () => fetchEvent({ data: { eventId } }),
+  })
+
+export const createEvent = createServerFn({ method: 'POST' })
+  .inputValidator((data: CreateEventRequest) => EventContractSchema.parse(data))
+  .handler(async ({ data }) => {
+    const authObj = await auth()
+    const token = await authObj.getToken()
+
+    const baseUrl = process.env.API_BASE_URL
+    if (!baseUrl) {
+      throw new Error('API_BASE_URL is not defined')
+    }
+
+    const { data: event } = await axios.post<Event>(
+      `${baseUrl}/v1/events`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+    return EventResponseSchema.parse(event)
+  })
+
+export const updateEvent = createServerFn({ method: 'POST' })
+  .inputValidator((data: UpdateEventRequest & Pick<Event, 'id'>) => {
+    return UpdateEventContractSchema.extend({
+      id: z.string(),
+    }).parse(data)
+  })
+  .handler(async ({ data }) => {
+    const eventId = data.id
+    const authObj = await auth()
+    const token = await authObj.getToken()
+
+    const baseUrl = process.env.API_BASE_URL
+    if (!baseUrl) {
+      throw new Error('API_BASE_URL is not defined')
+    }
+
+    const { data: event } = await axios.post<Event>(
+      `${baseUrl}/v1/events/${eventId}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+    return EventResponseSchema.parse(event)
   })

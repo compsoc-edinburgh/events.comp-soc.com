@@ -29,7 +29,7 @@ export const EventContractSchema = z.object({
   date: z.iso.datetime(),
   aboutMarkdown: z.string().min(1).nullable(),
   location: z.string().min(1, "Location is required"),
-  locationURL: z.url().min(1).nullish(),
+  locationURL: z.url().min(1).nullable(),
   form: z.array(CustomFieldSchema).nullable(),
 });
 export const UpdateEventContractSchema = EventContractSchema.partial();

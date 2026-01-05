@@ -1,6 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ClockIcon, MapPin, ServerCrash, UserIcon } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query'
+import { EventState } from '@events.comp-soc.com/shared'
+import { toast } from 'sonner'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
@@ -8,7 +14,7 @@ import GoogleMaps from '@/components/google-maps.tsx'
 import { SigBadge } from '@/components/sigs-badge.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { StatusCard } from '@/components/ui/status-card.tsx'
-import { eventQueryOption } from '@/lib/data/event.ts'
+import { eventQueryOption, updateEvent } from '@/lib/data/event.ts'
 import DraftBadge from '@/components/draft-badge.tsx'
 import { useCommitteeAuth } from '@/lib/auth.ts'
 
@@ -35,9 +41,44 @@ export const Route = createFileRoute('/events/$eventId/')({
 
 function EventRoute() {
   const { eventId } = Route.useParams()
+  const queryClient = useQueryClient()
   const { isCommittee } = useCommitteeAuth()
   const navigate = useNavigate({ from: '/events/$eventId' })
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
+  const dateObj = new Date(event.date)
+
+  const publishMutation = useMutation({
+    mutationFn: () =>
+      updateEvent({
+        data: {
+          id: eventId,
+          state: EventState.Published,
+        },
+      }),
+    onSuccess: (event) => {
+      queryClient.invalidateQueries({ queryKey: ['events', eventId] })
+      toast.success(event.title, {
+        description: 'Event has been published',
+      })
+    },
+    onError: (error) => {
+      toast.error('Failed to publish event', {
+        description: error.message || 'Something went wrong',
+      })
+    },
+  })
+
+  const formattedDate = dateObj.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+
+  const formattedTime = dateObj.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
 
   const isDraft = event.state === 'draft'
 
@@ -69,7 +110,7 @@ function EventRoute() {
               Date
             </div>
             <div className="font-semibold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base ">
-              Mon 29 Dec 14:30
+              {formattedDate} - {formattedTime}
             </div>
           </div>
           <div className="flex-1 sm:flex-none">
@@ -78,7 +119,7 @@ function EventRoute() {
               Capacity
             </div>
             <div className="font-semibold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base">
-              {event.capacity} Students
+              {event.capacity ? `${event.capacity} Students` : 'Unlimited'}
             </div>
           </div>
         </div>
@@ -103,7 +144,11 @@ function EventRoute() {
         )}
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          <Button>Register Now</Button>
+          {isDraft ? (
+            <Button onClick={() => publishMutation.mutate()}>Publish</Button>
+          ) : (
+            <Button>Register Now</Button>
+          )}
           {isCommittee && (
             <Button
               variant="secondary"

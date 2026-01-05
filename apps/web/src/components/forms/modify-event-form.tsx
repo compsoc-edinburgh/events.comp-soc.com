@@ -3,6 +3,7 @@ import { useForm, useStore } from '@tanstack/react-form'
 import { ChevronDownIcon, InfoIcon, PlusIcon, XIcon } from 'lucide-react'
 import {
   CustomFieldSchema,
+  EventContractSchema,
   EventPriority,
   EventState,
   Sigs,
@@ -84,6 +85,27 @@ export const EventFormSchema = z
       })
     }
   })
+
+export const FormToRequest = EventFormSchema.transform((form) => {
+  const date = new Date(form.date)
+  const [hours, minutes] = form.time.split(':').map(Number)
+  date.setHours(hours, minutes, 0, 0)
+  const {
+    time: _time,
+    registrationFormEnabled: _registrationFormEnabled,
+    customFields: _customFields,
+    ...data
+  } = form
+
+  return {
+    ...data,
+    capacity: form.capacity ? parseInt(form.capacity, 10) : null,
+    date: date.toISOString(),
+    aboutMarkdown: form.aboutMarkdown || null,
+    locationURL: form.locationURL ? `https://${form.locationURL}` : null,
+    form: form.registrationFormEnabled ? form.customFields : null,
+  }
+}).pipe(EventContractSchema)
 
 function ModifyEventForm({
   onFormSubmit,
@@ -740,15 +762,7 @@ function ModifyEventForm({
                 form="event-form"
                 className="w-full sm:w-auto"
               >
-                Publish
-              </Button>
-              <Button
-                type="submit"
-                variant="outline"
-                form="event-form"
-                className="w-full sm:w-auto"
-              >
-                Save
+                Create
               </Button>
               <Button
                 variant="outline"
