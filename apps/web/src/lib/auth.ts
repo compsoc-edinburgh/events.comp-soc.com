@@ -1,4 +1,4 @@
-import { useAuth, useUser } from '@clerk/clerk-react'
+import { useAuth, useUser } from '@clerk/tanstack-react-start'
 import { UserRole } from '@events.comp-soc.com/shared'
 
 export function useCommitteeAuth() {

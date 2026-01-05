@@ -3,6 +3,7 @@ import axios from 'redaxios'
 import { queryOptions } from '@tanstack/react-query'
 import { EventResponseSchema, EventState } from '@events.comp-soc.com/shared'
 import { z } from 'zod'
+import { auth } from '@clerk/tanstack-react-start/server'
 import type { Event } from '@events.comp-soc.com/shared'
 
 const eventIDSchema = z.object({
@@ -12,6 +13,9 @@ const eventIDSchema = z.object({
 export const fetchEvent = createServerFn({ method: 'GET' })
   .inputValidator(eventIDSchema)
   .handler(async ({ data }) => {
+    const authObj = await auth()
+    const token = await authObj.getToken()
+
     const baseUrl = process.env.API_BASE_URL
     if (!baseUrl) {
       throw new Error('API_BASE_URL is not defined')
@@ -20,6 +24,11 @@ export const fetchEvent = createServerFn({ method: 'GET' })
     try {
       const { data: event } = await axios.get<Event>(
         `${baseUrl}/v1/events/${data.eventId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       )
       return EventResponseSchema.parse(event)
     } catch (err) {
@@ -37,6 +46,9 @@ const eventsFilterSchema = z
 export const fetchEvents = createServerFn({ method: 'GET' })
   .inputValidator((data) => eventsFilterSchema.parse(data))
   .handler(async ({ data }) => {
+    const authObj = await auth()
+    const token = await authObj.getToken()
+
     const baseUrl = process.env.API_BASE_URL
     if (!baseUrl) {
       throw new Error('API_BASE_URL is not defined')
@@ -48,6 +60,9 @@ export const fetchEvents = createServerFn({ method: 'GET' })
         {
           params: {
             state: data?.state,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
         },
       )

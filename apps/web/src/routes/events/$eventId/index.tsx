@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ClockIcon, MapPin, ServerCrash, UserIcon } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import Window from '@/components/layout/window/window.tsx'
@@ -9,6 +9,8 @@ import { SigBadge } from '@/components/sigs-badge.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { StatusCard } from '@/components/ui/status-card.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
+import DraftBadge from '@/components/draft-badge.tsx'
+import { useCommitteeAuth } from '@/lib/auth.ts'
 
 export const Route = createFileRoute('/events/$eventId/')({
   loader: async ({ context, params }) => {
@@ -33,7 +35,11 @@ export const Route = createFileRoute('/events/$eventId/')({
 
 function EventRoute() {
   const { eventId } = Route.useParams()
+  const { isCommittee } = useCommitteeAuth()
+  const navigate = useNavigate({ from: '/events/$eventId' })
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
+
+  const isDraft = event.state === 'draft'
 
   return (
     <Window activeTab="/events">
@@ -41,20 +47,22 @@ function EventRoute() {
         <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           {event.title}
         </div>
-        <div className="flex gap-2 mt-1">
+        <div className="flex gap-2 mt-2.5">
+          {isDraft && <DraftBadge />}
           <SigBadge sig={event.organiser} size="sm" />
         </div>
 
-        <div className="my-6 sm:my-8 flex flex-col gap-4 sm:gap-8">
-          <div className="flex-1 sm:flex-none">
-            <div className="flex gap-2 items-center text-sm sm:text-base text-neutral-400">
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-              Location
-            </div>
-            <div className="font-semibold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base wrap-break-word">
-              {event.location}
-            </div>
+        <div className="mt-10">
+          <div className="flex gap-2 items-center text-sm sm:text-base text-neutral-400">
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
+            Location
           </div>
+          <div className="font-semibold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base wrap-break-word">
+            {event.location}
+          </div>
+        </div>
+
+        <div className="my-6 sm:my-8 flex flex-col md:flex-row gap-4 sm:gap-8">
           <div className="flex-1 sm:flex-none">
             <div className="flex gap-2 items-center text-sm sm:text-base text-neutral-400">
               <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -96,6 +104,18 @@ function EventRoute() {
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
           <Button>Register Now</Button>
+          {isCommittee && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void navigate({
+                  to: '/events/$eventId/edit',
+                })
+              }}
+            >
+              Edit
+            </Button>
+          )}
         </div>
       </Sheet>
     </Window>

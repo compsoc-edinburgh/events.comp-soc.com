@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.49.0",
+    "@clerk/tanstack-react-start": "^0.27.8",
     "@clerk/themes": "^2.4.46",
     "@events.comp-soc.com/shared": "workspace:*",
     "@radix-ui/react-label": "^2.1.8",

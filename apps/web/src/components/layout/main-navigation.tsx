@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { MenuIcon, XIcon } from 'lucide-react'
-import { SignOutButton, useAuth } from '@clerk/clerk-react'
+import { SignOutButton, useAuth } from '@clerk/tanstack-react-start'
 import { mainNavLinks } from '@/config/navigation.ts'
 import { Spinner } from '@/components/ui/spinner.tsx'
 import { Button } from '@/components/ui/button.tsx'

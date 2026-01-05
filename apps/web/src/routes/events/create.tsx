@@ -1,4 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { EventPriority, EventState, Sigs } from '@events.comp-soc.com/shared'
+import type { z } from 'zod'
+import type { CustomField } from '@events.comp-soc.com/shared'
+import type { EventFormSchema } from '@/components/forms/modify-event-form.tsx'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
@@ -12,6 +16,20 @@ export const Route = createFileRoute('/events/create')({
 
 function CreateRoute() {
   const navigate = useNavigate({ from: '/events/create' })
+  const defaultValues = {
+    title: '',
+    organiser: Sigs.Compsoc,
+    state: EventState.Draft,
+    priority: EventPriority.Default,
+    date: new Date(),
+    time: '',
+    location: '',
+    aboutMarkdown: '',
+    capacity: '',
+    locationURL: '',
+    registrationFormEnabled: false,
+    customFields: [] as Array<CustomField>,
+  } as z.infer<typeof EventFormSchema>
 
   return (
     <ProtectedRoute activeTab="/events/create">
@@ -30,6 +48,7 @@ function CreateRoute() {
           <Separator className="my-5" />
 
           <ModifyEventForm
+            defaultValues={defaultValues}
             onFormSubmit={(value) => {
               void navigate({
                 to: '/events/$eventId',
