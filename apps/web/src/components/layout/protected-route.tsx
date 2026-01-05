@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useCommitteeAuth } from '@/lib/auth.ts'
 import { StatusCard } from '@/components/ui/status-card.tsx'
 import Window from '@/components/layout/window/window.tsx'
-import Sheet from '@/components/layout/sheet.tsx'
+import { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Spinner } from '@/components/ui/spinner.tsx'
 
 interface ProtectedRouteProps {
@@ -17,11 +17,9 @@ function ProtectedRoute({ children, activeTab }: ProtectedRouteProps) {
   if (!isLoaded) {
     return (
       <Window activeTab={activeTab}>
-        <Sheet>
-          <div className="flex items-center justify-center h-[60vh]">
-            <Spinner className="w-8 h-8 text-neutral-600" />
-          </div>
-        </Sheet>
+        <EmptySheet>
+          <Spinner className="w-8 h-8 text-neutral-600" />
+        </EmptySheet>
       </Window>
     )
   }
@@ -29,15 +27,13 @@ function ProtectedRoute({ children, activeTab }: ProtectedRouteProps) {
   if (!isAuthenticated) {
     return (
       <Window activeTab={activeTab}>
-        <Sheet>
-          <div className="flex items-center justify-center h-[70vh]">
-            <StatusCard
-              title="Authentication required"
-              message="You need to sign in to access this page. Committee members only!"
-              icon={<LogIn className="w-10 h-10" strokeWidth={1.5} />}
-            />
-          </div>
-        </Sheet>
+        <EmptySheet>
+          <StatusCard
+            title="Authentication required"
+            message="You need to sign in to access this page. Committee members only!"
+            icon={<LogIn className="w-10 h-10" strokeWidth={1.5} />}
+          />
+        </EmptySheet>
       </Window>
     )
   }
@@ -45,15 +41,13 @@ function ProtectedRoute({ children, activeTab }: ProtectedRouteProps) {
   if (!isCommittee) {
     return (
       <Window activeTab={activeTab}>
-        <Sheet>
-          <div className="flex items-center justify-center h-[70vh]">
-            <StatusCard
-              title="Access denied"
-              message="This area is restricted to committee members. Nice try though!"
-              icon={<ShieldX className="w-10 h-10" strokeWidth={1.5} />}
-            />
-          </div>
-        </Sheet>
+        <EmptySheet>
+          <StatusCard
+            title="Access denied"
+            message="This area is restricted to committee members. Nice try though!"
+            icon={<ShieldX className="w-10 h-10" strokeWidth={1.5} />}
+          />
+        </EmptySheet>
       </Window>
     )
   }

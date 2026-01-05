@@ -21,6 +21,13 @@ export const docsNavTabs: Array<NavTab> = [
     requireAuth: true,
   },
   {
+    label: 'Drafts',
+    path: '/events/draft',
+    isClosedToCheck: false,
+    requireCommittee: true,
+    requireAuth: true,
+  },
+  {
     label: 'Explore',
     path: '/',
     isClosedToCheck: false,
@@ -32,13 +39,6 @@ export const docsNavTabs: Array<NavTab> = [
     path: '/events',
     isClosedToCheck: true,
     requireCommittee: false,
-    requireAuth: true,
-  },
-  {
-    label: 'Drafts',
-    path: '/events/draft',
-    isClosedToCheck: false,
-    requireCommittee: true,
     requireAuth: true,
   },
   {

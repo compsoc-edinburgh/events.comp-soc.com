@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RegistrationStatus } from "./constants";
+import { RegistrationStatus } from "./constants.js";
 
 export const RegistrationAnswerSchema = z.record(
   z.string(),

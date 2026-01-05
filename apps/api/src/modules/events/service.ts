@@ -2,12 +2,7 @@ import { eventStore } from "./store.js";
 import { SqlContext } from "../../db/db.js";
 import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
 import { NotFoundError, UnauthorizedError } from "../../lib/errors.js";
-import {
-  UserRole as UserRoleConst,
-  EventState,
-  Nullable,
-  UserRole,
-} from "@events.comp-soc.com/shared";
+import { UserRole, EventState, Nullable } from "@events.comp-soc.com/shared";
 
 export const eventService = {
   async getEvents({
@@ -19,7 +14,7 @@ export const eventService = {
     filters: EventsQueryFilter;
     role: Nullable<UserRole>;
   }) {
-    const isCommittee = role === UserRoleConst.Committee;
+    const isCommittee = role === UserRole.Committee;
 
     const authorisedFilters = {
       ...filters,
@@ -40,7 +35,7 @@ export const eventService = {
   }) {
     const { id } = data;
     const event = await eventStore.findById({ db, data });
-    const isCommittee = role === UserRoleConst.Committee;
+    const isCommittee = role === UserRole.Committee;
 
     if (!event || (!isCommittee && event.state === EventState.Draft)) {
       throw new NotFoundError(`Event with ${id} not found`);
@@ -50,7 +45,7 @@ export const eventService = {
   },
 
   async createEvent({ db, data, role }: { db: SqlContext; data: CreateEvent; role: UserRole }) {
-    if (role !== UserRoleConst.Committee) {
+    if (role !== UserRole.Committee) {
       throw new UnauthorizedError("Only committee can create an event");
     }
 
@@ -60,7 +55,7 @@ export const eventService = {
   async updateEvent({ db, data, role }: { db: SqlContext; data: UpdateEvent; role: UserRole }) {
     const { id } = data;
 
-    if (role !== UserRoleConst.Committee) {
+    if (role !== UserRole.Committee) {
       throw new UnauthorizedError("Only committee members can update events");
     }
 
@@ -75,7 +70,7 @@ export const eventService = {
   async deleteEvent({ db, data, role }: { db: SqlContext; data: EventId; role: UserRole }) {
     const { id } = data;
 
-    if (role !== UserRoleConst.Committee) {
+    if (role !== UserRole.Committee) {
       throw new UnauthorizedError("Only committee can delete an event");
     }
 

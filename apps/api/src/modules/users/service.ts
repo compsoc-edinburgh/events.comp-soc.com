@@ -2,7 +2,7 @@ import { SqlContext } from "../../db/db.js";
 import { CreateUser, UserId, UpdateUser } from "./schema.js";
 import { NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { userStore } from "./store.js";
-import { Nullable, UserRole as UserRoleConst, UserRole } from "@events.comp-soc.com/shared";
+import { Nullable, UserRole } from "@events.comp-soc.com/shared";
 
 export const userService = {
   async getUserById({
@@ -23,7 +23,7 @@ export const userService = {
       throw new NotFoundError(`User with ${id} not found`);
     }
 
-    if (role === UserRoleConst.Committee || user.id === requesterId) {
+    if (role === UserRole.Committee || user.id === requesterId) {
       return user;
     }
 
@@ -48,7 +48,7 @@ export const userService = {
   }) {
     const { id } = data;
 
-    const isCommittee = role === UserRoleConst.Committee;
+    const isCommittee = role === UserRole.Committee;
     const isSelf = id === requesterId;
 
     if (!isCommittee && !isSelf) {
@@ -76,7 +76,7 @@ export const userService = {
   }) {
     const { id } = data;
 
-    const isCommittee = role === UserRoleConst.Committee;
+    const isCommittee = role === UserRole.Committee;
     const isSelf = id === requesterId;
 
     if (!isCommittee && !isSelf) {
