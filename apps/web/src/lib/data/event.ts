@@ -82,18 +82,6 @@ export const fetchEvents = createServerFn({ method: 'GET' })
     }
   })
 
-export const eventsQueryOptions = (state?: 'draft' | 'published') =>
-  queryOptions({
-    queryKey: ['events', { state }],
-    queryFn: () => fetchEvents({ data: { state } }),
-  })
-
-export const eventQueryOption = (eventId: string) =>
-  queryOptions({
-    queryKey: ['events', eventId],
-    queryFn: () => fetchEvent({ data: { eventId } }),
-  })
-
 export const createEvent = createServerFn({ method: 'POST' })
   .inputValidator((data: CreateEventRequest) => EventContractSchema.parse(data))
   .handler(async ({ data }) => {
@@ -134,7 +122,7 @@ export const updateEvent = createServerFn({ method: 'POST' })
       throw new Error('API_BASE_URL is not defined')
     }
 
-    const { data: event } = await axios.post<Event>(
+    const { data: event } = await axios.put<Event>(
       `${baseUrl}/v1/events/${eventId}`,
       data,
       {
@@ -145,4 +133,39 @@ export const updateEvent = createServerFn({ method: 'POST' })
       },
     )
     return EventResponseSchema.parse(event)
+  })
+
+export const deleteEvent = createServerFn({ method: 'POST' })
+  .inputValidator(eventIDSchema)
+  .handler(async ({ data }) => {
+    const eventId = data.eventId
+    const authObj = await auth()
+    const token = await authObj.getToken()
+
+    const baseUrl = process.env.API_BASE_URL
+    if (!baseUrl) {
+      throw new Error('API_BASE_URL is not defined')
+    }
+
+    const { data: event } = await axios.delete<Event>(
+      `${baseUrl}/v1/events/${eventId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
+    return EventResponseSchema.parse(event)
+  })
+
+export const eventsQueryOptions = (state?: 'draft' | 'published') =>
+  queryOptions({
+    queryKey: ['events', { state }],
+    queryFn: () => fetchEvents({ data: { state } }),
+  })
+
+export const eventQueryOption = (eventId: string) =>
+  queryOptions({
+    queryKey: ['events', eventId],
+    queryFn: () => fetchEvent({ data: { eventId } }),
   })
