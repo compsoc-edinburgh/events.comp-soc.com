@@ -257,7 +257,7 @@ describe("Event route", () => {
     });
   });
 
-  describe("POST /v1/events/:id", () => {
+  describe("PUT /v1/events/:id", () => {
     beforeEach(async () => {
       await db.insert(eventsTable).values({
         id: "existing-event",
@@ -273,7 +273,7 @@ describe("Event route", () => {
       setMockAuth({ userId: null, sessionClaims: null });
 
       const response = await app.inject({
-        method: "POST",
+        method: "PUT",
         url: "/v1/events/existing-event",
         payload: { title: "Updated Title" },
       });
@@ -289,7 +289,7 @@ describe("Event route", () => {
       });
 
       const response = await app.inject({
-        method: "POST",
+        method: "PUT",
         url: "/v1/events/existing-event",
         payload: { title: "Updated Title" },
       });
@@ -304,7 +304,7 @@ describe("Event route", () => {
       });
 
       const response = await app.inject({
-        method: "POST",
+        method: "PUT",
         url: "/v1/events/existing-event",
         payload: {
           title: "Updated Event Title",
@@ -327,7 +327,7 @@ describe("Event route", () => {
       });
 
       const response = await app.inject({
-        method: "POST",
+        method: "PUT",
         url: "/v1/events/non-existing-event",
         payload: { title: "Updated Title" },
       });

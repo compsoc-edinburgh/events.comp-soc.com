@@ -59,6 +59,7 @@ import {
 } from '@/components/ui/tooltip.tsx'
 import { Switch } from '@/components/ui/switch.tsx'
 import { ButtonGroup } from '@/components/ui/button-group.tsx'
+import { DEFAULT_FIELDS } from '@/config/event-form.ts'
 
 export const EventFormSchema = z
   .object({
@@ -102,40 +103,25 @@ export const FormToRequest = EventFormSchema.transform((form) => {
     capacity: form.capacity ? parseInt(form.capacity, 10) : null,
     date: date.toISOString(),
     aboutMarkdown: form.aboutMarkdown || null,
-    locationURL: form.locationURL ? `https://${form.locationURL}` : null,
+    locationURL: form.locationURL ? form.locationURL : null,
     form: form.registrationFormEnabled ? form.customFields : null,
   }
 }).pipe(EventContractSchema)
 
 function ModifyEventForm({
   onFormSubmit,
+  onCancel,
   defaultValues,
   isModify = false,
   isLoading = false,
 }: {
   onFormSubmit: (value: z.infer<typeof EventFormSchema>) => void
   defaultValues: z.infer<typeof EventFormSchema>
+  onCancel?: () => void
   isModify?: boolean
   isLoading?: boolean
 }) {
   const [open, setOpen] = useState(false)
-
-  const getDefaultCustomFields = (): Array<CustomField> => [
-    {
-      id: `field-${Date.now()}-1`,
-      type: 'select',
-      label: 'University Year',
-      required: true,
-      options: ['1', '2', '3', '4', 'Masters', 'PhD'],
-    },
-    {
-      id: `field-${Date.now()}-2`,
-      type: 'select',
-      label: 'Dietary Requirements',
-      options: ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Halal'],
-      required: true,
-    },
-  ]
 
   const form = useForm({
     defaultValues,
@@ -167,9 +153,8 @@ function ModifyEventForm({
     form.setFieldValue('customFields', [...customFields, newField])
   }
 
-  const addDefaultFields = () => {
-    const defaultFields = getDefaultCustomFields()
-    form.setFieldValue('customFields', [...customFields, ...defaultFields])
+  const setDefaultFields = () => {
+    form.setFieldValue('customFields', [...DEFAULT_FIELDS])
   }
 
   const removeCustomField = (id: string) => {
@@ -613,7 +598,7 @@ function ModifyEventForm({
                         size="sm"
                         disabled={isLoading}
                         variant="outline"
-                        onClick={addDefaultFields}
+                        onClick={setDefaultFields}
                       >
                         Default
                       </Button>
@@ -771,14 +756,26 @@ function ModifyEventForm({
           className="flex-col sm:flex-row gap-2 sm:gap-3"
         >
           {isModify ? (
-            <Button
-              type="submit"
-              form="event-form"
-              disabled={isLoading}
-              className="w-full sm:w-auto"
-            >
-              {isLoading ? 'Updating' : 'Update'}
-            </Button>
+            <>
+              <Button
+                type="submit"
+                form="event-form"
+                disabled={isLoading}
+                className="w-full sm:w-auto"
+              >
+                {isLoading ? 'Updating' : 'Update'}
+              </Button>
+              {onCancel && (
+                <Button
+                  variant="secondary"
+                  disabled={isLoading}
+                  onClick={onCancel}
+                  className="w-full sm:w-auto"
+                >
+                  Back
+                </Button>
+              )}
+            </>
           ) : (
             <>
               <Button

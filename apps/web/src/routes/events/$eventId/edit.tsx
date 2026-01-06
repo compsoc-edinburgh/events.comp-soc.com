@@ -72,6 +72,13 @@ function EditEventRoute() {
     })
   }
 
+  const handleCancel = () => {
+    void navigate({
+      to: '/events/$eventId',
+      params: { eventId },
+    })
+  }
+
   return (
     <ProtectedRoute activeTab="/events/create">
       <Window activeTab="/events/create">
@@ -93,6 +100,7 @@ function EditEventRoute() {
             isModify
             isLoading={isUpdating}
             onFormSubmit={handleSubmit}
+            onCancel={handleCancel}
           />
         </Sheet>
       </Window>

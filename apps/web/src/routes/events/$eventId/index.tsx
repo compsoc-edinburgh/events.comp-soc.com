@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ClockIcon, MapPin, ServerCrash, UserIcon } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { useState } from 'react'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
@@ -12,9 +11,10 @@ import { StatusCard } from '@/components/ui/status-card.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
 import DraftBadge from '@/components/draft-badge.tsx'
 import { useCommitteeAuth } from '@/lib/auth.ts'
-import { usePublishEvent } from '@/lib/hooks/use-publish-event.tsx'
 import { formatEventDate } from '@/lib/utils.ts'
-import EventRegistrationFormDialog from '@/components/forms/event-registration-form-dialog.tsx'
+import DeleteEventButton from '@/components/controlls/delete-event-button.tsx'
+import PublishEventButton from '@/components/controlls/publish-event-button.tsx'
+import RegisterEventButton from '@/components/controlls/register-event-button.tsx'
 
 export const Route = createFileRoute('/events/$eventId/')({
   loader: async ({ context, params }) => {
@@ -38,14 +38,11 @@ export const Route = createFileRoute('/events/$eventId/')({
 })
 
 function EventRoute() {
-  const [open, setOpen] = useState(false)
-  const { eventId } = Route.useParams()
-  const { isCommittee, isAuthenticated } = useCommitteeAuth()
   const navigate = useNavigate({ from: '/events/$eventId' })
+  const { eventId } = Route.useParams()
+  const { isCommittee } = useCommitteeAuth()
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
   const { full: date } = formatEventDate(event.date)
-
-  const { publishEvent, isPublishing } = usePublishEvent(eventId)
 
   const isDraft = event.state === 'draft'
 
@@ -112,37 +109,27 @@ function EventRoute() {
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
           {isDraft ? (
-            <Button onClick={() => publishEvent()} disabled={isPublishing}>
-              {isPublishing ? 'Publishing...' : 'Publish'}
-            </Button>
+            <PublishEventButton eventId={eventId} />
           ) : (
-            <Button onClick={() => setOpen(!open)} disabled={!isAuthenticated}>
-              Register Now
-            </Button>
+            <RegisterEventButton form={event.form ?? []} title={event.title} />
           )}
           {isCommittee && (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                void navigate({
-                  to: '/events/$eventId/edit',
-                })
-              }}
-            >
-              Edit
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  void navigate({
+                    to: '/events/$eventId/edit',
+                  })
+                }}
+              >
+                Edit
+              </Button>
+              <DeleteEventButton eventId={eventId} />
+            </>
           )}
         </div>
       </Sheet>
-      {event.form !== null && (
-        <EventRegistrationFormDialog
-          onFormSubmit={() => {}}
-          formStructure={event.form}
-          isOpen={open}
-          onOpenChange={() => setOpen(!open)}
-          eventTitle={event.title}
-        />
-      )}
     </Window>
   )
 }

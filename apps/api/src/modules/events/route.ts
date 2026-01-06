@@ -65,7 +65,7 @@ export const eventRoutes = async (server: FastifyInstance) => {
     return reply.status(201).send(newEvent);
   });
 
-  server.post("/:id", async (request, reply) => {
+  server.put("/:id", async (request, reply) => {
     const { userId, sessionClaims } = getAuth(request);
     const role = sessionClaims?.metadata?.role;
 
