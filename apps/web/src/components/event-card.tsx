@@ -2,25 +2,14 @@ import { Link } from '@tanstack/react-router'
 import { ArrowUpRight, CalendarIcon, MapPin } from 'lucide-react'
 import type { Event } from '@events.comp-soc.com/shared'
 import { SigBadge } from '@/components/sigs-badge.tsx'
+import { formatEventDate } from '@/lib/utils.ts'
 
 interface EventCardProps {
   event: Event
 }
 
 function EventCard({ event }: EventCardProps) {
-  const dateObj = new Date(event.date)
-
-  const formattedDate = dateObj.toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  })
-
-  const formattedTime = dateObj.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
+  const { full: date } = formatEventDate(event.date)
 
   return (
     <Link
@@ -44,9 +33,7 @@ function EventCard({ event }: EventCardProps) {
         <div className="flex flex-col gap-1 sm:gap-1.5 mt-2 sm:mt-3 text-xs sm:text-sm text-neutral-400">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <CalendarIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-            <span className="truncate">
-              {formattedDate} - {formattedTime}
-            </span>
+            <span className="truncate">{date}</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />

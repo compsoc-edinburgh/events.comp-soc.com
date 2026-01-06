@@ -1,9 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ServerCrash } from 'lucide-react'
-import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import type { z } from 'zod'
-import type { Event, UpdateEventRequest } from '@events.comp-soc.com/shared'
 import ModifyEventForm, {
   EventFormSchema,
   FormToRequest,
@@ -12,8 +10,9 @@ import Window from '@/components/layout/window/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
-import { eventQueryOption, updateEvent } from '@/lib/data/event.ts'
+import { eventQueryOption } from '@/lib/data/event.ts'
 import { StatusCard } from '@/components/ui/status-card.tsx'
+import { useUpdateEvent } from '@/lib/hooks/use-update-event.tsx'
 
 export const Route = createFileRoute('/events/$eventId/edit')({
   loader: async ({ context, params }) => {
@@ -39,29 +38,9 @@ export const Route = createFileRoute('/events/$eventId/edit')({
 function EditEventRoute() {
   const { eventId } = Route.useParams()
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
-
-  const updateMutation = useMutation({
-    mutationFn: (data: UpdateEventRequest & Pick<Event, 'id'>) =>
-      updateEvent({ data }),
-    onSuccess: (event) => {
-      toast.success(event.title, {
-        description: 'Event has been updated',
-      })
-      void navigate({
-        to: '/events/$eventId',
-        params: {
-          eventId: event.id,
-        },
-      })
-    },
-    onError: (error) => {
-      toast.error('Failed to update event', {
-        description: error.message || 'Something went wrong',
-      })
-    },
-  })
-
+  const { updateEvent, isUpdating } = useUpdateEvent(eventId)
   const navigate = useNavigate({ from: '/events/$eventId/edit' })
+
   const defaultValues = EventFormSchema.parse({
     title: event.title,
     organiser: event.organiser,
@@ -83,9 +62,13 @@ function EditEventRoute() {
 
   const handleSubmit = (value: z.infer<typeof EventFormSchema>) => {
     const contractData = FormToRequest.parse(value)
-    updateMutation.mutate({
-      id: event.id,
-      ...contractData,
+    updateEvent(contractData, {
+      onSuccess: (newEvent) => {
+        void navigate({
+          to: '/events/$eventId',
+          params: { eventId: newEvent.id },
+        })
+      },
     })
   }
 
@@ -108,6 +91,7 @@ function EditEventRoute() {
           <ModifyEventForm
             defaultValues={defaultValues}
             isModify
+            isLoading={isUpdating}
             onFormSubmit={handleSubmit}
           />
         </Sheet>

@@ -61,13 +61,8 @@ function DraftRoute() {
           )}
 
           <div className="mt-8 grid gap-4">
-            {events.length > 0 ? (
-              events.map((event) => <EventCard key={event.id} event={event} />)
-            ) : (
-              <div className="text-neutral-500 text-center py-8">
-                No draft events. Create a new event to get started.
-              </div>
-            )}
+            {events.length > 0 &&
+              events.map((event) => <EventCard key={event.id} event={event} />)}
           </div>
         </Sheet>
       </Window>
