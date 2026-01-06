@@ -1,12 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ClockIcon, MapPin, ServerCrash, UserIcon } from 'lucide-react'
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from '@tanstack/react-query'
-import { EventState } from '@events.comp-soc.com/shared'
-import { toast } from 'sonner'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
@@ -14,9 +9,12 @@ import GoogleMaps from '@/components/google-maps.tsx'
 import { SigBadge } from '@/components/sigs-badge.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { StatusCard } from '@/components/ui/status-card.tsx'
-import { eventQueryOption, updateEvent } from '@/lib/data/event.ts'
+import { eventQueryOption } from '@/lib/data/event.ts'
 import DraftBadge from '@/components/draft-badge.tsx'
 import { useCommitteeAuth } from '@/lib/auth.ts'
+import { usePublishEvent } from '@/lib/hooks/use-publish-event.tsx'
+import { formatEventDate } from '@/lib/utils.ts'
+import EventRegistrationFormDialog from '@/components/forms/event-registration-form-dialog.tsx'
 
 export const Route = createFileRoute('/events/$eventId/')({
   loader: async ({ context, params }) => {
@@ -40,45 +38,14 @@ export const Route = createFileRoute('/events/$eventId/')({
 })
 
 function EventRoute() {
+  const [open, setOpen] = useState(false)
   const { eventId } = Route.useParams()
-  const queryClient = useQueryClient()
-  const { isCommittee } = useCommitteeAuth()
+  const { isCommittee, isAuthenticated } = useCommitteeAuth()
   const navigate = useNavigate({ from: '/events/$eventId' })
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
-  const dateObj = new Date(event.date)
+  const { full: date } = formatEventDate(event.date)
 
-  const publishMutation = useMutation({
-    mutationFn: () =>
-      updateEvent({
-        data: {
-          id: eventId,
-          state: EventState.Published,
-        },
-      }),
-    onSuccess: (event) => {
-      queryClient.invalidateQueries({ queryKey: ['events', eventId] })
-      toast.success(event.title, {
-        description: 'Event has been published',
-      })
-    },
-    onError: (error) => {
-      toast.error('Failed to publish event', {
-        description: error.message || 'Something went wrong',
-      })
-    },
-  })
-
-  const formattedDate = dateObj.toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  })
-
-  const formattedTime = dateObj.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
+  const { publishEvent, isPublishing } = usePublishEvent(eventId)
 
   const isDraft = event.state === 'draft'
 
@@ -110,7 +77,7 @@ function EventRoute() {
               Date
             </div>
             <div className="font-semibold mt-1 sm:mt-2 ml-6 sm:ml-7 text-sm sm:text-base ">
-              {formattedDate} - {formattedTime}
+              {date}
             </div>
           </div>
           <div className="flex-1 sm:flex-none">
@@ -145,9 +112,13 @@ function EventRoute() {
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
           {isDraft ? (
-            <Button onClick={() => publishMutation.mutate()}>Publish</Button>
+            <Button onClick={() => publishEvent()} disabled={isPublishing}>
+              {isPublishing ? 'Publishing...' : 'Publish'}
+            </Button>
           ) : (
-            <Button>Register Now</Button>
+            <Button onClick={() => setOpen(!open)} disabled={!isAuthenticated}>
+              Register Now
+            </Button>
           )}
           {isCommittee && (
             <Button
@@ -163,6 +134,15 @@ function EventRoute() {
           )}
         </div>
       </Sheet>
+      {event.form !== null && (
+        <EventRegistrationFormDialog
+          onFormSubmit={() => {}}
+          formStructure={event.form}
+          isOpen={open}
+          onOpenChange={() => setOpen(!open)}
+          eventTitle={event.title}
+        />
+      )}
     </Window>
   )
 }

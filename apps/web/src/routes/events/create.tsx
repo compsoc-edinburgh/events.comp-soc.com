@@ -1,12 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { EventPriority, EventState, Sigs } from '@events.comp-soc.com/shared'
 import type { z } from 'zod'
-import type {
-  CreateEventRequest,
-  CustomField,
-} from '@events.comp-soc.com/shared'
+import type { CustomField } from '@events.comp-soc.com/shared'
 import type { EventFormSchema } from '@/components/forms/modify-event-form.tsx'
 import ModifyEventForm, {
   FormToRequest,
@@ -15,7 +10,7 @@ import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
-import { createEvent } from '@/lib/data/event.ts'
+import { useCreateEvent } from '@/lib/hooks/use-create-event.tsx'
 
 export const Route = createFileRoute('/events/create')({
   component: CreateRoute,
@@ -23,26 +18,7 @@ export const Route = createFileRoute('/events/create')({
 
 function CreateRoute() {
   const navigate = useNavigate({ from: '/events/create' })
-
-  const createMutation = useMutation({
-    mutationFn: (data: CreateEventRequest) => createEvent({ data }),
-    onSuccess: (event) => {
-      toast.success(event.title, {
-        description: 'Event has been created',
-      })
-      void navigate({
-        to: '/events/$eventId',
-        params: {
-          eventId: event.id,
-        },
-      })
-    },
-    onError: (error) => {
-      toast.error('Failed to create event', {
-        description: error.message || 'Something went wrong',
-      })
-    },
-  })
+  const { createEvent, isCreating } = useCreateEvent()
 
   const defaultValues = {
     title: '',
@@ -61,7 +37,14 @@ function CreateRoute() {
 
   const handleSubmit = (value: z.infer<typeof EventFormSchema>) => {
     const contractData = FormToRequest.parse(value)
-    createMutation.mutate(contractData)
+    createEvent(contractData, {
+      onSuccess: (newEvent) => {
+        void navigate({
+          to: '/events/$eventId',
+          params: { eventId: newEvent.id },
+        })
+      },
+    })
   }
 
   return (
@@ -83,6 +66,7 @@ function CreateRoute() {
           <ModifyEventForm
             defaultValues={defaultValues}
             onFormSubmit={handleSubmit}
+            isLoading={isCreating}
           />
         </Sheet>
       </Window>

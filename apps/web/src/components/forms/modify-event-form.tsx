@@ -111,10 +111,12 @@ function ModifyEventForm({
   onFormSubmit,
   defaultValues,
   isModify = false,
+  isLoading = false,
 }: {
   onFormSubmit: (value: z.infer<typeof EventFormSchema>) => void
   defaultValues: z.infer<typeof EventFormSchema>
   isModify?: boolean
+  isLoading?: boolean
 }) {
   const [open, setOpen] = useState(false)
 
@@ -248,6 +250,7 @@ function ModifyEventForm({
                     <FieldLabel htmlFor={field.name}>Title</FieldLabel>
                     <Input
                       id={field.name}
+                      disabled={isLoading}
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
@@ -274,6 +277,7 @@ function ModifyEventForm({
                     <FieldLabel htmlFor={field.name}>Organiser</FieldLabel>
                     <Select
                       name={field.name}
+                      disabled={isLoading}
                       value={field.state.value}
                       onValueChange={(value) =>
                         field.handleChange(value as typeof field.state.value)
@@ -311,6 +315,7 @@ function ModifyEventForm({
                     <FieldLabel htmlFor={field.name}>Priority</FieldLabel>
                     <Select
                       name={field.name}
+                      disabled={isLoading}
                       value={field.state.value}
                       onValueChange={(value) =>
                         field.handleChange(value as typeof field.state.value)
@@ -349,6 +354,7 @@ function ModifyEventForm({
                     <Input
                       id={field.name}
                       name={field.name}
+                      disabled={isLoading}
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -379,6 +385,7 @@ function ModifyEventForm({
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
+                          disabled={isLoading}
                           className="w-full justify-start"
                         >
                           {field.state.value.toLocaleDateString()}
@@ -419,6 +426,7 @@ function ModifyEventForm({
                       id={field.name}
                       name={field.name}
                       type="time"
+                      disabled={isLoading}
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -444,10 +452,12 @@ function ModifyEventForm({
                     <FieldLabel htmlFor={field.name}>About</FieldLabel>
                     <Tabs defaultValue="edit">
                       <TabsList>
-                        <TabsTrigger value="edit">Edit</TabsTrigger>
+                        <TabsTrigger value="edit" disabled={isLoading}>
+                          Edit
+                        </TabsTrigger>
                         <TabsTrigger
                           value="preview"
-                          disabled={field.state.value.length === 0}
+                          disabled={field.state.value.length === 0 || isLoading}
                         >
                           Preview
                         </TabsTrigger>
@@ -456,6 +466,7 @@ function ModifyEventForm({
                         <Textarea
                           id={field.name}
                           name={field.name}
+                          disabled={isLoading}
                           value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}
@@ -488,6 +499,7 @@ function ModifyEventForm({
                     <Input
                       id={field.name}
                       name={field.name}
+                      disabled={isLoading}
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -513,6 +525,7 @@ function ModifyEventForm({
                     <InputGroup>
                       <InputGroupInput
                         id={field.name}
+                        disabled={isLoading}
                         name={field.name}
                         value={field.state.value}
                         onBlur={field.handleBlur}
@@ -569,6 +582,7 @@ function ModifyEventForm({
                   <Field orientation="horizontal">
                     <Switch
                       id={field.name}
+                      disabled={isLoading}
                       checked={field.state.value}
                       onCheckedChange={(checked) => field.handleChange(checked)}
                     />
@@ -597,6 +611,7 @@ function ModifyEventForm({
                       <Button
                         type="button"
                         size="sm"
+                        disabled={isLoading}
                         variant="outline"
                         onClick={addDefaultFields}
                       >
@@ -606,6 +621,7 @@ function ModifyEventForm({
                         type="button"
                         variant="outline"
                         size="sm"
+                        disabled={isLoading}
                         onClick={addCustomField}
                       >
                         <PlusIcon className="mr-2 h-4 w-4" />
@@ -625,6 +641,7 @@ function ModifyEventForm({
                         <FieldLabel>Field Type</FieldLabel>
                         <Select
                           value={field.type}
+                          disabled={isLoading}
                           onValueChange={(value) =>
                             updateCustomField(field.id, {
                               type: value as CustomField['type'],
@@ -648,6 +665,7 @@ function ModifyEventForm({
                         <FieldLabel>Label</FieldLabel>
                         <Input
                           value={field.label}
+                          disabled={isLoading}
                           onChange={(e) =>
                             updateCustomField(field.id, {
                               label: e.target.value,
@@ -664,6 +682,7 @@ function ModifyEventForm({
                             <Button
                               type="button"
                               size="sm"
+                              disabled={isLoading}
                               variant="ghost"
                               onClick={() => addOption(field.id)}
                             >
@@ -676,6 +695,7 @@ function ModifyEventForm({
                               <div key={index} className="flex gap-2">
                                 <Input
                                   value={option}
+                                  disabled={isLoading}
                                   onChange={(e) =>
                                     updateOption(
                                       field.id,
@@ -689,6 +709,7 @@ function ModifyEventForm({
                                   type="button"
                                   variant="ghost"
                                   size="icon"
+                                  disabled={isLoading}
                                   onClick={() => removeOption(field.id, index)}
                                 >
                                   <XIcon className="h-4 w-4" />
@@ -708,6 +729,7 @@ function ModifyEventForm({
                       <Field orientation="horizontal">
                         <Switch
                           checked={field.required}
+                          disabled={isLoading}
                           onCheckedChange={(checked) =>
                             updateCustomField(field.id, {
                               required: checked,
@@ -719,6 +741,7 @@ function ModifyEventForm({
                         </FieldLabel>
                         <Button
                           type="button"
+                          disabled={isLoading}
                           variant="outline"
                           size="sm"
                           onClick={() => removeCustomField(field.id)}
@@ -751,22 +774,25 @@ function ModifyEventForm({
             <Button
               type="submit"
               form="event-form"
+              disabled={isLoading}
               className="w-full sm:w-auto"
             >
-              Update
+              {isLoading ? 'Updating' : 'Update'}
             </Button>
           ) : (
             <>
               <Button
                 type="submit"
                 form="event-form"
+                disabled={isLoading}
                 className="w-full sm:w-auto"
               >
-                Create
+                {isLoading ? 'Creating' : 'Create'}
               </Button>
               <Button
                 variant="outline"
                 type="button"
+                disabled={isLoading}
                 onClick={() => form.reset()}
                 className="w-full sm:w-auto"
               >
