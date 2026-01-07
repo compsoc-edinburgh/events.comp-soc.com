@@ -20,7 +20,7 @@ function DocsToolbar({ children }: DocsToolbarProps) {
     <nav className="sticky flex top-8 md:top-9 z-30 h-12 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl">
       <div className="border-neutral-700 border p-1 w-full h-full rounded-sm items-center flex px-3">
         <div className="flex items-center">
-          <div className="sm:flex hidden gap-3 items-center">
+          <div className="flex gap-3 items-center">
             <IterationCw className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
             <IterationCcw className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
           </div>
@@ -61,7 +61,7 @@ function DocsToolbar({ children }: DocsToolbarProps) {
 
           {children && (
             <>
-              <div className="w-px h-4 bg-neutral-700 mx-4 md:flex hidden" />
+              <div className="w-px h-4 bg-neutral-700 mx-4 flex" />
               {children}
             </>
           )}

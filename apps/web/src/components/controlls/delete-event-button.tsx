@@ -24,8 +24,8 @@ function DeleteEventButton({ eventId }: { eventId: string }) {
     <Dialog>
       <DialogTrigger>
         <Tooltip>
-          <TooltipTrigger>
-            <Button variant="ghost" size="icon">
+          <TooltipTrigger className="flex items-center justify-center">
+            <Button variant="ghost" size="icon" className="w-6 h-6">
               <TrashIcon className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
             </Button>
           </TooltipTrigger>

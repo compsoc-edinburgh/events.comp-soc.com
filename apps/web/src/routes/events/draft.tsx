@@ -53,7 +53,7 @@ function DraftRoute() {
           </div>
 
           {events.length === 0 && (
-            <div className="h-[62vh] md:h-[57vh] flex items-center justify-center">
+            <div className="h-[58vh] md:h-[55vh] flex items-center justify-center">
               <div className="text-xl font-bold text-neutral-700 pb-32">
                 Nothing Found
               </div>

@@ -2,9 +2,10 @@
 
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { XIcon } from 'lucide-react'
+import { Minimize2, MinusIcon, XIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { WindowBar } from '@/components/layout/window/window-bar.tsx'
 
 function Dialog({
   ...props
@@ -40,6 +41,22 @@ function DialogOverlay({
   )
 }
 
+export const DialogWindowControls = ({
+  showCloseButton,
+}: {
+  showCloseButton: boolean
+}) => (
+  <div className="hidden sm:flex gap-2 items-center h-full">
+    <DialogPrimitive.Close asChild disabled={!showCloseButton}>
+      <button className="focus:outline-none group">
+        <XIcon className="w-4 h-4 text-neutral-500 group-hover:text-white transition-colors cursor-pointer" />
+      </button>
+    </DialogPrimitive.Close>
+    <MinusIcon className="w-4 h-4 text-neutral-800 cursor-not-allowed" />
+    <Minimize2 className="w-4 h-4 text-neutral-800 cursor-not-allowed" />
+  </div>
+)
+
 function DialogContent({
   className,
   children,
@@ -54,21 +71,17 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border border-border p-6 shadow-lg duration-200 outline-none sm:max-w-lg',
+          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out rounded-sm data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 border border-border shadow-lg duration-200 outline-none sm:max-w-lg',
           className,
         )}
         {...props}
       >
-        {children}
-        {showCloseButton && (
-          <DialogPrimitive.Close
-            data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-          >
-            <XIcon />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
-        )}
+        <WindowBar
+          isSticky={false}
+          controls={<DialogWindowControls showCloseButton={showCloseButton} />}
+          title="Confirmation Dialog"
+        />
+        <div className="px-6 pb-6 grid gap-4">{children}</div>
       </DialogPrimitive.Content>
     </DialogPortal>
   )
