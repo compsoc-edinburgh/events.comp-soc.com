@@ -1,5 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ClockIcon, MapPin, ServerCrash, UserIcon } from 'lucide-react'
+import {
+  ClockIcon,
+  MapPin,
+  PencilIcon,
+  ServerCrash,
+  UserIcon,
+} from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
@@ -17,6 +23,11 @@ import PublishEventButton from '@/components/controlls/publish-event-button.tsx'
 import RegisterEventButton from '@/components/controlls/register-event-button.tsx'
 import { registrationQueryByAuthOption } from '@/lib/data/registration.ts'
 import { RegistrationBlock } from '@/components/registration-block.tsx'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip.tsx'
 
 export const Route = createFileRoute('/events/$eventId/')({
   loader: async ({ context, params }) => {
@@ -53,7 +64,34 @@ function EventRoute() {
   const isRegistered = !!registration
 
   return (
-    <Window activeTab="/events">
+    <Window
+      activeTab="/events"
+      toolbarContent={
+        isCommittee ? (
+          <div className="flex items-center justify-center gap-2">
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    void navigate({
+                      to: '/events/$eventId/edit',
+                    })
+                  }}
+                >
+                  <PencilIcon className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Edit</p>
+              </TooltipContent>
+            </Tooltip>
+            <DeleteEventButton eventId={eventId} />
+          </div>
+        ) : undefined
+      }
+    >
       <Sheet>
         <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
           {event.title}
@@ -125,21 +163,6 @@ function EventRoute() {
               title={event.title}
               eventId={eventId}
             />
-          )}
-          {isCommittee && (
-            <>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  void navigate({
-                    to: '/events/$eventId/edit',
-                  })
-                }}
-              >
-                Edit
-              </Button>
-              <DeleteEventButton eventId={eventId} />
-            </>
           )}
         </div>
       </Sheet>

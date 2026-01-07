@@ -9,9 +9,14 @@ import { Spinner } from '@/components/ui/spinner.tsx'
 interface ProtectedRouteProps {
   children: ReactNode
   activeTab?: string
+  isRequireCommittee?: boolean
 }
 
-function ProtectedRoute({ children, activeTab }: ProtectedRouteProps) {
+function ProtectedRoute({
+  children,
+  activeTab,
+  isRequireCommittee = true,
+}: ProtectedRouteProps) {
   const { isLoaded, isAuthenticated, isCommittee } = useCommitteeAuth()
 
   if (!isLoaded) {
@@ -38,7 +43,7 @@ function ProtectedRoute({ children, activeTab }: ProtectedRouteProps) {
     )
   }
 
-  if (!isCommittee) {
+  if (!isCommittee && isRequireCommittee) {
     return (
       <Window activeTab={activeTab}>
         <EmptySheet>

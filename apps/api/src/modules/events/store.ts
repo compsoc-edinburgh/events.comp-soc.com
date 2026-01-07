@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
 import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
-import { eventsTable } from "../../db/schema.js";
+import { eventsTable, registrationsTable } from "../../db/schema.js";
 
 export const eventStore = {
   async create({ db, data }: { db: SqlContext; data: CreateEvent }) {
@@ -26,9 +26,12 @@ export const eventStore = {
 
   async delete({ db, data }: { db: SqlContext; data: EventId }) {
     const { id } = data;
-    const result = await db.delete(eventsTable).where(eq(eventsTable.id, id)).returning();
+    return await db.transaction(async (tx) => {
+      await tx.delete(registrationsTable).where(eq(registrationsTable.eventId, id));
 
-    return result[0];
+      const result = await tx.delete(eventsTable).where(eq(eventsTable.id, id)).returning();
+      return result[0];
+    });
   },
 
   async get({ db, filters }: { db: SqlContext; filters: EventsQueryFilter }) {
