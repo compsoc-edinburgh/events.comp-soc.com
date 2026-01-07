@@ -291,6 +291,159 @@ describe("Registration route", () => {
     });
   });
 
+  describe("GET /v1/events/:eventId/registrations", () => {
+    beforeEach(async () => {
+      await db.insert(usersTable).values([
+        { id: "user-1", email: "u1@ex.com", firstName: "U", lastName: "1" },
+        { id: "user-2", email: "u2@ex.com", firstName: "U", lastName: "2" },
+      ]);
+
+      await db.insert(eventsTable).values({
+        id: "test-event",
+        title: "Test Event",
+        state: "published",
+        aboutMarkdown: "markdown",
+        organiser: "projectShare",
+        date: new Date(),
+      });
+
+      await db.insert(registrationsTable).values([
+        { userId: "user-1", eventId: "test-event", status: "accepted" },
+        { userId: "user-2", eventId: "test-event", status: "pending" },
+      ]);
+    });
+
+    it("should filter registrations by status query param", async () => {
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/test-event/registrations",
+        query: { status: "accepted" },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+      expect(data).toHaveLength(1);
+      expect(data[0].userId).toBe("user-1");
+      expect(data[0].status).toBe("accepted");
+    });
+
+    it("should filter registrations by userId query param", async () => {
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/test-event/registrations",
+        query: { userId: "user-2" },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+      expect(data).toHaveLength(1);
+      expect(data[0].userId).toBe("user-2");
+    });
+
+    it("should respect pagination limits", async () => {
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/test-event/registrations",
+        query: { limit: "1" },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+      expect(data.length).toBeLessThanOrEqual(1);
+    });
+
+    it("should return empty array if event has no registrations", async () => {
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      await db.insert(eventsTable).values({
+        id: "empty-event",
+        title: "Empty Event",
+        state: "published",
+        aboutMarkdown: "md",
+        organiser: "projectShare",
+        date: new Date(),
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/empty-event/registrations",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual([]);
+    });
+  });
+
+  describe("GET /v1/events/:eventId/registrations/me", () => {
+    beforeEach(async () => {
+      await db.insert(usersTable).values([
+        { id: "test-user", email: "test@example.com", firstName: "Test", lastName: "User" },
+        { id: "other-user", email: "other@example.com", firstName: "Other", lastName: "User" },
+      ]);
+
+      await db.insert(eventsTable).values({
+        id: "test-event",
+        title: "Test Event",
+        state: "published",
+        aboutMarkdown: "markdown",
+        organiser: "projectShare",
+        date: new Date(),
+      });
+
+      await db.insert(registrationsTable).values({
+        userId: "test-user",
+        eventId: "test-event",
+        status: "pending",
+      });
+    });
+
+    it("should return 401 if user is not authenticated", async () => {
+      setMockAuth({ userId: null, sessionClaims: null });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/test-event/registrations/me",
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+
+    it("should allow a user to fetch their own registration", async () => {
+      setMockAuth({
+        userId: "test-user",
+        sessionClaims: { metadata: { role: "member" } },
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/test-event/registrations/me",
+      });
+
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+      expect(data.userId).toBe("test-user");
+      expect(data.eventId).toBe("test-event");
+    });
+  });
+
   describe("DELETE /v1/events/:eventId/registrations/:targetUserId", () => {
     beforeEach(async () => {
       await db.insert(usersTable).values([

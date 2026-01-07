@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ClockIcon, MapPin, ServerCrash, UserIcon } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
@@ -15,6 +15,8 @@ import { formatEventDate } from '@/lib/utils.ts'
 import DeleteEventButton from '@/components/controlls/delete-event-button.tsx'
 import PublishEventButton from '@/components/controlls/publish-event-button.tsx'
 import RegisterEventButton from '@/components/controlls/register-event-button.tsx'
+import { registrationQueryByAuthOption } from '@/lib/data/registration.ts'
+import { RegistrationBlock } from '@/components/registration-block.tsx'
 
 export const Route = createFileRoute('/events/$eventId/')({
   loader: async ({ context, params }) => {
@@ -42,9 +44,13 @@ function EventRoute() {
   const { eventId } = Route.useParams()
   const { isCommittee } = useCommitteeAuth()
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
+  const { data: registration, isLoading: isRegistrationLoading } = useQuery(
+    registrationQueryByAuthOption(eventId),
+  )
   const { full: date } = formatEventDate(event.date)
 
   const isDraft = event.state === 'draft'
+  const isRegistered = !!registration
 
   return (
     <Window activeTab="/events">
@@ -56,6 +62,8 @@ function EventRoute() {
           {isDraft && <DraftBadge />}
           <SigBadge sig={event.organiser} size="sm" />
         </div>
+
+        {registration && <RegistrationBlock registration={registration} />}
 
         <div className="mt-10">
           <div className="flex gap-2 items-center text-sm sm:text-base text-neutral-400">
@@ -111,7 +119,12 @@ function EventRoute() {
           {isDraft ? (
             <PublishEventButton eventId={eventId} />
           ) : (
-            <RegisterEventButton form={event.form ?? []} title={event.title} />
+            <RegisterEventButton
+              disabled={isRegistered || isRegistrationLoading}
+              form={event.form ?? []}
+              title={event.title}
+              eventId={eventId}
+            />
           )}
           {isCommittee && (
             <>

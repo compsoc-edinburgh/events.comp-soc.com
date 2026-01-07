@@ -4,7 +4,7 @@ import { activeMockAuthState, setMockAuth } from "../../lib/mock-auth.js";
 import { buildServer } from "../../server.js";
 import { db } from "../../db/db.js";
 import { sql } from "drizzle-orm";
-import { usersTable } from "../../db/schema.js";
+import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 
 vi.mock("@clerk/fastify", () => {
   return {
@@ -25,6 +25,8 @@ describe("User route", () => {
   });
 
   beforeEach(async () => {
+    await db.execute(sql`TRUNCATE TABLE ${registrationsTable} CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE ${eventsTable} CASCADE`);
     await db.execute(sql`TRUNCATE TABLE ${usersTable} CASCADE`);
   });
 
@@ -188,6 +190,94 @@ describe("User route", () => {
 
       const response = await app.inject({ method: "DELETE", url: "/v1/users/bad_user" });
       expect(response.statusCode).toBe(200);
+    });
+  });
+
+  describe("GET /v1/users/registrations", () => {
+    beforeEach(async () => {
+      await db.insert(usersTable).values({
+        id: "active_user",
+        firstName: "Active",
+        lastName: "User",
+        email: "active@example.com",
+      });
+
+      await db.insert(eventsTable).values([
+        {
+          id: "event_1",
+          title: "First Event",
+          state: "published",
+          aboutMarkdown: "md",
+          organiser: "projectShare",
+          date: new Date(),
+        },
+        {
+          id: "event_2",
+          title: "Second Event",
+          state: "published",
+          aboutMarkdown: "md",
+          organiser: "projectShare",
+          date: new Date(),
+        },
+      ]);
+
+      await db.insert(registrationsTable).values([
+        { userId: "active_user", eventId: "event_1", status: "accepted" },
+        { userId: "active_user", eventId: "event_2", status: "pending" },
+      ]);
+    });
+
+    it("should return 401 if user is not authenticated", async () => {
+      setMockAuth({ userId: null, sessionClaims: null });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/users/registrations",
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+
+    it("should return all registrations for the authenticated user", async () => {
+      setMockAuth({
+        userId: "active_user",
+        sessionClaims: { metadata: { role: "member" } },
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/users/registrations",
+      });
+
+      expect(response.statusCode).toBe(200);
+
+      const data = response.json();
+      expect(Array.isArray(data)).toBe(true);
+      expect(data).toHaveLength(2);
+
+      expect(data[0].userId).toBe("active_user");
+      expect(data[1].userId).toBe("active_user");
+    });
+
+    it("should return empty array/no content if user has no registrations", async () => {
+      await db.insert(usersTable).values({
+        id: "new_user",
+        firstName: "New",
+        lastName: "User",
+        email: "new@example.com",
+      });
+
+      setMockAuth({
+        userId: "new_user",
+        sessionClaims: { metadata: { role: "member" } },
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/users/registrations",
+      });
+
+      expect(response.statusCode).toBe(204);
     });
   });
 });

@@ -15,7 +15,7 @@ import type {
   UpdateEventRequest,
 } from '@events.comp-soc.com/shared'
 
-const eventIDSchema = z.object({
+export const eventIDSchema = z.object({
   eventId: z.string().min(1, 'EventId is required'),
 })
 
@@ -39,9 +39,11 @@ export const fetchEvent = createServerFn({ method: 'GET' })
           },
         },
       )
+
       return EventResponseSchema.parse(event)
     } catch (err) {
       console.error(err)
+
       throw new Error('Failed to load an event')
     }
   })
@@ -75,9 +77,11 @@ export const fetchEvents = createServerFn({ method: 'GET' })
           },
         },
       )
+
       return events.map((event) => EventResponseSchema.parse(event))
     } catch (err) {
       console.error(err)
+
       throw new Error('Failed to load events')
     }
   })
@@ -103,6 +107,7 @@ export const createEvent = createServerFn({ method: 'POST' })
         },
       },
     )
+
     return EventResponseSchema.parse(event)
   })
 
@@ -132,6 +137,7 @@ export const updateEvent = createServerFn({ method: 'POST' })
         },
       },
     )
+
     return EventResponseSchema.parse(event)
   })
 
@@ -155,6 +161,7 @@ export const deleteEvent = createServerFn({ method: 'POST' })
         },
       },
     )
+
     return EventResponseSchema.parse(event)
   })
 
