@@ -35,6 +35,10 @@ export const userService = {
     return userStore.create({ db, data });
   },
 
+  async getUserRegistrations({ db, data }: { db: SqlContext; data: UserId }) {
+    return userStore.getRegistrationsById({ db, data });
+  },
+
   async updateUser({
     db,
     data,

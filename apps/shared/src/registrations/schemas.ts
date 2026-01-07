@@ -12,7 +12,10 @@ export const RegistrationUpdateContractSchema = z.object({
 });
 
 export const RegistrationResponseSchema = RegistrationContractSchema.extend({
-  id: z.string(),
+  eventId: z.string(),
+  eventTitle: z.string().optional(),
+  eventDate: z.iso.datetime(),
+  eventLocation: z.string().nullable(),
   status: z.enum(RegistrationStatus),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

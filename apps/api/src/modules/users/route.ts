@@ -21,6 +21,27 @@ export const userRoutes = async (server: FastifyInstance) => {
     return reply.send(user);
   });
 
+  server.get("/registrations", async (request, reply) => {
+    const { userId } = getAuth(request);
+
+    if (!userId) {
+      return reply.status(401).send({ message: "Unauthorised" });
+    }
+
+    const registrations = await userService.getUserRegistrations({
+      db: server.db,
+      data: {
+        id: userId,
+      },
+    });
+
+    if (registrations && registrations.length > 0) {
+      return reply.status(200).send(registrations);
+    }
+
+    return reply.status(204).send();
+  });
+
   server.post("/", async (request, reply) => {
     const { userId } = getAuth(request);
 

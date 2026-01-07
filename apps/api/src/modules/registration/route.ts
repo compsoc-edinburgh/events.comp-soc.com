@@ -4,6 +4,7 @@ import {
   CreateRegistrationSchema,
   RegistrationEventIdSchema,
   RegistrationParamsSchema,
+  RegistrationsQueryFilterSchema,
   UpdateRegistrationSchema,
 } from "./schema.js";
 import { registrationService } from "./service.js";
@@ -37,6 +38,45 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     });
 
     return reply.status(201).send(registration);
+  });
+
+  server.get("/", async (request, reply) => {
+    const { sessionClaims } = getAuth(request);
+    const role = sessionClaims?.metadata?.role;
+
+    const params = RegistrationEventIdSchema.parse(request.params);
+    const filters = RegistrationsQueryFilterSchema.parse(request.query);
+
+    const events = await registrationService.getRegistrations({
+      db: server.db,
+      filters: {
+        id: params.eventId,
+        ...filters,
+      },
+      role: role ?? null,
+    });
+
+    return reply.status(200).send(events);
+  });
+
+  server.get("/me", async (request, reply) => {
+    const { userId, sessionClaims } = getAuth(request);
+    const role = sessionClaims?.metadata?.role;
+
+    if (!userId || !role) {
+      return reply.status(401).send({ message: "Unauthorised" });
+    }
+
+    const data = RegistrationEventIdSchema.parse(request.params);
+    const registration = await registrationService.getRegistrationByUser({
+      db: server.db,
+      data: {
+        ...data,
+        userId,
+      },
+    });
+
+    return registration ? reply.status(200).send(registration) : reply.status(204).send();
   });
 
   server.put("/:userId", async (request, reply) => {

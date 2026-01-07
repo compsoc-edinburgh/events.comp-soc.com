@@ -1,9 +1,15 @@
 import { SqlContext } from "../../db/db.js";
-import { CreateRegistration, RegistrationParams, UpdateRegistration } from "./schema.js";
+import {
+  CreateRegistration,
+  RegistrationParams,
+  RegistrationsQueryFilter,
+  UpdateRegistration,
+} from "./schema.js";
 import { eventStore } from "../events/store.js";
-import { RegistrationStatus, UserRole } from "@events.comp-soc.com/shared";
+import { Nullable, RegistrationStatus, UserRole } from "@events.comp-soc.com/shared";
 import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { registrationStore } from "./store.js";
+import { EventId } from "../events/schema.js";
 
 export const registrationService = {
   async createRegistration({
@@ -51,6 +57,31 @@ export const registrationService = {
         data: { ...data, status },
       });
     });
+  },
+
+  async getRegistrationByUser({ db, data }: { db: SqlContext; data: RegistrationParams }) {
+    return await registrationStore.getByUserAndEvent({
+      db,
+      data,
+    });
+  },
+
+  async getRegistrations({
+    db,
+    filters,
+    role,
+  }: {
+    db: SqlContext;
+    filters: RegistrationsQueryFilter & Pick<EventId, "id">;
+    role: Nullable<UserRole>;
+  }) {
+    const isCommittee = role === "committee";
+
+    if (!isCommittee) {
+      throw new UnauthorizedError("You do not have permission to view this registration");
+    }
+
+    return registrationStore.get({ db, filters });
   },
 
   async updateRegistration({
