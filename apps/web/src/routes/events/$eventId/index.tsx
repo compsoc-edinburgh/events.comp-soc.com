@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
+  ChartPieIcon,
   ClockIcon,
   MapPin,
   PencilIcon,
@@ -68,11 +69,12 @@ function EventRoute() {
       activeTab="/events"
       toolbarContent={
         isCommittee ? (
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-3">
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger className="flex items-center justify-center">
                 <Button
                   variant="ghost"
+                  className="w-6 h-6"
                   size="icon"
                   onClick={() => {
                     void navigate({
@@ -85,6 +87,25 @@ function EventRoute() {
               </TooltipTrigger>
               <TooltipContent>
                 <p>Edit</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger className="flex items-center justify-center">
+                <Button
+                  variant="ghost"
+                  className="w-6 h-6"
+                  size="icon"
+                  onClick={() => {
+                    void navigate({
+                      to: '/events/$eventId/analytics',
+                    })
+                  }}
+                >
+                  <ChartPieIcon className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Analytics</p>
               </TooltipContent>
             </Tooltip>
             <DeleteEventButton eventId={eventId} />
