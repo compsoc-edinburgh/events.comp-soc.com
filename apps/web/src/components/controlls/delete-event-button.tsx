@@ -1,4 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
+import { TrashIcon } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -9,6 +10,11 @@ import {
 } from '@/components/ui/dialog.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { useDeleteEvent } from '@/lib/hooks/use-delete-event.tsx'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip.tsx'
 
 function DeleteEventButton({ eventId }: { eventId: string }) {
   const navigate = useNavigate({ from: '/events/$eventId' })
@@ -16,8 +22,17 @@ function DeleteEventButton({ eventId }: { eventId: string }) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="secondary">Delete</Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button variant="ghost" size="icon">
+              <TrashIcon className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Delete</p>
+          </TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -30,6 +45,7 @@ function DeleteEventButton({ eventId }: { eventId: string }) {
         <div className="flex justify-start gap-3 mt-4">
           <Button
             disabled={isDeleting}
+            className="w-full md:max-w-fit"
             onClick={() => {
               deleteEvent(undefined, {
                 onSuccess: () => {

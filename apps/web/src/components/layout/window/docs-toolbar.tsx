@@ -17,7 +17,7 @@ interface DocsToolbarProps {
 
 function DocsToolbar({ children }: DocsToolbarProps) {
   return (
-    <nav className="hidden sticky md:flex top-9 z-30 h-12 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl">
+    <nav className="sticky flex top-8 md:top-9 z-30 h-12 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl">
       <div className="border-neutral-700 border p-1 w-full h-full rounded-sm items-center flex px-3">
         <div className="flex items-center">
           <div className="sm:flex hidden gap-3 items-center">

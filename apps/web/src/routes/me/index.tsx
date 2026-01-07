@@ -15,14 +15,11 @@ export const Route = createFileRoute('/me/')({
 })
 
 function RouteComponent() {
-  const { data: registrations } = useSuspenseQuery(
-    userRegistrationQueryOption(),
-  )
-
-  console.log(registrations)
+  const { data } = useSuspenseQuery(userRegistrationQueryOption())
+  const registrations = data === null ? [] : data
 
   return (
-    <ProtectedRoute activeTab="/me">
+    <ProtectedRoute activeTab="/me" isRequireCommittee={false}>
       <Window activeTab="/me">
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
@@ -36,7 +33,7 @@ function RouteComponent() {
             Manage your event sign-ups and track your status.
           </div>
 
-          {registrations !== null && registrations.length === 0 && (
+          {registrations.length === 0 && (
             <div className="h-[62vh] md:h-[57vh] flex items-center justify-center">
               <div className="text-xl font-bold text-neutral-700 pb-32">
                 Nothing Found
@@ -45,8 +42,7 @@ function RouteComponent() {
           )}
 
           <div className="mt-8 grid gap-4">
-            {registrations !== null &&
-              registrations.length > 0 &&
+            {registrations.length > 0 &&
               registrations.map((registration) => (
                 <RegistrationCard
                   key={registration.eventId}
