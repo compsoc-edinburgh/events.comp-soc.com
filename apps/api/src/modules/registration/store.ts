@@ -1,13 +1,15 @@
-import { eq, and, count, inArray } from "drizzle-orm";
+import { eq, and, count, inArray, asc } from "drizzle-orm";
 import {
   CreateRegistration,
   RegistrationParams,
   RegistrationsQueryFilter,
+  UpdateBatchRegistration,
   UpdateRegistration,
 } from "./schema.js";
 import { SqlContext } from "../../db/db.js";
 import { eventsTable, registrationsTable } from "../../db/schema.js";
 import { EventId } from "../events/schema.js";
+import { RegistrationStatus } from "@events.comp-soc.com/shared";
 
 export const registrationSelection = {
   userId: registrationsTable.userId,
@@ -48,13 +50,66 @@ export const registrationStore = {
       .select({ count: count() })
       .from(registrationsTable)
       .where(
-        and(
-          eq(registrationsTable.eventId, id),
-          inArray(registrationsTable.status, ["pending", "accepted"])
-        )
+        and(eq(registrationsTable.eventId, id), inArray(registrationsTable.status, ["accepted"]))
       );
 
     return result?.count ?? 0;
+  },
+
+  async getPendingOrderedByDate({
+    db,
+    data,
+  }: {
+    db: SqlContext;
+    data: { eventId: string; limit: number };
+  }) {
+    const { eventId, limit } = data;
+
+    return db
+      .select({
+        userId: registrationsTable.userId,
+        eventId: registrationsTable.eventId,
+      })
+      .from(registrationsTable)
+      .where(and(eq(registrationsTable.eventId, eventId), eq(registrationsTable.status, "pending")))
+      .orderBy(asc(registrationsTable.createdAt))
+      .limit(limit);
+  },
+
+  async updateStatusBatch({ db, data }: { db: SqlContext; data: UpdateBatchRegistration }) {
+    const { eventId, userIds, status } = data;
+
+    if (userIds.length === 0) return [];
+
+    return db
+      .update(registrationsTable)
+      .set({ status, updatedAt: new Date() })
+      .where(
+        and(eq(registrationsTable.eventId, eventId), inArray(registrationsTable.userId, userIds))
+      )
+      .returning();
+  },
+
+  async getOldestByStatus({
+    db,
+    data,
+  }: {
+    db: SqlContext;
+    data: { eventId: string; status: RegistrationStatus };
+  }) {
+    const { eventId, status } = data;
+
+    const [oldest] = await db
+      .select({
+        userId: registrationsTable.userId,
+        eventId: registrationsTable.eventId,
+      })
+      .from(registrationsTable)
+      .where(and(eq(registrationsTable.eventId, eventId), eq(registrationsTable.status, status)))
+      .orderBy(asc(registrationsTable.createdAt))
+      .limit(1);
+
+    return oldest;
   },
 
   async getByUserAndEvent({ db, data }: { db: SqlContext; data: RegistrationParams }) {

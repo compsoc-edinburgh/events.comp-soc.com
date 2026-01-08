@@ -11,6 +11,11 @@ export const RegistrationUpdateContractSchema = z.object({
   status: z.enum(RegistrationStatus),
 });
 
+export const RegistrationStatusBatchUpdateSchema = z.object({
+  fromStatus: z.enum(RegistrationStatus),
+  toStatus: z.enum(RegistrationStatus),
+});
+
 export const RegistrationResponseSchema = RegistrationContractSchema.extend({
   eventId: z.string(),
   eventTitle: z.string().optional(),
@@ -19,4 +24,12 @@ export const RegistrationResponseSchema = RegistrationContractSchema.extend({
   status: z.enum(RegistrationStatus),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+});
+
+export const RegistrationBatchAcceptResponseSchema = z.object({
+  acceptedCount: z.number(),
+});
+
+export const RegistrationPromoteFromWaitlistResponseSchema = z.object({
+  message: z.string(),
 });

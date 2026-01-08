@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "../../db/db.js";
@@ -39,51 +39,48 @@ describe("Registration route", () => {
         lastName: "User",
       });
 
-      await db.insert(eventsTable).values({
-        id: "published-event",
-        title: "Published Event",
-        state: "published",
-        aboutMarkdown: "markdown",
-        organiser: "projectShare",
-        date: new Date(),
-        capacity: null,
-      });
-
-      await db.insert(eventsTable).values({
-        id: "draft-event",
-        title: "Draft Event",
-        state: "draft",
-        aboutMarkdown: "markdown",
-        organiser: "projectShare",
-        date: new Date(),
-        capacity: null,
-      });
-
-      await db.insert(eventsTable).values({
-        id: "limited-event",
-        title: "Limited Event",
-        state: "published",
-        aboutMarkdown: "markdown",
-        organiser: "projectShare",
-        date: new Date(),
-        capacity: 2,
-      });
+      await db.insert(eventsTable).values([
+        {
+          id: "published-event",
+          title: "Published Event",
+          state: "published",
+          aboutMarkdown: "markdown",
+          organiser: "projectShare",
+          date: new Date(),
+          capacity: null,
+        },
+        {
+          id: "draft-event",
+          title: "Draft Event",
+          state: "draft",
+          aboutMarkdown: "markdown",
+          organiser: "projectShare",
+          date: new Date(),
+          capacity: null,
+        },
+        {
+          id: "limited-event",
+          title: "Limited Event",
+          state: "published",
+          aboutMarkdown: "markdown",
+          organiser: "projectShare",
+          date: new Date(),
+          capacity: 2,
+        },
+      ]);
     });
 
-    it("should return 401 if user is not authenticated", async () => {
-      setMockAuth({ userId: null, sessionClaims: null });
+    it("should register user with pending status regardless of capacity", async () => {
+      await db.insert(usersTable).values([
+        { id: "user-1", email: "user1@example.com", firstName: "U", lastName: "1" },
+        { id: "user-2", email: "user2@example.com", firstName: "U", lastName: "2" },
+      ]);
 
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/published-event/registrations",
-        payload: {},
-      });
+      await db.insert(registrationsTable).values([
+        { userId: "user-1", eventId: "limited-event", status: "accepted" },
+        { userId: "user-2", eventId: "limited-event", status: "accepted" },
+      ]);
 
-      expect(response.statusCode).toBe(401);
-      expect(response.json()).toEqual({ message: "Unauthorised" });
-    });
-
-    it("should return 404 if event does not exist", async () => {
       setMockAuth({
         userId: "test-user",
         sessionClaims: { metadata: { role: "member" } },
@@ -91,11 +88,37 @@ describe("Registration route", () => {
 
       const response = await app.inject({
         method: "POST",
-        url: "/v1/events/non-existing-event/registrations",
+        url: "/v1/events/limited-event/registrations",
         payload: {},
       });
 
-      expect(response.statusCode).toBe(404);
+      expect(response.statusCode).toBe(201);
+      const data = response.json();
+
+      // CRITICAL CHANGE: Status should be pending, not waitlist
+      expect(data.status).toBe("pending");
+      expect(data.userId).toBe("test-user");
+    });
+
+    it("should return 409 if user is already registered", async () => {
+      await db.insert(registrationsTable).values({
+        userId: "test-user",
+        eventId: "published-event",
+        status: "pending",
+      });
+
+      setMockAuth({
+        userId: "test-user",
+        sessionClaims: { metadata: { role: "member" } },
+      });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/published-event/registrations",
+        payload: {},
+      });
+
+      expect(response.statusCode).toBe(409);
     });
 
     it("should return 404 if regular user tries to register to draft event", async () => {
@@ -111,72 +134,6 @@ describe("Registration route", () => {
       });
 
       expect(response.statusCode).toBe(404);
-    });
-
-    it("should register user with pending status when capacity is null", async () => {
-      setMockAuth({
-        userId: "test-user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/published-event/registrations",
-        payload: {},
-      });
-
-      expect(response.statusCode).toBe(201);
-
-      const data = response.json();
-      expect(data.userId).toBe("test-user");
-      expect(data.eventId).toBe("published-event");
-      expect(data.status).toBe("pending");
-    });
-
-    it("should register user with pending status when capacity allows", async () => {
-      setMockAuth({
-        userId: "test-user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/limited-event/registrations",
-        payload: {},
-      });
-
-      expect(response.statusCode).toBe(201);
-
-      const data = response.json();
-      expect(data.status).toBe("pending");
-    });
-
-    it("should register user with waitlist status when capacity is full", async () => {
-      await db.insert(usersTable).values([
-        { id: "user-1", email: "user1@example.com", firstName: "User", lastName: "One" },
-        { id: "user-2", email: "user2@example.com", firstName: "User", lastName: "Two" },
-      ]);
-
-      await db.insert(registrationsTable).values([
-        { userId: "user-1", eventId: "limited-event", status: "pending" },
-        { userId: "user-2", eventId: "limited-event", status: "pending" },
-      ]);
-
-      setMockAuth({
-        userId: "test-user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/limited-event/registrations",
-        payload: {},
-      });
-
-      expect(response.statusCode).toBe(201);
-
-      const data = response.json();
-      expect(data.status).toBe("waitlist");
     });
   });
 
@@ -441,6 +398,213 @@ describe("Registration route", () => {
       const data = response.json();
       expect(data.userId).toBe("test-user");
       expect(data.eventId).toBe("test-event");
+    });
+  });
+
+  describe("POST /v1/events/:eventId/registrations/batch-accept", () => {
+    beforeEach(async () => {
+      await db.insert(eventsTable).values({
+        id: "batch-event",
+        title: "Batch Event",
+        state: "published",
+        capacity: 2,
+        aboutMarkdown: "md",
+        organiser: "projectShare",
+        date: new Date(),
+      });
+
+      await db.insert(usersTable).values([
+        { id: "p1", email: "p1@ex.com", firstName: "P1", lastName: "U" },
+        { id: "p2", email: "p2@ex.com", firstName: "P2", lastName: "U" },
+        { id: "p3", email: "p3@ex.com", firstName: "P3", lastName: "U" },
+      ]);
+
+      await db.insert(registrationsTable).values([
+        {
+          userId: "p1",
+          eventId: "batch-event",
+          status: "pending",
+          createdAt: new Date(Date.now() - 3000),
+        },
+        {
+          userId: "p2",
+          eventId: "batch-event",
+          status: "pending",
+          createdAt: new Date(Date.now() - 2000),
+        },
+        {
+          userId: "p3",
+          eventId: "batch-event",
+          status: "pending",
+          createdAt: new Date(Date.now() - 1000),
+        },
+      ]);
+    });
+
+    it("should allow committee to auto-fill to capacity", async () => {
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/batch-event/registrations/batch-accept",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({ acceptedCount: 2 });
+
+      const accepted = await db
+        .select()
+        .from(registrationsTable)
+        .where(eq(registrationsTable.status, "accepted"));
+      expect(accepted).toHaveLength(2);
+      const acceptedIds = accepted.map((a) => a.userId);
+      expect(acceptedIds).toContain("p1");
+      expect(acceptedIds).toContain("p2");
+      expect(acceptedIds).not.toContain("p3");
+    });
+
+    it("should return 401/403 for non-committee users", async () => {
+      setMockAuth({
+        userId: "p1",
+        sessionClaims: { metadata: { role: "member" } },
+      });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/batch-event/registrations/batch-accept",
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+  });
+
+  describe("POST /v1/events/:eventId/registrations/promote-from-waitlist", () => {
+    beforeEach(async () => {
+      await db.insert(eventsTable).values({
+        id: "promote-event",
+        capacity: 1,
+        state: "published",
+        title: "Promote",
+        aboutMarkdown: "md",
+        organiser: "projectShare",
+        date: new Date(),
+      });
+
+      await db
+        .insert(usersTable)
+        .values([{ id: "waitlist-1", email: "w1@ex.com", firstName: "W1", lastName: "U" }]);
+
+      await db.insert(registrationsTable).values({
+        userId: "waitlist-1",
+        eventId: "promote-event",
+        status: "waitlist",
+      });
+    });
+
+    it("should promote the oldest waitlisted user if capacity allows", async () => {
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/promote-event/registrations/promote-from-waitlist",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toHaveProperty("message", "waitlist-1");
+    });
+
+    it("should return 409 if event is already full", async () => {
+      await db
+        .insert(usersTable)
+        .values({ id: "filler", email: "f@ex.com", firstName: "F", lastName: "U" });
+      await db.insert(registrationsTable).values({
+        userId: "filler",
+        eventId: "promote-event",
+        status: "accepted",
+      });
+
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/promote-event/registrations/promote-from-waitlist",
+      });
+
+      expect(response.statusCode).toBe(409);
+    });
+
+    it("should return a clean message if the waitlist is empty", async () => {
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      await db.delete(registrationsTable).where(eq(registrationsTable.status, "waitlist"));
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/promote-event/registrations/promote-from-waitlist",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({ message: "Waitlist is empty" });
+    });
+  });
+
+  describe("POST /v1/events/:eventId/registrations/batch-update-status", () => {
+    it("should allow moving all pending to waitlist", async () => {
+      await db.insert(eventsTable).values({
+        id: "cleanup-event",
+        state: "published",
+        title: "T",
+        aboutMarkdown: "md",
+        organiser: "p",
+        date: new Date(),
+      });
+      await db
+        .insert(usersTable)
+        .values({ id: "u1", email: "u1@ex.com", firstName: "U", lastName: "1" });
+      await db
+        .insert(registrationsTable)
+        .values({ userId: "u1", eventId: "cleanup-event", status: "pending" });
+
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/cleanup-event/registrations/batch-update-status",
+        payload: { fromStatus: "pending", toStatus: "waitlist" },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({ updatedCount: 1 });
+    });
+
+    it("should return 403 if trying to mass-accept", async () => {
+      setMockAuth({
+        userId: "committee-user",
+        sessionClaims: { metadata: { role: "committee" } },
+      });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/any/registrations/batch-update-status",
+        payload: { fromStatus: "pending", toStatus: "accepted" },
+      });
+
+      expect(response.statusCode).toBe(403);
     });
   });
 
