@@ -22,6 +22,18 @@ export const UpdateRegistrationSchema = BaseRegistrationSchema.pick({
     status: z.enum(RegistrationStatus).default("pending"),
   });
 
+export const UpdateBatchRegistrationSchema = z.object({
+  eventId: BaseRegistrationSchema.shape.eventId,
+  userIds: z.array(BaseRegistrationSchema.shape.userId),
+  status: z.enum(RegistrationStatus).default("pending"),
+});
+
+export const UpdateBatchStatusRegistrationSchema = z.object({
+  eventId: BaseRegistrationSchema.shape.eventId,
+  fromStatus: z.enum(RegistrationStatus),
+  toStatus: z.enum(RegistrationStatus),
+});
+
 export const RegistrationsQueryFilterSchema = z.object({
   userId: UserIdSchema.shape.id.optional(),
   page: z.coerce.number().min(1).default(1),
@@ -42,3 +54,6 @@ export type CreateRegistration = z.infer<typeof CreateRegistrationSchema>;
 export type UpdateRegistration = z.infer<typeof UpdateRegistrationSchema>;
 export type RegistrationParams = z.infer<typeof RegistrationParamsSchema>;
 export type RegistrationsQueryFilter = z.infer<typeof RegistrationsQueryFilterSchema>;
+export type RegistrationEventId = z.infer<typeof RegistrationEventIdSchema>;
+export type UpdateBatchRegistration = z.infer<typeof UpdateBatchRegistrationSchema>;
+export type UpdateBatchStatusRegistration = z.infer<typeof UpdateBatchStatusRegistrationSchema>;

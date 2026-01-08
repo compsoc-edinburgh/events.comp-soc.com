@@ -5,11 +5,13 @@ import {
   RegistrationEventIdSchema,
   RegistrationParamsSchema,
   RegistrationsQueryFilterSchema,
+  UpdateBatchStatusRegistrationSchema,
   UpdateRegistrationSchema,
 } from "./schema.js";
 import { registrationService } from "./service.js";
 import {
   RegistrationContractSchema,
+  RegistrationStatusBatchUpdateSchema,
   RegistrationUpdateContractSchema,
 } from "@events.comp-soc.com/shared";
 
@@ -38,6 +40,67 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     });
 
     return reply.status(201).send(registration);
+  });
+
+  server.post("/batch-accept", async (request, reply) => {
+    const { userId, sessionClaims } = getAuth(request);
+    const role = sessionClaims?.metadata?.role;
+
+    if (!userId || role !== "committee") {
+      return reply.status(401).send({ message: "Unauthorised" });
+    }
+
+    const { eventId } = RegistrationEventIdSchema.parse(request.params);
+    const result = await registrationService.batchAcceptRegistration({
+      db: server.db,
+      data: { eventId },
+      role,
+    });
+
+    return reply.status(200).send(result);
+  });
+
+  server.post("/promote-from-waitlist", async (request, reply) => {
+    const { userId, sessionClaims } = getAuth(request);
+    const role = sessionClaims?.metadata?.role;
+
+    if (!userId || role !== "committee") {
+      return reply.status(401).send({ message: "Unauthorised" });
+    }
+
+    const { eventId } = RegistrationEventIdSchema.parse(request.params);
+    const result = await registrationService.promoteNextFromWaitlist({
+      db: server.db,
+      data: { eventId },
+      role,
+    });
+
+    return reply.status(200).send(result);
+  });
+
+  server.post("/batch-update-status", async (request, reply) => {
+    const { userId, sessionClaims } = getAuth(request);
+    const role = sessionClaims?.metadata?.role;
+
+    if (!userId || role !== "committee") {
+      return reply.status(401).send({ message: "Unauthorised" });
+    }
+
+    const { eventId } = RegistrationEventIdSchema.parse(request.params);
+    const dto = RegistrationStatusBatchUpdateSchema.parse(request.body);
+
+    const data = UpdateBatchStatusRegistrationSchema.parse({
+      eventId,
+      ...dto,
+    });
+
+    const result = await registrationService.batchUpdateStatus({
+      db: server.db,
+      data,
+      role,
+    });
+
+    return reply.status(200).send(result);
   });
 
   server.get("/", async (request, reply) => {
