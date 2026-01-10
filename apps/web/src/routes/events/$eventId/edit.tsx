@@ -12,7 +12,7 @@ import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
 import { StatusCard } from '@/components/ui/status-card.tsx'
-import { useUpdateEvent } from '@/lib/hooks/use-update-event.tsx'
+import { useUpdateEvent } from '@/lib/hooks/events/use-update-event.tsx'
 
 export const Route = createFileRoute('/events/$eventId/edit')({
   loader: async ({ context, params }) => {

@@ -33,6 +33,49 @@
 
   --color-destructive: #7f1d1d;
   --color-ring: #dc2626;
+
+  --color-card: #161616; /* slightly above window */
+  --color-card-foreground: #f2f2f2;
+
+  /* Card subtle variants */
+  --color-card-muted: #1b1b1b;
+  --color-card-hover: #1f1f1f;
+
+  /* Borders & dividers */
+  --color-card-border: #2a2a2a;
+  --color-divider: #2f2f2f;
+
+  --chart-1: var(--color-red-100);
+  --chart-2: var(--color-red-200);
+  --chart-3: var(--color-red-300);
+  --chart-4: var(--color-red-400);
+  --chart-5: var(--color-red-500);
+  --chart-6: var(--color-red-600);
+  --chart-7: var(--color-red-700);
+  --chart-8: var(--color-red-800);
+  --chart-9: var(--color-red-900);
+
+  --color-status-pending: #facc15; /* yellow-400 */
+  --color-status-pending-bg: #422006; /* yellow-950 */
+  --color-status-pending-border: #713f12; /* yellow-800 */
+
+  --color-status-accepted: #4ade80; /* green-400 */
+  --color-status-accepted-bg: #052e16; /* green-950 */
+  --color-status-accepted-border: #14532d; /* green-800 */
+
+  --color-status-rejected: #f87171; /* red-400 */
+  --color-status-rejected-bg: #450a0a; /* red-950 */
+  --color-status-rejected-border: #7f1d1d; /* red-800 */
+
+  --color-status-waitlist: #a3a3a3; /* neutral-400 */
+  --color-status-waitlist-bg: #262626; /* neutral-800 */
+  --color-status-waitlist-border: #404040; /* neutral-700 */
+
+  /* Map Chart Colors to Statuses (Optional but Recommended) */
+  --chart-accepted: var(--color-status-accepted);
+  --chart-pending: var(--color-status-pending);
+  --chart-rejected: var(--color-status-rejected);
+
   --radius: 0.25rem;
 }
 

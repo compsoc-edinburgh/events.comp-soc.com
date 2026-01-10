@@ -10,7 +10,7 @@ import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
-import { useCreateEvent } from '@/lib/hooks/use-create-event.tsx'
+import { useCreateEvent } from '@/lib/hooks/events/use-create-event.tsx'
 
 export const Route = createFileRoute('/events/create')({
   component: CreateRoute,

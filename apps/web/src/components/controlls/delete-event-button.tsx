@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog.tsx'
 import { Button } from '@/components/ui/button.tsx'
-import { useDeleteEvent } from '@/lib/hooks/use-delete-event.tsx'
+import { useDeleteEvent } from '@/lib/hooks/events/use-delete-event.tsx'
 import {
   Tooltip,
   TooltipContent,

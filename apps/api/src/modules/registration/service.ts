@@ -4,7 +4,7 @@ import {
   RegistrationEventId,
   RegistrationParams,
   RegistrationsQueryFilter,
-  UpdateBatchStatusRegistration,
+  UpdateBatchRegistration,
   UpdateRegistration,
 } from "./schema.js";
 import { eventStore } from "../events/store.js";
@@ -176,67 +176,15 @@ export const registrationService = {
     });
   },
 
-  async promoteNextFromWaitlist({
-    db,
-    data,
-    role,
-  }: {
-    db: SqlContext;
-    data: RegistrationEventId;
-    role: UserRole;
-  }) {
-    if (role !== "committee") {
-      throw new UnauthorizedError("Only committee members can promote users");
-    }
-
-    return await db.transaction(async (tx) => {
-      const event = await eventStore.findByIdForUpdate({ tx, data: { id: data.eventId } });
-      const activeCount = await registrationStore.countActiveByEventId({
-        db: tx,
-        data: { id: data.eventId },
-      });
-
-      if (event.capacity === null) {
-        throw new ConflictError("Event doesn't have a capacity.");
-      }
-
-      if (activeCount >= event.capacity) {
-        throw new ConflictError("Event is full. Cannot promote from waitlist.");
-      }
-
-      const nextInLine = await registrationStore.getOldestByStatus({
-        db: tx,
-        data: { eventId: data.eventId, status: "waitlist" },
-      });
-
-      if (!nextInLine) {
-        return { message: "Waitlist is empty" };
-      }
-
-      await registrationStore.update({
-        db: tx,
-        data: { eventId: data.eventId, userId: nextInLine.userId, status: "accepted" },
-      });
-
-      return { message: nextInLine.userId };
-    });
-  },
-
   async batchUpdateStatus({
     db,
     data,
     role,
   }: {
     db: SqlContext;
-    data: UpdateBatchStatusRegistration;
+    data: UpdateBatchRegistration;
     role: UserRole;
   }) {
-    if (data.toStatus === "accepted") {
-      throw new UnauthorizedError(
-        "Mass acceptance is not allowed here. Please use the 'Accept to Capacity' feature."
-      );
-    }
-
     if (role !== "committee") {
       throw new UnauthorizedError("Only committee members can perform batch updates");
     }
@@ -251,32 +199,16 @@ export const registrationService = {
         throw new NotFoundError(`Event with ${data.eventId} not found`);
       }
 
-      const targets = await registrationStore.get({
-        db: tx,
-        filters: {
-          id: data.eventId,
-          status: data.fromStatus,
-          page: 1,
-          limit: 1000,
-        },
-      });
-
-      if (targets.length === 0) {
-        return { updatedCount: 0 };
-      }
-
-      const userIds = targets.map((r) => r.userId);
-
       await registrationStore.updateStatusBatch({
         db: tx,
         data: {
           eventId: data.eventId,
-          userIds,
-          status: data.toStatus,
+          userIds: data.userIds,
+          status: data.status,
         },
       });
 
-      return { updatedCount: userIds.length };
+      return { updatedCount: data.userIds.length };
     });
   },
 
@@ -304,5 +236,33 @@ export const registrationService = {
     }
 
     return await registrationStore.delete({ db, data });
+  },
+
+  async getRegistrationAnalytics({
+    db,
+    eventId,
+    role,
+  }: {
+    db: SqlContext;
+    eventId: string;
+    role: Nullable<UserRole>;
+  }) {
+    if (role !== "committee") {
+      throw new UnauthorizedError("Only committee members can view analytics");
+    }
+
+    const event = await eventStore.findById({
+      db,
+      data: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundError(`Event with ${eventId} not found`);
+    }
+
+    return await registrationStore.getAnalytics({
+      db,
+      eventId,
+    });
   },
 };

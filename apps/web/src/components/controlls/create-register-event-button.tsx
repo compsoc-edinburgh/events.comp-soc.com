@@ -7,9 +7,9 @@ import type {
 import { Button } from '@/components/ui/button.tsx'
 import { useCommitteeAuth } from '@/lib/auth.ts'
 import EventRegistrationFormDialog from '@/components/forms/event-registration-form-dialog.tsx'
-import { useCreateRegistration } from '@/lib/hooks/use-create-registration.tsx'
+import { useCreateRegistration } from '@/lib/hooks/registrations/use-create-registration.tsx'
 
-function RegisterEventButton({
+function CreateRegisterEventButton({
   form,
   title,
   eventId,
@@ -55,4 +55,4 @@ function RegisterEventButton({
   )
 }
 
-export default RegisterEventButton
+export default CreateRegisterEventButton
