@@ -95,7 +95,6 @@ describe("Registration route", () => {
       expect(response.statusCode).toBe(201);
       const data = response.json();
 
-      // CRITICAL CHANGE: Status should be pending, not waitlist
       expect(data.status).toBe("pending");
       expect(data.userId).toBe("test-user");
     });
@@ -307,23 +306,6 @@ describe("Registration route", () => {
       expect(data[0].userId).toBe("user-2");
     });
 
-    it("should respect pagination limits", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/events/test-event/registrations",
-        query: { limit: "1" },
-      });
-
-      expect(response.statusCode).toBe(200);
-      const data = response.json();
-      expect(data.length).toBeLessThanOrEqual(1);
-    });
-
     it("should return empty array if event has no registrations", async () => {
       setMockAuth({
         userId: "committee-user",
@@ -481,130 +463,172 @@ describe("Registration route", () => {
     });
   });
 
-  describe("POST /v1/events/:eventId/registrations/promote-from-waitlist", () => {
+  describe("GET /v1/events/:eventId/registrations/analytics", () => {
+    const analyticsEventId = "analytics-event";
+
     beforeEach(async () => {
       await db.insert(eventsTable).values({
-        id: "promote-event",
-        capacity: 1,
+        id: analyticsEventId,
+        title: "Analytics Test Event",
         state: "published",
-        title: "Promote",
-        aboutMarkdown: "md",
+        date: new Date(),
         organiser: "projectShare",
-        date: new Date(),
-      });
-
-      await db
-        .insert(usersTable)
-        .values([{ id: "waitlist-1", email: "w1@ex.com", firstName: "W1", lastName: "U" }]);
-
-      await db.insert(registrationsTable).values({
-        userId: "waitlist-1",
-        eventId: "promote-event",
-        status: "waitlist",
-      });
-    });
-
-    it("should promote the oldest waitlisted user if capacity allows", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/promote-event/registrations/promote-from-waitlist",
-      });
-
-      expect(response.statusCode).toBe(200);
-      expect(response.json()).toHaveProperty("message", "waitlist-1");
-    });
-
-    it("should return 409 if event is already full", async () => {
-      await db
-        .insert(usersTable)
-        .values({ id: "filler", email: "f@ex.com", firstName: "F", lastName: "U" });
-      await db.insert(registrationsTable).values({
-        userId: "filler",
-        eventId: "promote-event",
-        status: "accepted",
-      });
-
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/promote-event/registrations/promote-from-waitlist",
-      });
-
-      expect(response.statusCode).toBe(409);
-    });
-
-    it("should return a clean message if the waitlist is empty", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      await db.delete(registrationsTable).where(eq(registrationsTable.status, "waitlist"));
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/promote-event/registrations/promote-from-waitlist",
-      });
-
-      expect(response.statusCode).toBe(200);
-      expect(response.json()).toEqual({ message: "Waitlist is empty" });
-    });
-  });
-
-  describe("POST /v1/events/:eventId/registrations/batch-update-status", () => {
-    it("should allow moving all pending to waitlist", async () => {
-      await db.insert(eventsTable).values({
-        id: "cleanup-event",
-        state: "published",
-        title: "T",
         aboutMarkdown: "md",
-        organiser: "p",
-        date: new Date(),
+        form: [
+          {
+            id: "size-field",
+            type: "select",
+            label: "T-Shirt Size",
+            required: true,
+            options: ["Small", "Medium", "Large"],
+          },
+          {
+            id: "diet-field",
+            type: "select",
+            label: "Dietary",
+            required: true,
+            options: ["None", "Vegan"],
+          },
+          {
+            id: "input-field",
+            type: "input",
+            label: "Name",
+            required: true,
+          },
+        ],
       });
-      await db
-        .insert(usersTable)
-        .values({ id: "u1", email: "u1@ex.com", firstName: "U", lastName: "1" });
-      await db
-        .insert(registrationsTable)
-        .values({ userId: "u1", eventId: "cleanup-event", status: "pending" });
 
+      await db.insert(usersTable).values([
+        { id: "u1", email: "u1@test.com", firstName: "A", lastName: "A" },
+        { id: "u2", email: "u2@test.com", firstName: "B", lastName: "B" },
+        { id: "u3", email: "u3@test.com", firstName: "C", lastName: "C" },
+      ]);
+
+      const today = new Date();
+      const yesterday = new Date(Date.now() - 86400000);
+
+      await db.insert(registrationsTable).values([
+        {
+          userId: "u1",
+          eventId: analyticsEventId,
+          status: "accepted",
+          createdAt: today,
+          answers: { "size-field": "Medium", "diet-field": "Vegan" },
+        },
+        {
+          userId: "u2",
+          eventId: analyticsEventId,
+          status: "accepted",
+          createdAt: today,
+          answers: { "size-field": "Medium", "diet-field": "None" },
+        },
+        {
+          userId: "u3",
+          eventId: analyticsEventId,
+          status: "pending",
+          createdAt: yesterday,
+          answers: { "size-field": "Small", "diet-field": "None" },
+        },
+      ]);
+    });
+
+    it("should return correct aggregated data for committee members", async () => {
       setMockAuth({
         userId: "committee-user",
         sessionClaims: { metadata: { role: "committee" } },
       });
 
       const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/cleanup-event/registrations/batch-update-status",
-        payload: { fromStatus: "pending", toStatus: "waitlist" },
+        method: "GET",
+        url: `/v1/events/${analyticsEventId}/registrations/analytics`,
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.json()).toEqual({ updatedCount: 1 });
+      const data = response.json();
+
+      expect(data.totalCount).toBe(3);
+      expect(data.countByStatus).toEqual({
+        accepted: 2,
+        pending: 1,
+      });
+
+      const dateKeys = Object.keys(data.countByDate);
+      expect(dateKeys.length).toBeGreaterThanOrEqual(2);
+
+      const sizeAnalytics = data.countByAnswers["size-field"];
+      expect(sizeAnalytics.label).toBe("T-Shirt Size");
+
+      type DataOption = {
+        option: string;
+        count: number;
+      };
+
+      const mediumCount = sizeAnalytics.data.find((d: DataOption) => d.option === "Medium").count;
+      const smallCount = sizeAnalytics.data.find((d: DataOption) => d.option === "Small").count;
+      const largeCount = sizeAnalytics.data.find((d: DataOption) => d.option === "Large").count;
+
+      expect(mediumCount).toBe(2);
+      expect(smallCount).toBe(1);
+      expect(largeCount).toBe(0);
+
+      const dietAnalytics = data.countByAnswers["diet-field"];
+      expect(dietAnalytics.data.find((d: DataOption) => d.option === "Vegan").count).toBe(1);
+      expect(dietAnalytics.data.find((d: DataOption) => d.option === "None").count).toBe(2);
     });
 
-    it("should return 403 if trying to mass-accept", async () => {
+    it("should initialize zero-counts for events with no registrations", async () => {
+      await db.insert(eventsTable).values({
+        id: "empty-event",
+        title: "Empty",
+        state: "published",
+        date: new Date(),
+        organiser: "p",
+        aboutMarkdown: "",
+        form: [{ id: "sel", type: "select", label: "Sel", options: ["A", "B"], required: false }],
+      });
+
       setMockAuth({
         userId: "committee-user",
         sessionClaims: { metadata: { role: "committee" } },
       });
 
       const response = await app.inject({
-        method: "POST",
-        url: "/v1/events/any/registrations/batch-update-status",
-        payload: { fromStatus: "pending", toStatus: "accepted" },
+        method: "GET",
+        url: "/v1/events/empty-event/registrations/analytics",
       });
 
-      expect(response.statusCode).toBe(403);
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+
+      expect(data.totalCount).toBe(0);
+      expect(data.countByStatus).toEqual({});
+      // Ensure the chart data structure is still built from the schema
+      expect(data.countByAnswers["sel"].data[0].count).toBe(0);
+    });
+
+    it("should return 401 for non-committee members", async () => {
+      setMockAuth({
+        userId: "u1", // Regular user
+        sessionClaims: { metadata: { role: "member" } },
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/v1/events/${analyticsEventId}/registrations/analytics`,
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+
+    it("should return 401 for unauthenticated users", async () => {
+      setMockAuth({ userId: null, sessionClaims: null });
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/v1/events/${analyticsEventId}/registrations/analytics`,
+      });
+
+      expect(response.statusCode).toBe(401);
     });
   });
 

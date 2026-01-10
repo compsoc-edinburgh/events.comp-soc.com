@@ -60,24 +60,6 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     return reply.status(200).send(result);
   });
 
-  server.post("/promote-from-waitlist", async (request, reply) => {
-    const { userId, sessionClaims } = getAuth(request);
-    const role = sessionClaims?.metadata?.role;
-
-    if (!userId || role !== "committee") {
-      return reply.status(401).send({ message: "Unauthorised" });
-    }
-
-    const { eventId } = RegistrationEventIdSchema.parse(request.params);
-    const result = await registrationService.promoteNextFromWaitlist({
-      db: server.db,
-      data: { eventId },
-      role,
-    });
-
-    return reply.status(200).send(result);
-  });
-
   server.post("/batch-update-status", async (request, reply) => {
     const { userId, sessionClaims } = getAuth(request);
     const role = sessionClaims?.metadata?.role;
@@ -166,6 +148,25 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     });
 
     return reply.status(200).send(updatedRegistration);
+  });
+
+  server.get("/analytics", async (request, reply) => {
+    const { userId, sessionClaims } = getAuth(request);
+    const role = sessionClaims?.metadata?.role;
+
+    if (!userId || role !== "committee") {
+      return reply.status(401).send({ message: "Unauthorised" });
+    }
+
+    const { eventId } = RegistrationEventIdSchema.parse(request.params);
+
+    const analytics = await registrationService.getRegistrationAnalytics({
+      db: server.db,
+      eventId,
+      role,
+    });
+
+    return reply.status(200).send(analytics);
   });
 
   server.delete("/:userId", async (request, reply) => {

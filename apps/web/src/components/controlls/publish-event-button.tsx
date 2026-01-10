@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button.tsx'
-import { usePublishEvent } from '@/lib/hooks/use-publish-event.tsx'
+import { usePublishEvent } from '@/lib/hooks/events/use-publish-event.tsx'
 import {
   Dialog,
   DialogContent,

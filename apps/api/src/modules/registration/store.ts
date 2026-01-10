@@ -1,4 +1,4 @@
-import { eq, and, count, inArray, asc } from "drizzle-orm";
+import { eq, and, count, inArray, asc, sql } from "drizzle-orm";
 import {
   CreateRegistration,
   RegistrationParams,
@@ -7,14 +7,18 @@ import {
   UpdateRegistration,
 } from "./schema.js";
 import { SqlContext } from "../../db/db.js";
-import { eventsTable, registrationsTable } from "../../db/schema.js";
+import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import { EventId } from "../events/schema.js";
-import { RegistrationStatus } from "@events.comp-soc.com/shared";
+import { CustomField } from "@events.comp-soc.com/shared";
 
 export const registrationSelection = {
   userId: registrationsTable.userId,
+  firstName: usersTable.firstName,
+  lastName: usersTable.lastName,
+  email: usersTable.email,
   eventId: registrationsTable.eventId,
   status: registrationsTable.status,
+  answers: registrationsTable.answers,
   createdAt: registrationsTable.createdAt,
   updatedAt: registrationsTable.updatedAt,
   eventTitle: eventsTable.title,
@@ -71,8 +75,19 @@ export const registrationStore = {
         eventId: registrationsTable.eventId,
       })
       .from(registrationsTable)
-      .where(and(eq(registrationsTable.eventId, eventId), eq(registrationsTable.status, "pending")))
-      .orderBy(asc(registrationsTable.createdAt))
+      .where(
+        and(
+          eq(registrationsTable.eventId, eventId),
+          inArray(registrationsTable.status, ["pending", "waitlist"])
+        )
+      )
+      .orderBy(
+        sql`CASE 
+        WHEN ${registrationsTable.status} = 'pending' THEN 0 
+        WHEN ${registrationsTable.status} = 'waitlist' THEN 1
+      END`,
+        asc(registrationsTable.createdAt)
+      )
       .limit(limit);
   },
 
@@ -90,34 +105,13 @@ export const registrationStore = {
       .returning();
   },
 
-  async getOldestByStatus({
-    db,
-    data,
-  }: {
-    db: SqlContext;
-    data: { eventId: string; status: RegistrationStatus };
-  }) {
-    const { eventId, status } = data;
-
-    const [oldest] = await db
-      .select({
-        userId: registrationsTable.userId,
-        eventId: registrationsTable.eventId,
-      })
-      .from(registrationsTable)
-      .where(and(eq(registrationsTable.eventId, eventId), eq(registrationsTable.status, status)))
-      .orderBy(asc(registrationsTable.createdAt))
-      .limit(1);
-
-    return oldest;
-  },
-
   async getByUserAndEvent({ db, data }: { db: SqlContext; data: RegistrationParams }) {
     const { userId, eventId } = data;
     const [registration] = await db
       .select(registrationSelection)
       .from(registrationsTable)
       .innerJoin(eventsTable, eq(registrationsTable.eventId, eventsTable.id))
+      .innerJoin(usersTable, eq(registrationsTable.userId, usersTable.id))
       .where(and(eq(registrationsTable.userId, userId), eq(registrationsTable.eventId, eventId)));
 
     return registration;
@@ -130,13 +124,13 @@ export const registrationStore = {
     db: SqlContext;
     filters: RegistrationsQueryFilter & Pick<EventId, "id">;
   }) {
-    const { id, page, limit, status, userId } = filters;
-    const offset = (page - 1) * limit;
+    const { id, status, userId } = filters;
 
     return db
       .select(registrationSelection)
       .from(registrationsTable)
       .innerJoin(eventsTable, eq(registrationsTable.eventId, eventsTable.id))
+      .innerJoin(usersTable, eq(registrationsTable.userId, usersTable.id))
       .where(
         and(
           eq(registrationsTable.eventId, id),
@@ -144,9 +138,74 @@ export const registrationStore = {
           status ? eq(registrationsTable.status, status) : undefined
         )
       )
-      .limit(limit)
-      .offset(offset)
       .orderBy(registrationsTable.createdAt);
+  },
+
+  async getAnalytics({ db, eventId }: { db: SqlContext; eventId: string }) {
+    const [eventData] = await db
+      .select({ form: eventsTable.form })
+      .from(eventsTable)
+      .where(eq(eventsTable.id, eventId));
+
+    const registrations = await db
+      .select({
+        status: registrationsTable.status,
+        createdAt: registrationsTable.createdAt,
+        answers: registrationsTable.answers,
+      })
+      .from(registrationsTable)
+      .where(eq(registrationsTable.eventId, eventId));
+
+    const totalCount = registrations.length;
+    const countByStatus: Record<string, number> = {};
+    const countByDate: Record<string, number> = {};
+    const countByAnswers: Record<
+      string,
+      { label: string; data: { option: string; count: number }[] }
+    > = {};
+
+    const formSchema = (eventData?.form as CustomField[]) || [];
+    const selectFields = formSchema.filter((f) => f.type === "select" && f.options);
+
+    selectFields.forEach((field) => {
+      countByAnswers[field.id] = {
+        label: field.label,
+        data: (field.options || []).map((opt) => ({ option: opt, count: 0 })),
+      };
+    });
+
+    for (const reg of registrations) {
+      const status = reg.status || "unknown";
+      countByStatus[status] = (countByStatus[status] || 0) + 1;
+
+      const dateKey = reg.createdAt!.toISOString().split("T")[0];
+      countByDate[dateKey] = (countByDate[dateKey] || 0) + 1;
+
+      const answers = reg.answers as Record<string, string>;
+      if (answers) {
+        selectFields.forEach((field) => {
+          const userAnswer = answers[field.id];
+
+          if (userAnswer) {
+            const bucket = countByAnswers[field.id].data.find((d) => d.option === userAnswer);
+            if (bucket) {
+              bucket.count++;
+            }
+          }
+        });
+      }
+    }
+
+    const sortedCountByDate = Object.fromEntries(
+      Object.entries(countByDate).sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+    );
+
+    return {
+      totalCount,
+      countByStatus,
+      countByDate: sortedCountByDate,
+      countByAnswers,
+    };
   },
 
   async delete({ db, data }: { db: SqlContext; data: RegistrationParams }) {

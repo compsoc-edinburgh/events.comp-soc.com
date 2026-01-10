@@ -21,8 +21,8 @@ import { useCommitteeAuth } from '@/lib/auth.ts'
 import { formatEventDate } from '@/lib/utils.ts'
 import DeleteEventButton from '@/components/controlls/delete-event-button.tsx'
 import PublishEventButton from '@/components/controlls/publish-event-button.tsx'
-import RegisterEventButton from '@/components/controlls/register-event-button.tsx'
-import { registrationQueryByAuthOption } from '@/lib/data/registration.ts'
+import CreateRegisterEventButton from '@/components/controlls/create-register-event-button.tsx'
+import { registrationQueryByUserOption } from '@/lib/data/registration.ts'
 import { RegistrationBlock } from '@/components/registration-block.tsx'
 import {
   Tooltip,
@@ -57,7 +57,7 @@ function EventRoute() {
   const { isCommittee } = useCommitteeAuth()
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
   const { data: registration, isLoading: isRegistrationLoading } = useQuery(
-    registrationQueryByAuthOption(eventId),
+    registrationQueryByUserOption(eventId),
   )
   const { full: date } = formatEventDate(event.date)
 
@@ -178,7 +178,7 @@ function EventRoute() {
           {isDraft ? (
             <PublishEventButton eventId={eventId} />
           ) : (
-            <RegisterEventButton
+            <CreateRegisterEventButton
               disabled={isRegistered || isRegistrationLoading}
               form={event.form ?? []}
               title={event.title}
