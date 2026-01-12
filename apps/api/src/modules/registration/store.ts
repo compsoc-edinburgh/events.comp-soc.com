@@ -1,8 +1,11 @@
 import { eq, and, count, inArray, asc, sql } from "drizzle-orm";
 import {
+  AnalyticsEntry,
   CreateRegistration,
+  FormAnalyticsEntry,
   RegistrationParams,
   RegistrationsQueryFilter,
+  RegistrationStoreSelection,
   UpdateBatchRegistration,
   UpdateRegistration,
 } from "./schema.js";
@@ -10,21 +13,6 @@ import { SqlContext } from "../../db/db.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import { EventId } from "../events/schema.js";
 import { CustomField } from "@events.comp-soc.com/shared";
-
-export const registrationSelection = {
-  userId: registrationsTable.userId,
-  firstName: usersTable.firstName,
-  lastName: usersTable.lastName,
-  email: usersTable.email,
-  eventId: registrationsTable.eventId,
-  status: registrationsTable.status,
-  answers: registrationsTable.answers,
-  createdAt: registrationsTable.createdAt,
-  updatedAt: registrationsTable.updatedAt,
-  eventTitle: eventsTable.title,
-  eventDate: eventsTable.date,
-  eventLocation: eventsTable.location,
-};
 
 export const registrationStore = {
   async create({ db, data }: { db: SqlContext; data: CreateRegistration }) {
@@ -50,6 +38,7 @@ export const registrationStore = {
 
   async countActiveByEventId({ db, data }: { db: SqlContext; data: EventId }) {
     const { id } = data;
+
     const [result] = await db
       .select({ count: count() })
       .from(registrationsTable)
@@ -60,7 +49,7 @@ export const registrationStore = {
     return result?.count ?? 0;
   },
 
-  async getPendingOrderedByDate({
+  async getCandidatesOrderedByDate({
     db,
     data,
   }: {
@@ -94,8 +83,6 @@ export const registrationStore = {
   async updateStatusBatch({ db, data }: { db: SqlContext; data: UpdateBatchRegistration }) {
     const { eventId, userIds, status } = data;
 
-    if (userIds.length === 0) return [];
-
     return db
       .update(registrationsTable)
       .set({ status, updatedAt: new Date() })
@@ -107,8 +94,9 @@ export const registrationStore = {
 
   async getByUserAndEvent({ db, data }: { db: SqlContext; data: RegistrationParams }) {
     const { userId, eventId } = data;
+
     const [registration] = await db
-      .select(registrationSelection)
+      .select(RegistrationStoreSelection)
       .from(registrationsTable)
       .innerJoin(eventsTable, eq(registrationsTable.eventId, eventsTable.id))
       .innerJoin(usersTable, eq(registrationsTable.userId, usersTable.id))
@@ -127,7 +115,7 @@ export const registrationStore = {
     const { id, status, userId } = filters;
 
     return db
-      .select(registrationSelection)
+      .select(RegistrationStoreSelection)
       .from(registrationsTable)
       .innerJoin(eventsTable, eq(registrationsTable.eventId, eventsTable.id))
       .innerJoin(usersTable, eq(registrationsTable.userId, usersTable.id))
@@ -141,81 +129,92 @@ export const registrationStore = {
       .orderBy(registrationsTable.createdAt);
   },
 
-  async getAnalytics({ db, eventId }: { db: SqlContext; eventId: string }) {
-    const [eventData] = await db
-      .select({ form: eventsTable.form })
-      .from(eventsTable)
-      .where(eq(eventsTable.id, eventId));
-
-    const registrations = await db
+  async countByStatus({ db, eventId }: { db: SqlContext; eventId: string }) {
+    const results = await db
       .select({
         status: registrationsTable.status,
-        createdAt: registrationsTable.createdAt,
-        answers: registrationsTable.answers,
+        value: count(),
       })
       .from(registrationsTable)
-      .where(eq(registrationsTable.eventId, eventId));
+      .where(eq(registrationsTable.eventId, eventId))
+      .groupBy(registrationsTable.status);
 
-    const totalCount = registrations.length;
-    const countByStatus: Record<string, number> = {};
-    const countByDate: Record<string, number> = {};
-    const countByAnswers: Record<
-      string,
-      { label: string; data: { option: string; count: number }[] }
-    > = {};
+    return results.reduce((acc, result) => {
+      acc[result.status] = result.value;
 
-    const formSchema = (eventData?.form as CustomField[]) || [];
-    const selectFields = formSchema.filter((f) => f.type === "select" && f.options);
+      return acc;
+    }, {} as AnalyticsEntry);
+  },
+
+  async countByDate({ db, eventId }: { db: SqlContext; eventId: string }) {
+    const dateSql = sql<string>`to_char(${registrationsTable.createdAt}, 'YYYY-MM-DD')`;
+
+    const results = await db
+      .select({
+        date: dateSql,
+        value: count(),
+      })
+      .from(registrationsTable)
+      .where(eq(registrationsTable.eventId, eventId))
+      .groupBy(dateSql)
+      .orderBy(dateSql);
+
+    return results.reduce((acc, result) => {
+      acc[result.date] = result.value;
+
+      return acc;
+    }, {} as AnalyticsEntry);
+  },
+
+  async countByAnswers({
+    db,
+    eventId,
+    selectFields,
+  }: {
+    db: SqlContext;
+    eventId: string;
+    selectFields: CustomField[];
+  }) {
+    const output: FormAnalyticsEntry = {};
 
     selectFields.forEach((field) => {
-      countByAnswers[field.id] = {
+      output[field.id] = {
         label: field.label,
-        data: (field.options || []).map((opt) => ({ option: opt, count: 0 })),
+        data: (field.options || []).map((option) => ({ option, count: 0 })),
       };
     });
 
-    for (const reg of registrations) {
-      const status = reg.status || "unknown";
-      countByStatus[status] = (countByStatus[status] || 0) + 1;
+    const results = await db
+      .select({ answers: registrationsTable.answers })
+      .from(registrationsTable)
+      .where(eq(registrationsTable.eventId, eventId));
 
-      const dateKey = reg.createdAt!.toISOString().split("T")[0];
-      countByDate[dateKey] = (countByDate[dateKey] || 0) + 1;
+    for (const row of results) {
+      const answers = row.answers as Record<string, string>;
+      if (!answers) continue;
 
-      const answers = reg.answers as Record<string, string>;
-      if (answers) {
-        selectFields.forEach((field) => {
-          const userAnswer = answers[field.id];
-
-          if (userAnswer) {
-            const bucket = countByAnswers[field.id].data.find((d) => d.option === userAnswer);
-            if (bucket) {
-              bucket.count++;
-            }
+      selectFields.forEach((field) => {
+        const userAnswer = answers[field.id];
+        if (userAnswer) {
+          const bucket = output[field.id].data.find((d) => d.option === userAnswer);
+          if (bucket) {
+            bucket.count++;
           }
-        });
-      }
+        }
+      });
     }
 
-    const sortedCountByDate = Object.fromEntries(
-      Object.entries(countByDate).sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
-    );
-
-    return {
-      totalCount,
-      countByStatus,
-      countByDate: sortedCountByDate,
-      countByAnswers,
-    };
+    return output;
   },
 
   async delete({ db, data }: { db: SqlContext; data: RegistrationParams }) {
     const { userId, eventId } = data;
-    const recordToDelete = await this.getByUserAndEvent({ db, data });
 
-    await db
+    const [deleted] = await db
       .delete(registrationsTable)
-      .where(and(eq(registrationsTable.userId, userId), eq(registrationsTable.eventId, eventId)));
+      .where(and(eq(registrationsTable.userId, userId), eq(registrationsTable.eventId, eventId)))
+      .returning();
 
-    return recordToDelete;
+    return deleted;
   },
 };

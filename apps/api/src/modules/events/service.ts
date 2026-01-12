@@ -1,7 +1,7 @@
 import { eventStore } from "./store.js";
 import { SqlContext } from "../../db/db.js";
 import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
-import { NotFoundError, UnauthorizedError } from "../../lib/errors.js";
+import { NotFoundError } from "../../lib/errors.js";
 import { UserRole, EventState, Nullable } from "@events.comp-soc.com/shared";
 
 export const eventService = {
@@ -44,20 +44,12 @@ export const eventService = {
     return event;
   },
 
-  async createEvent({ db, data, role }: { db: SqlContext; data: CreateEvent; role: UserRole }) {
-    if (role !== UserRole.Committee) {
-      throw new UnauthorizedError("Only committee can create an event");
-    }
-
+  async createEvent({ db, data }: { db: SqlContext; data: CreateEvent }) {
     return eventStore.create({ db, data });
   },
 
-  async updateEvent({ db, data, role }: { db: SqlContext; data: UpdateEvent; role: UserRole }) {
+  async updateEvent({ db, data }: { db: SqlContext; data: UpdateEvent }) {
     const { id } = data;
-
-    if (role !== UserRole.Committee) {
-      throw new UnauthorizedError("Only committee members can update events");
-    }
 
     const updated = await eventStore.update({ db, data });
     if (!updated) {
@@ -67,12 +59,8 @@ export const eventService = {
     return updated;
   },
 
-  async deleteEvent({ db, data, role }: { db: SqlContext; data: EventId; role: UserRole }) {
+  async deleteEvent({ db, data }: { db: SqlContext; data: EventId }) {
     const { id } = data;
-
-    if (role !== UserRole.Committee) {
-      throw new UnauthorizedError("Only committee can delete an event");
-    }
 
     const deleted = await eventStore.delete({ db, data });
     if (!deleted) {

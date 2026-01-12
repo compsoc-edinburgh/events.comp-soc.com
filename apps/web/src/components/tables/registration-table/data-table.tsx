@@ -9,6 +9,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Check, Clock, Settings2, X } from 'lucide-react'
+import type { RegistrationStatus } from '@events.comp-soc.com/shared'
 import type {
   ColumnDef,
   ColumnFiltersState,
@@ -42,7 +43,6 @@ import {
 } from '@/components/ui/tooltip'
 import AcceptUntilCapacityButton from '@/components/controlls/accept-unitll-capacity-button.tsx'
 
-// Define a minimal interface for data that supports bulk actions
 interface WithId {
   userId: string
 }
@@ -50,10 +50,14 @@ interface WithId {
 interface DataTableProps<TData, TValue> {
   columns: Array<ColumnDef<TData, TValue>>
   data: Array<TData>
-  onBulkStatusChange?: (userIds: Array<string>, newStatus: string) => void
+  onBulkStatusChange?: (
+    userIds: Array<string>,
+    newStatus: RegistrationStatus,
+  ) => void
   eventId: string
   title: string
   isAddingDisabled: boolean
+  isActionsDisabled: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -63,6 +67,7 @@ export function DataTable<TData, TValue>({
   eventId,
   title,
   isAddingDisabled,
+  isActionsDisabled,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -111,7 +116,7 @@ export function DataTable<TData, TValue>({
   const selectedRowCount = table.getFilteredSelectedRowModel().rows.length
   const hasSelection = selectedRowCount > 0
 
-  const handleBulkAction = (status: string) => {
+  const handleBulkAction = (status: RegistrationStatus) => {
     const selectedRows = table.getFilteredSelectedRowModel().rows
 
     const ids = selectedRows.map(
@@ -162,7 +167,11 @@ export function DataTable<TData, TValue>({
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isActionsDisabled}
+                  >
                     Update
                   </Button>
                 </DropdownMenuTrigger>
@@ -172,6 +181,7 @@ export function DataTable<TData, TValue>({
                   <DropdownMenuItem
                     onClick={() => handleBulkAction('accepted')}
                     className="cursor-pointer"
+                    disabled={isActionsDisabled}
                   >
                     <Check className="mr-2 h-4 w-4 text-status-accepted" />
                     Accept
@@ -179,6 +189,7 @@ export function DataTable<TData, TValue>({
                   <DropdownMenuItem
                     onClick={() => handleBulkAction('rejected')}
                     className="cursor-pointer"
+                    disabled={isActionsDisabled}
                   >
                     <X className="mr-2 h-4 w-4 text-status-rejected" />
                     Reject
@@ -186,6 +197,7 @@ export function DataTable<TData, TValue>({
                   <DropdownMenuItem
                     onClick={() => handleBulkAction('waitlist')}
                     className="cursor-pointer"
+                    disabled={isActionsDisabled}
                   >
                     <Clock className="mr-2 h-4 w-4 text-status-waitlist" />
                     Waitlist

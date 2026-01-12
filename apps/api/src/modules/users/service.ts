@@ -13,8 +13,8 @@ export const userService = {
   }: {
     db: SqlContext;
     data: UserId;
-    role: Nullable<UserRole>;
-    requesterId: Nullable<string>;
+    role: UserRole;
+    requesterId: string;
   }) {
     const { id } = data;
     const user = await userStore.getById({ db, data: data });
@@ -75,8 +75,8 @@ export const userService = {
   }: {
     db: SqlContext;
     data: UserId;
-    role: Nullable<UserRole>;
-    requesterId: Nullable<string>;
+    role: UserRole;
+    requesterId: string;
   }) {
     const { id } = data;
 

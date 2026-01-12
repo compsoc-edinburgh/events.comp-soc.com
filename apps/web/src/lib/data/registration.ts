@@ -3,6 +3,8 @@ import { auth } from '@clerk/tanstack-react-start/server'
 import axios from 'redaxios'
 import {
   RegistrationAnalyticsResponseSchema,
+  RegistrationBatchAcceptResponseSchema,
+  RegistrationBatchUpdateResponseSchema,
   RegistrationContractSchema,
   RegistrationResponseSchema,
   RegistrationStatusBatchUpdateSchema,
@@ -35,17 +37,18 @@ export const batchAcceptRegistration = createServerFn({ method: 'POST' })
     if (!baseUrl) throw new Error('API_BASE_URL is not defined')
 
     try {
-      const response = await axios.post<RegistrationBatchAcceptResponse>(
-        `${baseUrl}/v1/events/${data.eventId}/registrations/batch-accept`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      const { data: acceptedCount } =
+        await axios.post<RegistrationBatchAcceptResponse>(
+          `${baseUrl}/v1/events/${data.eventId}/registrations/batch-accept`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        },
-      )
+        )
 
-      return response.data
+      return RegistrationBatchAcceptResponseSchema.parse(acceptedCount)
     } catch (err) {
       console.error('Batch accept failed', err)
       throw new Error('Failed to batch accept registrations')
@@ -70,18 +73,19 @@ export const batchUpdateStatus = createServerFn({ method: 'POST' })
     const { eventId, ...payload } = data
 
     try {
-      const response = await axios.post<RegistrationBatchUpdateResponse>(
-        `${baseUrl}/v1/events/${eventId}/registrations/batch-update-status`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+      const { data: updatedCount } =
+        await axios.post<RegistrationBatchUpdateResponse>(
+          `${baseUrl}/v1/events/${eventId}/registrations/batch-update-status`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
           },
-        },
-      )
+        )
 
-      return response.data
+      return RegistrationBatchUpdateResponseSchema.parse(updatedCount)
     } catch (err) {
       console.error('Batch update status failed', err)
       throw new Error('Failed to update registration statuses')
@@ -164,13 +168,15 @@ export const fetchRegistrationAnalytics = createServerFn({ method: 'GET' })
     }
 
     try {
-      const { data: analytics } = await axios.get<
-        Array<RegistrationAnalyticsResponse>
-      >(`${baseUrl}/v1/events/${data.eventId}/registrations/analytics`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const { data: analytics } =
+        await axios.get<RegistrationAnalyticsResponse>(
+          `${baseUrl}/v1/events/${data.eventId}/registrations/analytics`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
 
       return RegistrationAnalyticsResponseSchema.parse(analytics)
     } catch (err) {
@@ -259,7 +265,7 @@ export const updateRegistration = createServerFn({ method: 'POST' })
 
 export const registrationQueryByUserOption = (eventId: string) =>
   queryOptions({
-    queryKey: ['registrations', eventId],
+    queryKey: ['registrations', eventId, 'me'],
     queryFn: () => fetchRegistrationByUser({ data: { eventId } }),
   })
 
