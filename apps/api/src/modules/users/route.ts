@@ -59,10 +59,6 @@ export const userRoutes = async (server: FastifyInstance) => {
     const { userId, role } = request.user;
     const { id } = UserIdSchema.parse(request.params);
 
-    if (!userId || !role) {
-      return reply.status(401).send({ message: "Unauthorised" });
-    }
-
     const dto = UpdateUserContractSchema.parse(request.body);
     const data = UpdateUserSchema.parse({
       ...dto,

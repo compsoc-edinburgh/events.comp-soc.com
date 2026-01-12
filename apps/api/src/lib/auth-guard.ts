@@ -6,7 +6,7 @@ const requireAuth = async (request: FastifyRequest, reply: FastifyReply) => {
   const role = sessionClaims?.metadata?.role;
 
   if (!userId || !role) {
-    throw reply.status(401).send({ message: "Unauthorised" });
+    return reply.status(401).send({ message: "Unauthorised" });
   }
 
   request.user = { userId, role };
@@ -16,7 +16,7 @@ const requireCommittee = async (request: FastifyRequest, reply: FastifyReply) =>
   await requireAuth(request, reply);
 
   if (request.user.role !== "committee") {
-    throw reply.status(401).send({ message: "Unauthorised" });
+    return reply.status(401).send({ message: "Unauthorised" });
   }
 };
 
