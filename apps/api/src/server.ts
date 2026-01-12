@@ -6,7 +6,7 @@ import { userRoutes } from "./modules/users/route.js";
 import { eventRoutes } from "./modules/events/route.js";
 import { registrationRoutes } from "./modules/registration/route.js";
 import { healthCheck } from "./modules/health.js";
-import { errorHandler } from "./lib/errorHandler.js";
+import { errorHandler } from "./lib/./error-handler.js";
 
 export function buildServer() {
   const server = Fastify({

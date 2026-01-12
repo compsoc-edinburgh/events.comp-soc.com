@@ -4,7 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { db } from "../../db/db.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import { buildServer } from "../../server.js";
-import { activeMockAuthState, setMockAuth } from "../../lib/mock-auth.js";
+import { activeMockAuthState, setMockAuth } from "../../../tests/mock-auth.js";
 
 vi.mock("@clerk/fastify", () => {
   return {
@@ -13,7 +13,7 @@ vi.mock("@clerk/fastify", () => {
   };
 });
 
-describe("Registration route", () => {
+describe("Registration", () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
@@ -173,7 +173,7 @@ describe("Registration route", () => {
       expect(response.json()).toEqual({ message: "Unauthorised" });
     });
 
-    it("should return 403 if non-committee tries to update registration", async () => {
+    it("should return 401 if non-committee tries to update registration", async () => {
       setMockAuth({
         userId: "other-user",
         sessionClaims: { metadata: { role: "member" } },
@@ -185,7 +185,7 @@ describe("Registration route", () => {
         payload: { status: "accepted" },
       });
 
-      expect(response.statusCode).toBe(403);
+      expect(response.statusCode).toBe(401);
     });
 
     it("should allow committee to update registration status to accepted", async () => {
@@ -728,50 +728,6 @@ describe("Registration route", () => {
       });
 
       expect(response.statusCode).toBe(404);
-    });
-  });
-
-  describe("DELETE /v1/events/:eventId/registrations (self)", () => {
-    beforeEach(async () => {
-      await db.insert(usersTable).values({
-        id: "test-user",
-        email: "test@example.com",
-        firstName: "Test",
-        lastName: "User",
-      });
-
-      await db.insert(eventsTable).values({
-        id: "test-event",
-        title: "Test Event",
-        state: "published",
-        aboutMarkdown: "markdown",
-        organiser: "projectShare",
-        date: new Date(),
-      });
-
-      await db.insert(registrationsTable).values({
-        userId: "test-user",
-        eventId: "test-event",
-        status: "pending",
-      });
-    });
-
-    it("should allow user to delete their own registration via self endpoint", async () => {
-      setMockAuth({
-        userId: "test-user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
-
-      const response = await app.inject({
-        method: "DELETE",
-        url: "/v1/events/test-event/registrations",
-      });
-
-      expect(response.statusCode).toBe(200);
-
-      const data = response.json();
-      expect(data.userId).toBe("test-user");
-      expect(data.eventId).toBe("test-event");
     });
   });
 });

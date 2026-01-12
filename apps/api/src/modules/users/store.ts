@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
 import { CreateUser, UpdateUser, UserId } from "./schema.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
+import { RegistrationStoreSelection } from "../registration/schema.js";
 
 export const userStore = {
   async create({ db, data }: { db: SqlContext; data: CreateUser }) {
@@ -35,17 +36,9 @@ export const userStore = {
     const { id } = data;
 
     return db
-      .select({
-        userId: registrationsTable.userId,
-        eventId: registrationsTable.eventId,
-        status: registrationsTable.status,
-        createdAt: registrationsTable.createdAt,
-        updatedAt: registrationsTable.updatedAt,
-        eventTitle: eventsTable.title,
-        eventDate: eventsTable.date,
-        eventLocation: eventsTable.location,
-      })
+      .select(RegistrationStoreSelection)
       .from(registrationsTable)
+      .innerJoin(usersTable, eq(registrationsTable.userId, usersTable.id))
       .innerJoin(eventsTable, eq(registrationsTable.eventId, eventsTable.id))
       .where(eq(registrationsTable.userId, id))
       .orderBy(registrationsTable.createdAt);

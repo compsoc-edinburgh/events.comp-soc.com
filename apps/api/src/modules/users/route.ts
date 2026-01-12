@@ -1,12 +1,12 @@
 import { FastifyInstance } from "fastify";
-import { getAuth } from "@clerk/fastify";
 import { CreateUserSchema, UserIdSchema, UpdateUserSchema } from "./schema.js";
 import { userService } from "./service.js";
 import { UpdateUserContractSchema, UserContractSchema } from "@events.comp-soc.com/shared";
+import { requireAuth } from "../../lib/auth-guard.js";
 
 export const userRoutes = async (server: FastifyInstance) => {
-  server.get("/:id", async (request, reply) => {
-    const { userId: requesterId, sessionClaims } = getAuth(request);
+  server.get("/:id", { preHandler: [requireAuth] }, async (request, reply) => {
+    const { userId: requesterId, role } = request.user;
     const { id } = UserIdSchema.parse(request.params);
 
     const user = await userService.getUserById({
@@ -15,18 +15,14 @@ export const userRoutes = async (server: FastifyInstance) => {
         id,
       },
       requesterId,
-      role: sessionClaims?.metadata.role ?? null,
+      role,
     });
 
     return reply.send(user);
   });
 
-  server.get("/registrations", async (request, reply) => {
-    const { userId } = getAuth(request);
-
-    if (!userId) {
-      return reply.status(401).send({ message: "Unauthorised" });
-    }
+  server.get("/registrations", { preHandler: [requireAuth] }, async (request, reply) => {
+    const { userId } = request.user;
 
     const registrations = await userService.getUserRegistrations({
       db: server.db,
@@ -42,12 +38,8 @@ export const userRoutes = async (server: FastifyInstance) => {
     return reply.status(204).send();
   });
 
-  server.post("/", async (request, reply) => {
-    const { userId } = getAuth(request);
-
-    if (!userId) {
-      return reply.status(401).send({ message: "Unauthorised" });
-    }
+  server.post("/", { preHandler: [requireAuth] }, async (request, reply) => {
+    const { userId } = request.user;
 
     const dto = UserContractSchema.parse(request.body);
     const data = CreateUserSchema.parse({
@@ -63,11 +55,9 @@ export const userRoutes = async (server: FastifyInstance) => {
     return reply.status(201).send(newUser);
   });
 
-  server.put("/:id", async (request, reply) => {
-    const { userId, sessionClaims } = getAuth(request);
+  server.put("/:id", { preHandler: [requireAuth] }, async (request, reply) => {
+    const { userId, role } = request.user;
     const { id } = UserIdSchema.parse(request.params);
-
-    const role = sessionClaims?.metadata?.role;
 
     if (!userId || !role) {
       return reply.status(401).send({ message: "Unauthorised" });
@@ -89,13 +79,8 @@ export const userRoutes = async (server: FastifyInstance) => {
     return reply.status(200).send(updatedUser);
   });
 
-  server.delete("/:id", async (request, reply) => {
-    const { userId, sessionClaims } = getAuth(request);
-    const role = sessionClaims?.metadata?.role;
-
-    if (!userId || !role) {
-      return reply.status(401).send({ message: "Unauthorised" });
-    }
+  server.delete("/:id", { preHandler: [requireAuth] }, async (request, reply) => {
+    const { userId, role } = request.user;
 
     const data = UserIdSchema.parse(request.params);
     const deletedUser = await userService.deleteUser({

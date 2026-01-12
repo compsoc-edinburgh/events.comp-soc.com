@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
 import { eventsTable } from "../../db/schema.js";
-import { EventState } from "@events.comp-soc.com/shared";
 import { BaseUserSchema } from "../users/schema.js";
+import { QueryFilterSchema } from "../core/schema.js";
 
 const BaseEventSchema = createInsertSchema(eventsTable);
 
@@ -24,10 +24,8 @@ export const UpdateEventSchema = BaseEventSchema.omit({
     id: BaseUserSchema.shape.id,
   });
 
-export const EventsQueryFilterSchema = z.object({
-  page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(100).default(20),
-  state: z.enum([EventState.Draft, EventState.Published]).optional(),
+export const EventsQueryFilterSchema = QueryFilterSchema.extend({
+  state: BaseEventSchema.shape.state.optional(),
 });
 
 export type EventId = z.infer<typeof EventIdSchema>;

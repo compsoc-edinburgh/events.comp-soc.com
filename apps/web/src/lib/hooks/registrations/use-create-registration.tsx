@@ -16,14 +16,14 @@ export function useCreateRegistration(eventId: string, title: string) {
       }),
     onSuccess: () => {
       toast.success(`Registration for ${title}`, {
-        description: 'Event has been created',
+        description: 'Registration has been created',
       })
       void queryClient.invalidateQueries({
         queryKey: ['registrations'],
       })
     },
     onError: (error) => {
-      toast.error('Failed to create event', {
+      toast.error('Failed to create registration', {
         description: error.message || 'Something went wrong',
       })
     },

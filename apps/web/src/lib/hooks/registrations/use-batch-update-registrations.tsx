@@ -23,7 +23,7 @@ export function useBatchUpdateRegistrations(eventId: string, title: string) {
       })
     },
     onError: (error) => {
-      toast.error('Failed to accept students', {
+      toast.error('Failed to update students', {
         description: error.message || 'Something went wrong',
       })
     },
