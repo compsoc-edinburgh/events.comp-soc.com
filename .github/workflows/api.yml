@@ -109,8 +109,7 @@ jobs:
 
       - name: Build Image
         run: |
-          cd apps/api/
-          docker build . --tag events-api
+          docker build . --file apps/api/Dockerfile --tag events-api
 
       - name: Login to registry
         run: echo "${{ secrets.PAT }}" | docker login ghcr.io -u compsoc-service --password-stdin
