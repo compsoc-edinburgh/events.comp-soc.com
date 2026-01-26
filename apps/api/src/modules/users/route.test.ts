@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from "vitest";
 import { FastifyInstance } from "fastify";
-import { activeMockAuthState, setMockAuth } from "../../lib/mock-auth.js";
+import { activeMockAuthState, setMockAuth } from "../../../tests/mock-auth.js";
 import { buildServer } from "../../server.js";
 import { db } from "../../db/db.js";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 
 vi.mock("@clerk/fastify", () => {
@@ -13,7 +13,7 @@ vi.mock("@clerk/fastify", () => {
   };
 });
 
-describe("User route", () => {
+describe("User", () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
@@ -31,31 +31,54 @@ describe("User route", () => {
   });
 
   describe("GET /v1/users/:id", () => {
+    const targetUser = {
+      id: "target_user_123",
+      firstName: "Target",
+      lastName: "User",
+      email: "private@email.com",
+    };
+
     beforeEach(async () => {
-      await db.insert(usersTable).values({
-        id: "target_user_123",
-        firstName: "Target",
-        lastName: "User",
-        email: "private@email.com",
+      await db.insert(usersTable).values(targetUser);
+    });
+
+    it("should return 404 if user does not exist", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/users/non_existent_id",
+      });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.json()).toEqual({
+        message: "User with non_existent_id not found",
+        statusCode: 404,
       });
     });
 
-    it("should allow a user to see their own email", async () => {
+    it("should allow a user to see their own full profile (including email)", async () => {
       setMockAuth({
-        userId: "target_user_123",
+        userId: targetUser.id,
         sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
         method: "GET",
-        url: "/v1/users/target_user_123",
+        url: `/v1/users/${targetUser.id}`,
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.json().email).toBe("private@email.com");
+      expect(response.json()).toEqual(
+        expect.objectContaining({
+          id: targetUser.id,
+          firstName: targetUser.firstName,
+          email: targetUser.email, // Email should be visible
+        })
+      );
     });
 
-    it("should allow committee to see any user's email", async () => {
+    it("should allow committee members to see any user's full profile", async () => {
       setMockAuth({
         userId: "committee_admin",
         sessionClaims: { metadata: { role: "committee" } },
@@ -63,140 +86,252 @@ describe("User route", () => {
 
       const response = await app.inject({
         method: "GET",
-        url: "/v1/users/target_user_123",
+        url: `/v1/users/${targetUser.id}`,
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.json().email).toBe("private@email.com");
+      expect(response.json().email).toBe(targetUser.email);
     });
 
-    it("should HIDE email if a regular user fetches someone else", async () => {
+    it("should return public profile (redacted email) when viewing another user", async () => {
       setMockAuth({
-        userId: "different_user",
+        userId: "random_stranger",
         sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
         method: "GET",
-        url: "/v1/users/target_user_123",
+        url: `/v1/users/${targetUser.id}`,
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.json().email).toBeUndefined();
-      expect(response.json().firstName).toBe("Target");
+      const body = response.json();
+
+      expect(body.firstName).toBe(targetUser.firstName);
+      expect(body.email).toBeUndefined(); // Crucial check
+      expect(body).not.toHaveProperty("email");
     });
   });
 
   describe("POST /v1/users", () => {
-    it("should get unauthorised if user is not logged in", async () => {
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/users",
-        payload: { firstName: "Test", lastName: "User", email: "test@example.com" },
-      });
-      expect(response.statusCode).toBe(401);
-    });
+    const newUserPayload = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+    };
 
-    it("should create user", async () => {
+    it("should create a new user and persist to DB", async () => {
+      const authId = "auth_user_123";
       setMockAuth({
-        userId: "user_123",
+        userId: authId,
         sessionClaims: { metadata: { role: "member" } },
       });
 
       const response = await app.inject({
         method: "POST",
         url: "/v1/users",
-        payload: { firstName: "John", lastName: "Doe", email: "john@example.com" },
+        payload: newUserPayload,
       });
 
       expect(response.statusCode).toBe(201);
-      expect(response.json().id).toBe("user_123");
+      const responseBody = response.json();
+      expect(responseBody.id).toBe(authId);
+
+      const [dbUser] = await db.select().from(usersTable).where(eq(usersTable.id, authId));
+      expect(dbUser).toBeDefined();
+      expect(dbUser.email).toBe(newUserPayload.email);
+      expect(dbUser.role).toBe("member");
     });
 
-    it("should fail with 400 if email is invalid", async () => {
-      setMockAuth({ userId: "user_123", sessionClaims: {} });
+    it("should reject invalid email formats with 400", async () => {
+      setMockAuth({ userId: "user_x", sessionClaims: { metadata: { role: "member" } } });
 
       const response = await app.inject({
         method: "POST",
         url: "/v1/users",
-        payload: { firstName: "Test", lastName: "User", email: "not-an-email" },
+        payload: { ...newUserPayload, email: "not-an-email" },
       });
+
       expect(response.statusCode).toBe(400);
+    });
+
+    it("should reject missing required fields (lastName)", async () => {
+      setMockAuth({ userId: "user_y", sessionClaims: { metadata: { role: "member" } } });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/users",
+        payload: { firstName: "John", email: "john@test.com" },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
+
+    it("should ignore attempts to set protected fields (like role) via payload", async () => {
+      const authId = "hacker_1";
+      setMockAuth({ userId: authId, sessionClaims: { metadata: { role: "member" } } });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/users",
+        payload: {
+          ...newUserPayload,
+          role: "committee",
+        },
+      });
+
+      expect(response.statusCode).toBe(201);
+
+      const [dbUser] = await db.select().from(usersTable).where(eq(usersTable.id, authId));
+      expect(dbUser.role).toBe("member");
     });
   });
 
   describe("PUT /v1/users/:id", () => {
-    it("should fail if missing role", async () => {
-      setMockAuth({ userId: "user_123", sessionClaims: { metadata: { role: null } } });
+    const existingUser = {
+      id: "user_update_test",
+      firstName: "Original",
+      lastName: "Name",
+      email: "original@test.com",
+    };
 
-      const response = await app.inject({
-        method: "PUT",
-        url: "/v1/users/user_123",
-        payload: { firstName: "Updated" },
-      });
-      expect(response.statusCode).toBe(401);
+    beforeEach(async () => {
+      await db.insert(usersTable).values(existingUser);
     });
 
-    it("should fail if a regular user tries to update someone else", async () => {
-      setMockAuth({ userId: "user_123", sessionClaims: { metadata: { role: "member" } } });
+    it("should allow user to update their own profile", async () => {
+      setMockAuth({ userId: existingUser.id, sessionClaims: { metadata: { role: "member" } } });
 
       const response = await app.inject({
         method: "PUT",
-        url: "/v1/users/user_999",
+        url: `/v1/users/${existingUser.id}`,
+        payload: { firstName: "Updated" },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().firstName).toBe("Updated");
+
+      // Verify DB change
+      const [dbUser] = await db.select().from(usersTable).where(eq(usersTable.id, existingUser.id));
+      expect(dbUser.firstName).toBe("Updated");
+      expect(dbUser.lastName).toBe("Name"); // Should remain unchanged
+    });
+
+    it("should forbid regular users from updating others (403)", async () => {
+      setMockAuth({ userId: "other_user", sessionClaims: { metadata: { role: "member" } } });
+
+      const response = await app.inject({
+        method: "PUT",
+        url: `/v1/users/${existingUser.id}`,
         payload: { firstName: "Hacked" },
       });
 
       expect(response.statusCode).toBe(403);
     });
 
-    it("should allow committee to update a different user", async () => {
-      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
-
-      await db
-        .insert(usersTable)
-        .values({ id: "user_1", firstName: "Old", lastName: "N", email: "e@e.com" });
+    it("should allow committee to update any user", async () => {
+      setMockAuth({ userId: "admin_user", sessionClaims: { metadata: { role: "committee" } } });
 
       const response = await app.inject({
         method: "PUT",
-        url: "/v1/users/user_1",
-        payload: { firstName: "New" },
+        url: `/v1/users/${existingUser.id}`,
+        payload: { lastName: "AdminEdited" },
       });
+
       expect(response.statusCode).toBe(200);
+
+      const [dbUser] = await db.select().from(usersTable).where(eq(usersTable.id, existingUser.id));
+      expect(dbUser.lastName).toBe("AdminEdited");
+    });
+
+    it("should return 404 when updating non-existent user", async () => {
+      setMockAuth({ userId: "admin_user", sessionClaims: { metadata: { role: "committee" } } });
+
+      const response = await app.inject({
+        method: "PUT",
+        url: "/v1/users/ghost_user",
+        payload: { firstName: "Casper" },
+      });
+
+      expect(response.statusCode).toBe(404);
     });
   });
 
   describe("DELETE /v1/users/:id", () => {
-    it("should allow a user to delete their own account", async () => {
-      const userId = "delete_me";
-      setMockAuth({ userId, sessionClaims: { metadata: { role: "member" } } });
+    const userToDelete = {
+      id: "delete_target",
+      firstName: "Temp",
+      lastName: "User",
+      email: "temp@test.com",
+    };
 
-      await db
-        .insert(usersTable)
-        .values({ id: userId, firstName: "X", lastName: "Y", email: "x@y.com" });
+    beforeEach(async () => {
+      await db.insert(usersTable).values(userToDelete);
+    });
 
-      const response = await app.inject({ method: "DELETE", url: `/v1/users/${userId}` });
+    it("should allow user to delete their own account", async () => {
+      setMockAuth({ userId: userToDelete.id, sessionClaims: { metadata: { role: "member" } } });
+
+      const response = await app.inject({
+        method: "DELETE",
+        url: `/v1/users/${userToDelete.id}`,
+      });
+
       expect(response.statusCode).toBe(200);
+      expect(response.json().id).toBe(userToDelete.id);
 
-      const users = await db.select().from(usersTable);
+      // Verify DB deletion
+      const users = await db.select().from(usersTable).where(eq(usersTable.id, userToDelete.id));
       expect(users).toHaveLength(0);
     });
 
-    it("should allow committee to delete any user", async () => {
+    it("should forbid regular user from deleting others", async () => {
+      setMockAuth({ userId: "other_guy", sessionClaims: { metadata: { role: "member" } } });
+
+      const response = await app.inject({
+        method: "DELETE",
+        url: `/v1/users/${userToDelete.id}`,
+      });
+
+      expect(response.statusCode).toBe(403);
+
+      // Verify NOT deleted
+      const users = await db.select().from(usersTable).where(eq(usersTable.id, userToDelete.id));
+      expect(users).toHaveLength(1);
+    });
+
+    it("should allow committee to force delete a user", async () => {
       setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
 
-      await db
-        .insert(usersTable)
-        .values({ id: "bad_user", firstName: "B", lastName: "A", email: "b@a.com" });
+      const response = await app.inject({
+        method: "DELETE",
+        url: `/v1/users/${userToDelete.id}`,
+      });
 
-      const response = await app.inject({ method: "DELETE", url: "/v1/users/bad_user" });
       expect(response.statusCode).toBe(200);
+
+      const users = await db.select().from(usersTable).where(eq(usersTable.id, userToDelete.id));
+      expect(users).toHaveLength(0);
+    });
+
+    it("should return 404 if deleting non-existent user", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+
+      const response = await app.inject({
+        method: "DELETE",
+        url: "/v1/users/already_gone",
+      });
+
+      expect(response.statusCode).toBe(404);
     });
   });
 
   describe("GET /v1/users/registrations", () => {
+    const activeUserId = "active_user_1";
+
     beforeEach(async () => {
       await db.insert(usersTable).values({
-        id: "active_user",
+        id: activeUserId,
         firstName: "Active",
         lastName: "User",
         email: "active@example.com",
@@ -204,30 +339,56 @@ describe("User route", () => {
 
       await db.insert(eventsTable).values([
         {
-          id: "event_1",
-          title: "First Event",
+          id: "ev_1",
+          title: "Hackathon 2024",
           state: "published",
           aboutMarkdown: "md",
-          organiser: "projectShare",
+          organiser: "soc",
           date: new Date(),
         },
-        {
-          id: "event_2",
-          title: "Second Event",
-          state: "published",
-          aboutMarkdown: "md",
-          organiser: "projectShare",
-          date: new Date(),
-        },
-      ]);
-
-      await db.insert(registrationsTable).values([
-        { userId: "active_user", eventId: "event_1", status: "accepted" },
-        { userId: "active_user", eventId: "event_2", status: "pending" },
       ]);
     });
 
-    it("should return 401 if user is not authenticated", async () => {
+    it("should return 204 No Content if user has no registrations", async () => {
+      setMockAuth({ userId: activeUserId, sessionClaims: { metadata: { role: "member" } } });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/users/registrations",
+      });
+
+      expect(response.statusCode).toBe(204);
+      expect(response.body).toBe("");
+    });
+
+    it("should return list of registrations with joined event details", async () => {
+      // Create a registration
+      await db.insert(registrationsTable).values({
+        userId: activeUserId,
+        eventId: "ev_1",
+        status: "accepted",
+      });
+
+      setMockAuth({ userId: activeUserId, sessionClaims: { metadata: { role: "member" } } });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/users/registrations",
+      });
+
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+
+      expect(data).toHaveLength(1);
+      expect(data[0]).toMatchObject({
+        userId: activeUserId,
+        eventId: "ev_1",
+        status: "accepted",
+        eventTitle: "Hackathon 2024",
+      });
+    });
+
+    it("should fail with 401 if unauthenticated", async () => {
       setMockAuth({ userId: null, sessionClaims: null });
 
       const response = await app.inject({
@@ -236,48 +397,6 @@ describe("User route", () => {
       });
 
       expect(response.statusCode).toBe(401);
-    });
-
-    it("should return all registrations for the authenticated user", async () => {
-      setMockAuth({
-        userId: "active_user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/users/registrations",
-      });
-
-      expect(response.statusCode).toBe(200);
-
-      const data = response.json();
-      expect(Array.isArray(data)).toBe(true);
-      expect(data).toHaveLength(2);
-
-      expect(data[0].userId).toBe("active_user");
-      expect(data[1].userId).toBe("active_user");
-    });
-
-    it("should return empty array/no content if user has no registrations", async () => {
-      await db.insert(usersTable).values({
-        id: "new_user",
-        firstName: "New",
-        lastName: "User",
-        email: "new@example.com",
-      });
-
-      setMockAuth({
-        userId: "new_user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/users/registrations",
-      });
-
-      expect(response.statusCode).toBe(204);
     });
   });
 });

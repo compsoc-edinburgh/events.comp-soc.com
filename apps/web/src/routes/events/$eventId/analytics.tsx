@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { BarChart3 } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import type { RegistrationStatus } from '@events.comp-soc.com/shared'
 import { getColumns } from '@/components/tables/registration-table/columns.tsx'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
@@ -21,27 +20,37 @@ import { useBatchUpdateRegistrations } from '@/lib/hooks/registrations/use-batch
 
 export const Route = createFileRoute('/events/$eventId/analytics')({
   loader: async ({ context, params }) => {
-    await context.queryClient.ensureQueryData(eventQueryOption(params.eventId))
-    await context.queryClient.ensureQueryData(
-      registrationQueryOption(params.eventId),
-    )
-    await context.queryClient.ensureQueryData(
-      registrationAnalyticsQueryOption(params.eventId),
-    )
+    await Promise.all([
+      context.queryClient.ensureQueryData(eventQueryOption(params.eventId)),
+      context.queryClient.ensureQueryData(
+        registrationQueryOption(params.eventId),
+      ),
+      context.queryClient.ensureQueryData(
+        registrationAnalyticsQueryOption(params.eventId),
+      ),
+    ])
   },
   component: AnalyticsRoute,
 })
 
 function AnalyticsRoute() {
   const { eventId } = Route.useParams()
+
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
-  const { updateRegistration } = useUpdateRegistration(eventId, event.title)
-  const { batchUpdate } = useBatchUpdateRegistrations(eventId, event.title)
   const { data: registrations } = useSuspenseQuery(
     registrationQueryOption(eventId),
   )
   const { data: analytics } = useSuspenseQuery(
     registrationAnalyticsQueryOption(eventId),
+  )
+
+  const { updateRegistration, isUpdating } = useUpdateRegistration(
+    eventId,
+    event.title,
+  )
+  const { batchUpdate, isBatchUpdating } = useBatchUpdateRegistrations(
+    eventId,
+    event.title,
   )
 
   const isAcceptanceDisabled =
@@ -109,11 +118,12 @@ function AnalyticsRoute() {
               isAddingDisabled={isAcceptanceDisabled}
               eventId={eventId}
               title={event.title}
+              isActionsDisabled={isUpdating || isBatchUpdating}
               onBulkStatusChange={(userIds, newStatus) => {
                 batchUpdate({
                   data: {
                     userIds,
-                    status: newStatus as RegistrationStatus,
+                    status: newStatus,
                   },
                 })
               }}

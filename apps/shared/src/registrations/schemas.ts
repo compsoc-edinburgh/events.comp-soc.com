@@ -4,7 +4,7 @@ import { RegistrationStatus } from "./constants.js";
 export const RegistrationAnswerSchema = z.record(z.string(), z.string());
 
 export const RegistrationContractSchema = z.object({
-  answers: RegistrationAnswerSchema.optional().default({}),
+  answers: RegistrationAnswerSchema.optional(),
 });
 
 export const RegistrationUpdateContractSchema = z.object({

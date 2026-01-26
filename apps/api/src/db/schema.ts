@@ -73,9 +73,9 @@ export const registrationsTable = pgTable(
     eventId: text("event_id")
       .notNull()
       .references(() => eventsTable.id, { onDelete: "cascade" }),
-    status: registrationStatus("status").default("pending"),
+    status: registrationStatus("status").notNull().default("pending"),
     answers: json("form_data").$type<RegistrationFormAnswer>(),
-    createdAt: timestamp("created_at").defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
       .$onUpdate(() => new Date()),
