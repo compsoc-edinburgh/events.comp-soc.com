@@ -8,11 +8,11 @@ A full-stack event management platform for the University of Edinburgh's Computi
 
 This is a **pnpm monorepo** with three packages:
 
-| Package | Description | Tech Stack |
-|---------|-------------|------------|
-| `apps/api` | REST API server | Fastify, Drizzle ORM, PostgreSQL |
-| `apps/web` | Frontend application | React 19, TanStack Router, TanStack Query, Tailwind CSS |
-| `apps/shared` | Shared types & schemas | Zod, TypeScript |
+| Package       | Description            | Tech Stack                                              |
+| ------------- | ---------------------- | ------------------------------------------------------- |
+| `apps/api`    | REST API server        | Fastify, Drizzle ORM, PostgreSQL                        |
+| `apps/web`    | Frontend application   | React 19, TanStack Router, TanStack Query, Tailwind CSS |
+| `apps/shared` | Shared types & schemas | Zod, TypeScript                                         |
 
 ## Features
 
@@ -98,20 +98,20 @@ ngrok http 8080
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | Health check |
-| `GET` | `/v1/events` | List events |
-| `POST` | `/v1/events` | Create event |
-| `GET` | `/v1/events/:id` | Get event |
-| `PUT` | `/v1/events/:id` | Update event |
-| `DELETE` | `/v1/events/:id` | Delete event |
-| `GET` | `/v1/events/:eventId/registrations` | List registrations |
-| `POST` | `/v1/events/:eventId/registrations` | Create registration |
-| `PATCH` | `/v1/events/:eventId/registrations/:userId` | Update registration status |
-| `GET` | `/v1/users/:id` | Get user |
-| `GET` | `/v1/users/registrations` | Get user's registrations |
-| `POST` | `/webhooks/clerk` | Clerk webhook endpoint |
+| Method   | Endpoint                                    | Description                |
+| -------- | ------------------------------------------- | -------------------------- |
+| `GET`    | `/health`                                   | Health check               |
+| `GET`    | `/v1/events`                                | List events                |
+| `POST`   | `/v1/events`                                | Create event               |
+| `GET`    | `/v1/events/:id`                            | Get event                  |
+| `PUT`    | `/v1/events/:id`                            | Update event               |
+| `DELETE` | `/v1/events/:id`                            | Delete event               |
+| `GET`    | `/v1/events/:eventId/registrations`         | List registrations         |
+| `POST`   | `/v1/events/:eventId/registrations`         | Create registration        |
+| `PATCH`  | `/v1/events/:eventId/registrations/:userId` | Update registration status |
+| `GET`    | `/v1/users/:id`                             | Get user                   |
+| `GET`    | `/v1/users/registrations`                   | Get user's registrations   |
+| `POST`   | `/webhooks/clerk`                           | Clerk webhook endpoint     |
 
 ## Scripts
 
