@@ -8,11 +8,6 @@ interface GoogleMapsCardProps {
 function GoogleMaps({ locationURL, locationName }: GoogleMapsCardProps) {
   // Convert Google Maps URL to embeddable format (no API key required)
   const getEmbedUrl = (url: string): string => {
-    // If it's already an embed URL, return as is
-    if (url.includes('/embed')) {
-      return url
-    }
-
     // Use the simple embed format that doesn't require an API key
     let query = locationName || ''
 

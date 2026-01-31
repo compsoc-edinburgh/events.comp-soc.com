@@ -27,7 +27,11 @@ function PublishEventButton({ eventId }: { eventId: string }) {
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-start gap-3 mt-4">
-          <Button onClick={() => publishEvent()} disabled={isPublishing}>
+          <Button
+            onClick={() => publishEvent()}
+            disabled={isPublishing}
+            className="w-full md:max-w-fit"
+          >
             {isPublishing ? 'Publishing' : 'Publish'}
           </Button>
         </div>

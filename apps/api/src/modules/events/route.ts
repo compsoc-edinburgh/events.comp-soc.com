@@ -9,6 +9,7 @@ import {
 import { eventService } from "./service.js";
 import { EventContractSchema, UpdateEventContractSchema } from "@events.comp-soc.com/shared";
 import { nanoid } from "nanoid";
+import { requireCommittee } from "../../lib/auth-guard.js";
 
 export const eventRoutes = async (server: FastifyInstance) => {
   server.get("/", async (request, reply) => {
@@ -39,14 +40,7 @@ export const eventRoutes = async (server: FastifyInstance) => {
     return reply.status(200).send(events);
   });
 
-  server.post("/", async (request, reply) => {
-    const { userId, sessionClaims } = getAuth(request);
-    const role = sessionClaims?.metadata?.role;
-
-    if (!userId || !role) {
-      return reply.status(401).send({ message: "Unauthorised" });
-    }
-
+  server.post("/", { preHandler: [requireCommittee] }, async (request, reply) => {
     const dto = EventContractSchema.parse(request.body);
     const generatedId = nanoid();
 
@@ -59,20 +53,12 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const newEvent = await eventService.createEvent({
       db: server.db,
       data,
-      role,
     });
 
     return reply.status(201).send(newEvent);
   });
 
-  server.put("/:id", async (request, reply) => {
-    const { userId, sessionClaims } = getAuth(request);
-    const role = sessionClaims?.metadata?.role;
-
-    if (!userId || !role) {
-      return reply.status(401).send({ message: "Unauthorised" });
-    }
-
+  server.put("/:id", { preHandler: [requireCommittee] }, async (request, reply) => {
     const { id } = EventIdSchema.parse(request.params);
     const dto = UpdateEventContractSchema.parse(request.body);
 
@@ -85,25 +71,16 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const updatedEvent = await eventService.updateEvent({
       db: server.db,
       data,
-      role,
     });
 
     return reply.status(200).send(updatedEvent);
   });
 
-  server.delete("/:id", async (request, reply) => {
-    const { userId, sessionClaims } = getAuth(request);
-    const role = sessionClaims?.metadata?.role;
-
-    if (!userId || !role) {
-      return reply.status(401).send({ message: "Unauthorised" });
-    }
-
+  server.delete("/:id", { preHandler: [requireCommittee] }, async (request, reply) => {
     const data = EventIdSchema.parse(request.params);
     const deletedEvent = await eventService.deleteEvent({
       db: server.db,
       data,
-      role,
     });
 
     return reply.status(200).send(deletedEvent);

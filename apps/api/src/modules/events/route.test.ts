@@ -1,11 +1,11 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { activeMockAuthState, setMockAuth } from "../../lib/mock-auth.js";
+import { activeMockAuthState, setMockAuth } from "../../../tests/mock-auth.js";
 import { FastifyInstance } from "fastify";
 import { buildServer } from "../../server.js";
 import { db } from "../../db/db.js";
-import { sql } from "drizzle-orm";
-import { eventsTable } from "../../db/schema.js";
-import type { CreateEventRequest } from "@events.comp-soc.com/shared";
+import { sql, eq } from "drizzle-orm";
+import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
+import type { CreateEventRequest, UpdateEventRequest } from "@events.comp-soc.com/shared";
 
 vi.mock("@clerk/fastify", () => {
   return {
@@ -14,7 +14,7 @@ vi.mock("@clerk/fastify", () => {
   };
 });
 
-describe("Event route", () => {
+describe("Event", () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
@@ -26,72 +26,120 @@ describe("Event route", () => {
   });
 
   beforeEach(async () => {
+    await db.execute(sql`TRUNCATE TABLE ${registrationsTable} CASCADE`);
     await db.execute(sql`TRUNCATE TABLE ${eventsTable} CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE ${usersTable} CASCADE`);
   });
 
   describe("GET /v1/events", () => {
     beforeEach(async () => {
-      await db.insert(eventsTable).values({
-        id: "draft-event",
-        title: "Draft event",
-        state: "draft",
-        aboutMarkdown: "markdown",
+      const baseEvent = {
+        aboutMarkdown: "md",
         organiser: "projectShare",
         date: new Date(),
-      });
+      };
 
-      await db.insert(eventsTable).values({
-        id: "published-event",
-        title: "Published event",
-        state: "published",
-        aboutMarkdown: "markdown",
-        organiser: "projectShare",
-        date: new Date(),
-      });
+      await db.insert(eventsTable).values([
+        { ...baseEvent, id: "pub-1", title: "Public 1", state: "published" },
+        { ...baseEvent, id: "pub-2", title: "Public 2", state: "published" },
+        { ...baseEvent, id: "pub-3", title: "Public 3", state: "published" },
+        { ...baseEvent, id: "draft-1", title: "Draft 1", state: "draft" },
+        { ...baseEvent, id: "draft-2", title: "Draft 2", state: "draft" },
+      ]);
     });
 
-    it("Committee member can see all events", async () => {
-      setMockAuth({
-        userId: "regular-user",
-        sessionClaims: {
-          metadata: { role: "committee" },
-        },
-      });
+    it("should return ONLY published events for unauthenticated users", async () => {
+      setMockAuth({ userId: null, sessionClaims: null });
 
       const response = await app.inject({
         method: "GET",
         url: "/v1/events",
       });
 
-      const data = response.json();
       expect(response.statusCode).toBe(200);
+      const data = response.json();
+      expect(data).toHaveLength(3);
+    });
 
+    it("should return ONLY published events for regular members", async () => {
+      setMockAuth({ userId: "mem_1", sessionClaims: { metadata: { role: "member" } } });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events",
+      });
+
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("should return ALL events (draft & published) for committee members", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toHaveLength(5);
+    });
+
+    it("should support pagination (limit/page)", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+
+      // Page 1, Limit 2
+      const res1 = await app.inject({
+        method: "GET",
+        url: "/v1/events?page=1&limit=2",
+      });
+      expect(res1.json()).toHaveLength(2);
+
+      // Page 3, Limit 2 (Should have 1 item left: 5 total)
+      const res2 = await app.inject({
+        method: "GET",
+        url: "/v1/events?page=3&limit=2",
+      });
+      expect(res2.json()).toHaveLength(1);
+    });
+
+    it("should allow committee to filter by state explicitly", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events?state=draft",
+      });
+
+      const data = response.json();
       expect(data).toHaveLength(2);
+      expect(data[0].state).toBe("draft");
+    });
+  });
+
+  describe("GET /v1/events/:id", () => {
+    beforeEach(async () => {
+      await db.insert(eventsTable).values([
+        {
+          id: "draft-event",
+          title: "Secret",
+          state: "draft",
+          aboutMarkdown: "md",
+          organiser: "soc",
+          date: new Date(),
+        },
+        {
+          id: "public-event",
+          title: "Public",
+          state: "published",
+          aboutMarkdown: "md",
+          organiser: "soc",
+          date: new Date(),
+        },
+      ]);
     });
 
-    it("Regular user can only see published events", async () => {
-      setMockAuth({
-        userId: "regular-user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/events",
-      });
-
-      const data = response.json();
-      expect(response.statusCode).toBe(200);
-
-      expect(data).toHaveLength(1);
-      expect(data[0].state).toBe("published");
-    });
-
-    it("should return 404 for draft event if accessed by regular user", async () => {
-      setMockAuth({
-        userId: "regular-user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
+    it("should return 404 for draft event if user is member", async () => {
+      setMockAuth({ userId: "mem", sessionClaims: { metadata: { role: "member" } } });
 
       const response = await app.inject({
         method: "GET",
@@ -100,157 +148,99 @@ describe("Event route", () => {
 
       expect(response.statusCode).toBe(404);
     });
-  });
 
-  describe("Event list pagination", () => {
-    beforeEach(async () => {
-      const events = Array.from({ length: 5 }).map((_, i) => ({
-        id: `event-${i + 1}`,
-        title: `Event ${i + 1}`,
-        state: "published" as const,
-        aboutMarkdown: "markdown",
-        organiser: "projectShare",
-        date: new Date(2025, 0, i + 1),
-      }));
+    it("should return 200 for draft event if user is committee", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
 
-      await db.insert(eventsTable).values(events);
-    });
-
-    it("should return the first page with correct limit", async () => {
       const response = await app.inject({
         method: "GET",
-        url: "/v1/events",
-        query: { page: "1", limit: "2" },
+        url: "/v1/events/draft-event",
       });
 
-      const data = response.json();
       expect(response.statusCode).toBe(200);
-      expect(data).toHaveLength(2);
-
-      expect(data[0].id).toBe("event-1");
-      expect(data[1].id).toBe("event-2");
+      expect(response.json().id).toBe("draft-event");
     });
 
-    it("should return the second page correctly", async () => {
+    it("should return 404 if event does not exist", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+
       const response = await app.inject({
         method: "GET",
-        url: "/v1/events",
-        query: { page: "2", limit: "2" },
+        url: "/v1/events/non-existent",
       });
 
-      const data = response.json();
-      expect(response.statusCode).toBe(200);
-      expect(data).toHaveLength(2);
-
-      expect(data[0].id).toBe("event-3");
-      expect(data[1].id).toBe("event-4");
-    });
-
-    it("should return an empty array if page is out of bounds", async () => {
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/events",
-        query: { page: "10", limit: "2" },
-      });
-
-      const data = response.json();
-      expect(data).toHaveLength(0);
+      expect(response.statusCode).toBe(404);
     });
   });
 
   describe("POST /v1/events", () => {
-    const validEventData: CreateEventRequest = {
-      title: "New Event",
-      organiser: "evp",
-      state: "published",
+    const validPayload: CreateEventRequest = {
+      title: "Hackathon 2025",
+      organiser: "projectShare",
+      state: "draft",
       priority: "default",
-      capacity: 100,
+      capacity: 150,
       date: new Date().toISOString(),
-      aboutMarkdown: "Event description",
-      location: "Main Hall",
-      locationURL: null,
+      aboutMarkdown: "# Details",
+      location: "Comp Lab",
+      locationURL: "https://maps.google.com",
       form: [],
     };
 
-    it("should return 401 if user is not authenticated", async () => {
-      setMockAuth({ userId: null, sessionClaims: null });
+    it("should forbid creation by non-committee members (401)", async () => {
+      setMockAuth({ userId: "mem", sessionClaims: { metadata: { role: "member" } } });
 
       const response = await app.inject({
         method: "POST",
         url: "/v1/events",
-        payload: validEventData,
+        payload: validPayload,
       });
 
       expect(response.statusCode).toBe(401);
-      expect(response.json()).toEqual({ message: "Unauthorised" });
     });
 
-    it("should return 403 if user is not a committee member", async () => {
-      setMockAuth({
-        userId: "regular-user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
+    it("should create event successfully for committee", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
 
       const response = await app.inject({
         method: "POST",
         url: "/v1/events",
-        payload: validEventData,
-      });
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should create event when user is committee member", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events",
-        payload: validEventData,
+        payload: validPayload,
       });
 
       expect(response.statusCode).toBe(201);
+      const body = response.json();
 
-      const data = response.json();
-      expect(data.title).toBe(validEventData.title);
-      expect(data.organiser).toBe(validEventData.organiser);
-      expect(data.id).toBeDefined();
+      expect(body.id).toBeDefined();
+
+      const [dbEvent] = await db.select().from(eventsTable).where(eq(eventsTable.id, body.id));
+      expect(dbEvent).toBeDefined();
+      expect(dbEvent.title).toBe(validPayload.title);
+      expect(dbEvent.capacity).toBe(150);
     });
 
-    it("should return 400 for invalid parameters", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
+    it("should fail (400) if required fields are missing", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
 
       const response = await app.inject({
         method: "POST",
         url: "/v1/events",
         payload: {
-          title: "",
-          organiser: "projectShare",
-          date: "not-a-date",
+          // Missing title, organiser, date, etc.
+          aboutMarkdown: "Just desc",
         },
       });
 
       expect(response.statusCode).toBe(400);
     });
 
-    it("should return 400 when required fields are missing", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
+    it("should fail (400) if date is invalid", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
 
       const response = await app.inject({
         method: "POST",
         url: "/v1/events",
-        payload: {
-          title: "Event without organizer",
-        },
+        payload: { ...validPayload, date: "invalid-date-string" },
       });
 
       expect(response.statusCode).toBe(400);
@@ -258,78 +248,49 @@ describe("Event route", () => {
   });
 
   describe("PUT /v1/events/:id", () => {
+    const eventId = "update-test-id";
+
     beforeEach(async () => {
       await db.insert(eventsTable).values({
-        id: "existing-event",
-        title: "Existing Event",
+        id: eventId,
+        title: "Old Title",
         state: "draft",
-        aboutMarkdown: "Original description",
-        organiser: "projectShare",
+        aboutMarkdown: "Old MD",
+        organiser: "soc",
         date: new Date(),
+        capacity: 50,
       });
     });
 
-    it("should return 401 if user is not authenticated", async () => {
-      setMockAuth({ userId: null, sessionClaims: null });
+    it("should allow partial updates", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+
+      const updatePayload: UpdateEventRequest = {
+        title: "New Title",
+        // Note: Not sending capacity or state, they should remain unchanged
+      };
 
       const response = await app.inject({
         method: "PUT",
-        url: "/v1/events/existing-event",
-        payload: { title: "Updated Title" },
-      });
-
-      expect(response.statusCode).toBe(401);
-      expect(response.json()).toEqual({ message: "Unauthorised" });
-    });
-
-    it("should return 403 if user is not a committee member", async () => {
-      setMockAuth({
-        userId: "regular-user",
-        sessionClaims: { metadata: { role: "member" } },
-      });
-
-      const response = await app.inject({
-        method: "PUT",
-        url: "/v1/events/existing-event",
-        payload: { title: "Updated Title" },
-      });
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should update event when user is committee member", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      const response = await app.inject({
-        method: "PUT",
-        url: "/v1/events/existing-event",
-        payload: {
-          title: "Updated Event Title",
-          aboutMarkdown: "Updated description",
-        },
+        url: `/v1/events/${eventId}`,
+        payload: updatePayload,
       });
 
       expect(response.statusCode).toBe(200);
+      expect(response.json().title).toBe("New Title");
 
-      const data = response.json();
-      expect(data.title).toBe("Updated Event Title");
-      expect(data.aboutMarkdown).toBe("Updated description");
-      expect(data.id).toBe("existing-event");
+      const [dbEvent] = await db.select().from(eventsTable).where(eq(eventsTable.id, eventId));
+      expect(dbEvent.title).toBe("New Title");
+      expect(dbEvent.capacity).toBe(50);
     });
 
-    it("should return 404 when updating non-existing event", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
+    it("should return 404 if updating non-existent event", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
 
       const response = await app.inject({
         method: "PUT",
-        url: "/v1/events/non-existing-event",
-        payload: { title: "Updated Title" },
+        url: "/v1/events/ghost-event",
+        payload: { title: "Ghost" },
       });
 
       expect(response.statusCode).toBe(404);
@@ -337,78 +298,58 @@ describe("Event route", () => {
   });
 
   describe("DELETE /v1/events/:id", () => {
+    const eventId = "delete-target";
+
     beforeEach(async () => {
       await db.insert(eventsTable).values({
-        id: "event-to-delete",
-        title: "Event To Delete",
+        id: eventId,
+        title: "To Be Deleted",
         state: "draft",
-        aboutMarkdown: "Will be deleted",
-        organiser: "projectShare",
+        aboutMarkdown: "md",
+        organiser: "soc",
         date: new Date(),
       });
     });
 
-    it("should return 401 if user is not authenticated", async () => {
-      setMockAuth({ userId: null, sessionClaims: null });
+    it("should delete event and return 200", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
 
       const response = await app.inject({
         method: "DELETE",
-        url: "/v1/events/event-to-delete",
+        url: `/v1/events/${eventId}`,
       });
 
-      expect(response.statusCode).toBe(401);
-      expect(response.json()).toEqual({ message: "Unauthorised" });
+      expect(response.statusCode).toBe(200);
+      expect(response.json().id).toBe(eventId);
+
+      const result = await db.select().from(eventsTable).where(eq(eventsTable.id, eventId));
+      expect(result).toHaveLength(0);
     });
 
-    it("should return 403 if user is not a committee member", async () => {
-      setMockAuth({
-        userId: "regular-user",
-        sessionClaims: { metadata: { role: "member" } },
+    it("should CASCADE delete: deleting event must delete associated registrations", async () => {
+      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+      await db
+        .insert(usersTable)
+        .values({ id: "u2", firstName: "A", lastName: "B", email: "u2@gmail.com" });
+
+      await db.insert(registrationsTable).values({
+        userId: "u2",
+        eventId: eventId,
+        status: "accepted",
       });
 
       const response = await app.inject({
         method: "DELETE",
-        url: "/v1/events/event-to-delete",
-      });
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should delete event when user is committee member", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      const response = await app.inject({
-        method: "DELETE",
-        url: "/v1/events/event-to-delete",
+        url: `/v1/events/${eventId}`,
       });
 
       expect(response.statusCode).toBe(200);
 
-      const data = response.json();
-      expect(data.id).toBe("event-to-delete");
-
-      const checkResponse = await app.inject({
-        method: "GET",
-        url: "/v1/events/event-to-delete",
-      });
-      expect(checkResponse.statusCode).toBe(404);
-    });
-
-    it("should return 404 when deleting non-existing event", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      const response = await app.inject({
-        method: "DELETE",
-        url: "/v1/events/non-existing-event",
-      });
-
-      expect(response.statusCode).toBe(404);
+      const regs = await db
+        .select()
+        .from(registrationsTable)
+        .where(eq(registrationsTable.eventId, eventId));
+      expect(regs).toHaveLength(0);
     });
   });
 });

@@ -8,28 +8,20 @@ import {
   UpdateRegistration,
 } from "./schema.js";
 import { eventStore } from "../events/store.js";
-import { Nullable, UserRole } from "@events.comp-soc.com/shared";
+import { UserRole } from "@events.comp-soc.com/shared";
 import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { registrationStore } from "./store.js";
 import { EventId } from "../events/schema.js";
 
 export const registrationService = {
-  async createRegistration({
-    db,
-    data,
-    role,
-  }: {
-    db: SqlContext;
-    data: CreateRegistration;
-    role: UserRole;
-  }) {
+  async createRegistration({ db, data }: { db: SqlContext; data: CreateRegistration }) {
     return await db.transaction(async (tx) => {
       const event = await eventStore.findById({
         db: tx,
         data: { id: data.eventId },
       });
 
-      if (!event || (role !== "committee" && event.state === "draft")) {
+      if (event.state === "draft") {
         throw new NotFoundError(`Event with ${data.eventId} not found`);
       }
 
@@ -59,39 +51,20 @@ export const registrationService = {
   async getRegistrations({
     db,
     filters,
-    role,
   }: {
     db: SqlContext;
     filters: RegistrationsQueryFilter & Pick<EventId, "id">;
-    role: Nullable<UserRole>;
   }) {
-    const isCommittee = role === "committee";
-
-    if (!isCommittee) {
-      throw new UnauthorizedError("You do not have permission to view this registration");
-    }
-
     return registrationStore.get({ db, filters });
   },
 
-  async updateRegistration({
-    db,
-    data,
-    role,
-  }: {
-    db: SqlContext;
-    data: UpdateRegistration;
-    role: UserRole;
-  }) {
-    if (role !== "committee") {
-      throw new UnauthorizedError("Only committee members can update registrations");
-    }
-
+  async updateRegistration({ db, data }: { db: SqlContext; data: UpdateRegistration }) {
     return await db.transaction(async (tx) => {
       const registration = await registrationStore.getByUserAndEvent({
         db: tx,
         data,
       });
+
       if (!registration) {
         throw new NotFoundError("Registration not found");
       }
@@ -128,19 +101,7 @@ export const registrationService = {
     });
   },
 
-  async batchAcceptRegistration({
-    db,
-    data,
-    role,
-  }: {
-    db: SqlContext;
-    data: RegistrationEventId;
-    role: UserRole;
-  }) {
-    if (role !== "committee") {
-      throw new UnauthorizedError("Only committee members can update registrations");
-    }
-
+  async batchAcceptRegistration({ db, data }: { db: SqlContext; data: RegistrationEventId }) {
     return await db.transaction(async (tx) => {
       const event = await eventStore.findByIdForUpdate({
         tx,
@@ -157,7 +118,7 @@ export const registrationService = {
         throw new ConflictError("Event is already at or over capacity");
       }
 
-      const toAccept = await registrationStore.getPendingOrderedByDate({
+      const toAccept = await registrationStore.getCandidatesOrderedByDate({
         db: tx,
         data: { eventId: data.eventId, limit: spotsLeft },
       });
@@ -176,19 +137,7 @@ export const registrationService = {
     });
   },
 
-  async batchUpdateStatus({
-    db,
-    data,
-    role,
-  }: {
-    db: SqlContext;
-    data: UpdateBatchRegistration;
-    role: UserRole;
-  }) {
-    if (role !== "committee") {
-      throw new UnauthorizedError("Only committee members can perform batch updates");
-    }
-
+  async batchUpdateStatus({ db, data }: { db: SqlContext; data: UpdateBatchRegistration }) {
     return await db.transaction(async (tx) => {
       const event = await eventStore.findById({
         db: tx,
@@ -238,19 +187,7 @@ export const registrationService = {
     return await registrationStore.delete({ db, data });
   },
 
-  async getRegistrationAnalytics({
-    db,
-    eventId,
-    role,
-  }: {
-    db: SqlContext;
-    eventId: string;
-    role: Nullable<UserRole>;
-  }) {
-    if (role !== "committee") {
-      throw new UnauthorizedError("Only committee members can view analytics");
-    }
-
+  async getRegistrationAnalytics({ db, eventId }: { db: SqlContext; eventId: string }) {
     const event = await eventStore.findById({
       db,
       data: { id: eventId },
@@ -260,9 +197,17 @@ export const registrationService = {
       throw new NotFoundError(`Event with ${eventId} not found`);
     }
 
-    return await registrationStore.getAnalytics({
-      db,
-      eventId,
-    });
+    const formSchema = event.form || [];
+    const selectFields = formSchema.filter((f) => f.type === "select" && f.options);
+
+    const [countByStatus, countByDate, countByAnswers] = await Promise.all([
+      registrationStore.countByStatus({ db, eventId }),
+      registrationStore.countByDate({ db, eventId }),
+      registrationStore.countByAnswers({ db, eventId, selectFields }),
+    ]);
+
+    const totalCount = Object.values(countByStatus).reduce((a, b) => a + b, 0);
+
+    return { totalCount, countByStatus, countByDate, countByAnswers };
   },
 };
