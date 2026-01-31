@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Webhook } from "svix";
+import { clerkClient } from "@clerk/fastify";
 import { userService } from "../users/service.js";
 import { Nullable } from "@events.comp-soc.com/shared";
 
@@ -71,6 +72,12 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
               return reply.status(400).send({ error: "No primary email found" });
             }
 
+            await clerkClient.users.updateUserMetadata(data.id, {
+              publicMetadata: {
+                role: "member",
+              },
+            });
+
             await userService.createUser({
               db: server.db,
               data: {
@@ -81,7 +88,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
               },
             });
 
-            server.log.info(`Created user: ${data.id}`);
+            server.log.info(`Created user: ${data.id} with role: member`);
             break;
           }
 
