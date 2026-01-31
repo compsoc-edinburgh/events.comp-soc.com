@@ -16,5 +16,6 @@ declare module "fastify" {
       userId: string;
       role: UserRole;
     };
+    rawBody?: string;
   }
 }
