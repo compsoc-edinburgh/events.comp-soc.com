@@ -8,6 +8,13 @@
       "when": 1767533608741,
       "tag": "0000_watery_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769946474409,
+      "tag": "0001_military_juggernaut",
+      "breakpoints": true
     }
   ]
 }

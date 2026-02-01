@@ -2,7 +2,12 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Webhook } from "svix";
 import { clerkClient } from "@clerk/fastify";
 import { userService } from "../users/service.js";
-import { Nullable } from "@events.comp-soc.com/shared";
+import { Nullable, Sigs, UserRole } from "@events.comp-soc.com/shared";
+
+interface ClerkPublicMetadata {
+  role?: UserRole;
+  sigs?: Sigs[];
+}
 
 interface ClerkUserEventData {
   id: string;
@@ -13,6 +18,7 @@ interface ClerkUserEventData {
   first_name: Nullable<string>;
   last_name: Nullable<string>;
   primary_email_address_id: string;
+  public_metadata?: ClerkPublicMetadata;
 }
 
 interface ClerkWebhookEvent {
@@ -72,11 +78,16 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
               return reply.status(400).send({ error: "No primary email found" });
             }
 
-            await clerkClient.users.updateUserMetadata(data.id, {
-              publicMetadata: {
-                role: "member",
-              },
-            });
+            const existingRole = data.public_metadata?.role;
+            const existingSigs = data.public_metadata?.sigs;
+
+            if (!existingRole) {
+              await clerkClient.users.updateUserMetadata(data.id, {
+                publicMetadata: {
+                  role: UserRole.Member,
+                },
+              });
+            }
 
             await userService.createUser({
               db: server.db,
@@ -85,10 +96,13 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
                 email: primaryEmail.email_address,
                 firstName: data.first_name || "",
                 lastName: data.last_name || "",
+                sigs: existingSigs,
               },
             });
 
-            server.log.info(`Created user: ${data.id} with role: member`);
+            server.log.info(
+              `Created user: ${data.id} with role: ${existingRole || UserRole.Member}`
+            );
             break;
           }
 

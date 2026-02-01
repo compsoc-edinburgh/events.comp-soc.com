@@ -8,6 +8,7 @@ import {
   UserIcon,
 } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import type { Sigs } from '@events.comp-soc.com/shared'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
@@ -17,7 +18,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { StatusCard } from '@/components/ui/status-card.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
 import DraftBadge from '@/components/draft-badge.tsx'
-import { useCommitteeAuth } from '@/lib/auth.ts'
+import { useEventManagerAuth } from '@/lib/auth.ts'
 import { formatEventDate } from '@/lib/utils.ts'
 import DeleteEventButton from '@/components/controlls/delete-event-button.tsx'
 import PublishEventButton from '@/components/controlls/publish-event-button.tsx'
@@ -54,7 +55,7 @@ export const Route = createFileRoute('/events/$eventId/')({
 function EventRoute() {
   const navigate = useNavigate({ from: '/events/$eventId' })
   const { eventId } = Route.useParams()
-  const { isCommittee } = useCommitteeAuth()
+  const { canManage } = useEventManagerAuth()
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
   const { data: registration, isLoading: isRegistrationLoading } = useQuery(
     registrationQueryByUserOption(eventId),
@@ -64,11 +65,13 @@ function EventRoute() {
   const isDraft = event.state === 'draft'
   const isRegistered = !!registration
 
+  const canManageEvent = canManage(event.organiser as Sigs)
+
   return (
     <Window
       activeTab="/events"
       toolbarContent={
-        isCommittee ? (
+        canManageEvent ? (
           <div className="flex items-center justify-center gap-3">
             <Tooltip>
               <TooltipTrigger className="flex items-center justify-center">
@@ -110,7 +113,7 @@ function EventRoute() {
             </Tooltip>
             <DeleteEventButton eventId={eventId} />
           </div>
-        ) : undefined
+        ) : null
       }
     >
       <Sheet>

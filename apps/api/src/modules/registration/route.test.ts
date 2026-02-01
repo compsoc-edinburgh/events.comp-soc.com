@@ -4,7 +4,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { db } from "../../db/db.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import { buildServer } from "../../server.js";
-import { activeMockAuthState, setMockAuth } from "../../../tests/mock-auth.js";
+import {
+  activeMockAuthState,
+  setMockAuth,
+  setSigExecutiveAuth,
+  setMemberAuth,
+} from "../../../tests/mock-auth.js";
+import { Sigs } from "@events.comp-soc.com/shared";
 
 vi.mock("@clerk/fastify", () => {
   return {
@@ -728,6 +734,315 @@ describe("Registration", () => {
       });
 
       expect(response.statusCode).toBe(404);
+    });
+  });
+
+  // ===== SIG EXECUTIVE ROLE TESTS =====
+
+  describe("SIG Executive - GET /v1/events/:eventId/registrations", () => {
+    beforeEach(async () => {
+      await db.insert(usersTable).values([
+        { id: "user-1", email: "u1@ex.com", firstName: "U", lastName: "1" },
+        { id: "user-2", email: "u2@ex.com", firstName: "U", lastName: "2" },
+      ]);
+
+      await db.insert(eventsTable).values([
+        {
+          id: "ai-event",
+          title: "AI Event",
+          state: "published",
+          aboutMarkdown: "markdown",
+          organiser: Sigs.EdinburghAI,
+          date: new Date(),
+        },
+        {
+          id: "quant-event",
+          title: "Quant Event",
+          state: "published",
+          aboutMarkdown: "markdown",
+          organiser: Sigs.QuantSig,
+          date: new Date(),
+        },
+      ]);
+
+      await db.insert(registrationsTable).values([
+        { userId: "user-1", eventId: "ai-event", status: "pending" },
+        { userId: "user-2", eventId: "quant-event", status: "pending" },
+      ]);
+    });
+
+    it("should allow sig_executive to view registrations for their SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/ai-event/registrations",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toHaveLength(1);
+    });
+
+    it("should forbid sig_executive from viewing registrations for other SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/quant-event/registrations",
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should forbid regular members from viewing registrations", async () => {
+      setMemberAuth("member");
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/ai-event/registrations",
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+  });
+
+  describe("SIG Executive - PUT /v1/events/:eventId/registrations/:userId", () => {
+    beforeEach(async () => {
+      await db.insert(usersTable).values([
+        { id: "test-user", email: "test@example.com", firstName: "Test", lastName: "User" },
+      ]);
+
+      await db.insert(eventsTable).values([
+        {
+          id: "ai-event",
+          title: "AI Event",
+          state: "published",
+          aboutMarkdown: "markdown",
+          organiser: Sigs.EdinburghAI,
+          date: new Date(),
+          capacity: 10,
+        },
+        {
+          id: "quant-event",
+          title: "Quant Event",
+          state: "published",
+          aboutMarkdown: "markdown",
+          organiser: Sigs.QuantSig,
+          date: new Date(),
+          capacity: 10,
+        },
+      ]);
+
+      await db.insert(registrationsTable).values([
+        { userId: "test-user", eventId: "ai-event", status: "pending" },
+        { userId: "test-user", eventId: "quant-event", status: "pending" },
+      ]);
+    });
+
+    it("should allow sig_executive to update registration for their SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "PUT",
+        url: "/v1/events/ai-event/registrations/test-user",
+        payload: { status: "accepted" },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().status).toBe("accepted");
+    });
+
+    it("should forbid sig_executive from updating registration for other SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "PUT",
+        url: "/v1/events/quant-event/registrations/test-user",
+        payload: { status: "accepted" },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+  });
+
+  describe("SIG Executive - POST /v1/events/:eventId/registrations/batch-accept", () => {
+    beforeEach(async () => {
+      await db.insert(eventsTable).values([
+        {
+          id: "ai-batch-event",
+          title: "AI Batch Event",
+          state: "published",
+          capacity: 2,
+          aboutMarkdown: "md",
+          organiser: Sigs.EdinburghAI,
+          date: new Date(),
+        },
+        {
+          id: "quant-batch-event",
+          title: "Quant Batch Event",
+          state: "published",
+          capacity: 2,
+          aboutMarkdown: "md",
+          organiser: Sigs.QuantSig,
+          date: new Date(),
+        },
+      ]);
+
+      await db.insert(usersTable).values([
+        { id: "p1", email: "p1@ex.com", firstName: "P1", lastName: "U" },
+        { id: "p2", email: "p2@ex.com", firstName: "P2", lastName: "U" },
+      ]);
+
+      await db.insert(registrationsTable).values([
+        { userId: "p1", eventId: "ai-batch-event", status: "pending" },
+        { userId: "p2", eventId: "ai-batch-event", status: "pending" },
+        { userId: "p1", eventId: "quant-batch-event", status: "pending" },
+      ]);
+    });
+
+    it("should allow sig_executive to batch accept for their SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/ai-batch-event/registrations/batch-accept",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({ acceptedCount: 2 });
+    });
+
+    it("should forbid sig_executive from batch accepting for other SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events/quant-batch-event/registrations/batch-accept",
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+  });
+
+  describe("SIG Executive - GET /v1/events/:eventId/registrations/analytics", () => {
+    beforeEach(async () => {
+      await db.insert(eventsTable).values([
+        {
+          id: "ai-analytics-event",
+          title: "AI Analytics Event",
+          state: "published",
+          date: new Date(),
+          organiser: Sigs.EdinburghAI,
+          aboutMarkdown: "md",
+          form: [],
+        },
+        {
+          id: "quant-analytics-event",
+          title: "Quant Analytics Event",
+          state: "published",
+          date: new Date(),
+          organiser: Sigs.QuantSig,
+          aboutMarkdown: "md",
+          form: [],
+        },
+      ]);
+
+      await db.insert(usersTable).values([
+        { id: "u1", email: "u1@test.com", firstName: "A", lastName: "A" },
+      ]);
+
+      await db.insert(registrationsTable).values([
+        { userId: "u1", eventId: "ai-analytics-event", status: "accepted" },
+      ]);
+    });
+
+    it("should allow sig_executive to view analytics for their SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/ai-analytics-event/registrations/analytics",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().totalCount).toBe(1);
+    });
+
+    it("should forbid sig_executive from viewing analytics for other SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/quant-analytics-event/registrations/analytics",
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should forbid regular members from viewing analytics", async () => {
+      setMemberAuth("member");
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/ai-analytics-event/registrations/analytics",
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+  });
+
+  describe("SIG Executive - DELETE /v1/events/:eventId/registrations/:userId", () => {
+    beforeEach(async () => {
+      await db.insert(usersTable).values([
+        { id: "test-user", email: "test@example.com", firstName: "Test", lastName: "User" },
+      ]);
+
+      await db.insert(eventsTable).values([
+        {
+          id: "ai-event",
+          title: "AI Event",
+          state: "published",
+          aboutMarkdown: "markdown",
+          organiser: Sigs.EdinburghAI,
+          date: new Date(),
+        },
+        {
+          id: "quant-event",
+          title: "Quant Event",
+          state: "published",
+          aboutMarkdown: "markdown",
+          organiser: Sigs.QuantSig,
+          date: new Date(),
+        },
+      ]);
+
+      await db.insert(registrationsTable).values([
+        { userId: "test-user", eventId: "ai-event", status: "pending" },
+        { userId: "test-user", eventId: "quant-event", status: "pending" },
+      ]);
+    });
+
+    it("should allow sig_executive to delete registration for their SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "DELETE",
+        url: "/v1/events/ai-event/registrations/test-user",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().userId).toBe("test-user");
+    });
+
+    it("should forbid sig_executive from deleting registration for other SIG's event", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "DELETE",
+        url: "/v1/events/quant-event/registrations/test-user",
+      });
+
+      expect(response.statusCode).toBe(403);
     });
   });
 });

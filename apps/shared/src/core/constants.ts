@@ -10,6 +10,7 @@ export const Sigs = {
   SigInt: "sigInt",
   GameDevSig: "gameDevSig",
   EdinburghAI: "edinburghAI",
+  NeuroTechSig: "neuroTechSig",
   QuantSig: "quantSig",
 } as const;
 
