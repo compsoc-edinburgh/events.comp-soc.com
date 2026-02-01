@@ -19,7 +19,11 @@ import {
   Sigs,
 } from "@events.comp-soc.com/shared";
 
-export const usersRole = pgEnum("roles", [UserRole.Member, UserRole.SigExecutive, UserRole.Committee]);
+export const usersRole = pgEnum("roles", [
+  UserRole.Member,
+  UserRole.SigExecutive,
+  UserRole.Committee,
+]);
 
 export const eventState = pgEnum("eventState", [EventState.Draft, EventState.Published]);
 export const eventPriority = pgEnum("eventPriority", [EventPriority.Default, EventPriority.Pinned]);

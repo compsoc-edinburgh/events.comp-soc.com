@@ -808,9 +808,11 @@ describe("Registration", () => {
 
   describe("SIG Executive - PUT /v1/events/:eventId/registrations/:userId", () => {
     beforeEach(async () => {
-      await db.insert(usersTable).values([
-        { id: "test-user", email: "test@example.com", firstName: "Test", lastName: "User" },
-      ]);
+      await db
+        .insert(usersTable)
+        .values([
+          { id: "test-user", email: "test@example.com", firstName: "Test", lastName: "User" },
+        ]);
 
       await db.insert(eventsTable).values([
         {
@@ -947,13 +949,13 @@ describe("Registration", () => {
         },
       ]);
 
-      await db.insert(usersTable).values([
-        { id: "u1", email: "u1@test.com", firstName: "A", lastName: "A" },
-      ]);
+      await db
+        .insert(usersTable)
+        .values([{ id: "u1", email: "u1@test.com", firstName: "A", lastName: "A" }]);
 
-      await db.insert(registrationsTable).values([
-        { userId: "u1", eventId: "ai-analytics-event", status: "accepted" },
-      ]);
+      await db
+        .insert(registrationsTable)
+        .values([{ userId: "u1", eventId: "ai-analytics-event", status: "accepted" }]);
     });
 
     it("should allow sig_executive to view analytics for their SIG's event", async () => {
@@ -993,9 +995,11 @@ describe("Registration", () => {
 
   describe("SIG Executive - DELETE /v1/events/:eventId/registrations/:userId", () => {
     beforeEach(async () => {
-      await db.insert(usersTable).values([
-        { id: "test-user", email: "test@example.com", firstName: "Test", lastName: "User" },
-      ]);
+      await db
+        .insert(usersTable)
+        .values([
+          { id: "test-user", email: "test@example.com", firstName: "Test", lastName: "User" },
+        ]);
 
       await db.insert(eventsTable).values([
         {
