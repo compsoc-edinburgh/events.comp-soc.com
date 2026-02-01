@@ -11,6 +11,7 @@ import Sheet from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import { useCreateEvent } from '@/lib/hooks/events/use-create-event.tsx'
+import { useEventManagerAuth } from '@/lib/auth.ts'
 
 export const Route = createFileRoute('/events/create')({
   component: CreateRoute,
@@ -19,10 +20,17 @@ export const Route = createFileRoute('/events/create')({
 function CreateRoute() {
   const navigate = useNavigate({ from: '/events/create' })
   const { createEvent, isCreating } = useCreateEvent()
+  const { isCommittee, sigs } = useEventManagerAuth()
+
+  const defaultOrganiser = isCommittee
+    ? Sigs.Compsoc
+    : sigs && sigs.length > 0
+      ? sigs[0]
+      : Sigs.Compsoc
 
   const defaultValues = {
     title: '',
-    organiser: Sigs.Compsoc,
+    organiser: defaultOrganiser,
     state: EventState.Draft,
     priority: EventPriority.Default,
     date: new Date(),
@@ -48,7 +56,7 @@ function CreateRoute() {
   }
 
   return (
-    <ProtectedRoute activeTab="/events/create">
+    <ProtectedRoute activeTab="/events/create" requireEventManager>
       <Window activeTab="/events/create">
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">

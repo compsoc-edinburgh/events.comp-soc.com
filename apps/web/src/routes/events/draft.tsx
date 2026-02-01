@@ -35,7 +35,7 @@ function DraftRoute() {
   const { data: events } = useSuspenseQuery(eventsQueryOptions('draft'))
 
   return (
-    <ProtectedRoute activeTab="/events/draft">
+    <ProtectedRoute activeTab="/events/draft" requireEventManager>
       <Window activeTab="/events/draft">
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">

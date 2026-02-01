@@ -1,11 +1,17 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { activeMockAuthState, setMockAuth } from "../../../tests/mock-auth.js";
+import {
+  activeMockAuthState,
+  setMockAuth,
+  setSigExecutiveAuth,
+  setMemberAuth,
+} from "../../../tests/mock-auth.js";
 import { FastifyInstance } from "fastify";
 import { buildServer } from "../../server.js";
 import { db } from "../../db/db.js";
 import { sql, eq } from "drizzle-orm";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import type { CreateEventRequest, UpdateEventRequest } from "@events.comp-soc.com/shared";
+import { Sigs } from "@events.comp-soc.com/shared";
 
 vi.mock("@clerk/fastify", () => {
   return {
@@ -267,7 +273,6 @@ describe("Event", () => {
 
       const updatePayload: UpdateEventRequest = {
         title: "New Title",
-        // Note: Not sending capacity or state, they should remain unchanged
       };
 
       const response = await app.inject({
@@ -293,7 +298,7 @@ describe("Event", () => {
         payload: { title: "Ghost" },
       });
 
-      expect(response.statusCode).toBe(404);
+      expect(response.statusCode).toBe(403);
     });
   });
 
@@ -350,6 +355,350 @@ describe("Event", () => {
         .from(registrationsTable)
         .where(eq(registrationsTable.eventId, eventId));
       expect(regs).toHaveLength(0);
+    });
+  });
+
+  describe("SIG Executive - GET /v1/events", () => {
+    beforeEach(async () => {
+      const baseEvent = {
+        aboutMarkdown: "md",
+        date: new Date(),
+      };
+
+      await db.insert(eventsTable).values([
+        {
+          ...baseEvent,
+          id: "ai-pub",
+          title: "AI Published",
+          state: "published",
+          organiser: Sigs.EdinburghAI,
+        },
+        {
+          ...baseEvent,
+          id: "ai-draft",
+          title: "AI Draft",
+          state: "draft",
+          organiser: Sigs.EdinburghAI,
+        },
+        {
+          ...baseEvent,
+          id: "quant-pub",
+          title: "Quant Published",
+          state: "published",
+          organiser: Sigs.QuantSig,
+        },
+        {
+          ...baseEvent,
+          id: "quant-draft",
+          title: "Quant Draft",
+          state: "draft",
+          organiser: Sigs.QuantSig,
+        },
+        {
+          ...baseEvent,
+          id: "compsoc-pub",
+          title: "CompSoc Published",
+          state: "published",
+          organiser: Sigs.Compsoc,
+        },
+        {
+          ...baseEvent,
+          id: "compsoc-draft",
+          title: "CompSoc Draft",
+          state: "draft",
+          organiser: Sigs.Compsoc,
+        },
+      ]);
+    });
+
+    it("should return published events + draft events for assigned SIGs only", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events",
+      });
+
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+
+      expect(data).toHaveLength(4);
+
+      const ids = data.map((e: { id: string }) => e.id);
+      expect(ids).toContain("ai-pub");
+      expect(ids).toContain("ai-draft");
+      expect(ids).toContain("quant-pub");
+      expect(ids).toContain("compsoc-pub");
+      expect(ids).not.toContain("quant-draft");
+      expect(ids).not.toContain("compsoc-draft");
+    });
+
+    it("should return draft events for multiple assigned SIGs", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI, Sigs.QuantSig]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events",
+      });
+
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+
+      // Should see: all published (3) + AI draft (1) + Quant draft (1) = 5
+      expect(data).toHaveLength(5);
+
+      const ids = data.map((e: { id: string }) => e.id);
+      expect(ids).toContain("ai-draft");
+      expect(ids).toContain("quant-draft");
+      expect(ids).not.toContain("compsoc-draft");
+    });
+  });
+
+  describe("SIG Executive - GET /v1/events/:id", () => {
+    beforeEach(async () => {
+      await db.insert(eventsTable).values([
+        {
+          id: "ai-draft-event",
+          title: "AI Draft",
+          state: "draft",
+          aboutMarkdown: "md",
+          organiser: Sigs.EdinburghAI,
+          date: new Date(),
+        },
+        {
+          id: "quant-draft-event",
+          title: "Quant Draft",
+          state: "draft",
+          aboutMarkdown: "md",
+          organiser: Sigs.QuantSig,
+          date: new Date(),
+        },
+      ]);
+    });
+
+    it("should return 200 for draft event if sig_executive manages that SIG", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/ai-draft-event",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().id).toBe("ai-draft-event");
+    });
+
+    it("should return 404 for draft event if sig_executive does NOT manage that SIG", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events/quant-draft-event",
+      });
+
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  describe("SIG Executive - POST /v1/events", () => {
+    const validPayload: CreateEventRequest = {
+      title: "AI Workshop",
+      organiser: Sigs.EdinburghAI,
+      state: "draft",
+      priority: "default",
+      capacity: 50,
+      date: new Date().toISOString(),
+      aboutMarkdown: "# AI Event",
+      location: "AI Lab",
+      locationURL: "https://maps.google.com",
+      form: [],
+    };
+
+    it("should allow sig_executive to create event for their assigned SIG", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events",
+        payload: validPayload,
+      });
+
+      expect(response.statusCode).toBe(201);
+      const body = response.json();
+      expect(body.organiser).toBe(Sigs.EdinburghAI);
+    });
+
+    it("should forbid sig_executive from creating event for SIG they don't manage", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events",
+        payload: { ...validPayload, organiser: Sigs.QuantSig },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should forbid sig_executive from creating CompSoc events", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI, Sigs.QuantSig]);
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events",
+        payload: { ...validPayload, organiser: Sigs.Compsoc },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should allow sig_executive with multiple SIGs to create events for any of them", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI, Sigs.QuantSig]);
+
+      const response1 = await app.inject({
+        method: "POST",
+        url: "/v1/events",
+        payload: { ...validPayload, organiser: Sigs.EdinburghAI },
+      });
+      expect(response1.statusCode).toBe(201);
+
+      const response2 = await app.inject({
+        method: "POST",
+        url: "/v1/events",
+        payload: { ...validPayload, organiser: Sigs.QuantSig },
+      });
+      expect(response2.statusCode).toBe(201);
+    });
+
+    it("should forbid regular members from creating events", async () => {
+      setMemberAuth("member");
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/events",
+        payload: validPayload,
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+  });
+
+  describe("SIG Executive - PUT /v1/events/:id", () => {
+    beforeEach(async () => {
+      await db.insert(eventsTable).values([
+        {
+          id: "ai-event",
+          title: "AI Event",
+          state: "draft",
+          aboutMarkdown: "md",
+          organiser: Sigs.EdinburghAI,
+          date: new Date(),
+        },
+        {
+          id: "quant-event",
+          title: "Quant Event",
+          state: "draft",
+          aboutMarkdown: "md",
+          organiser: Sigs.QuantSig,
+          date: new Date(),
+        },
+      ]);
+    });
+
+    it("should allow sig_executive to update event for their SIG", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "PUT",
+        url: "/v1/events/ai-event",
+        payload: { title: "Updated AI Event" },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().title).toBe("Updated AI Event");
+    });
+
+    it("should forbid sig_executive from updating event for SIG they don't manage", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "PUT",
+        url: "/v1/events/quant-event",
+        payload: { title: "Trying to update Quant" },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should forbid sig_executive from transferring event to SIG they don't manage", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "PUT",
+        url: "/v1/events/ai-event",
+        payload: { organiser: Sigs.QuantSig },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should allow sig_executive to transfer event between SIGs they manage", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI, Sigs.QuantSig]);
+
+      const response = await app.inject({
+        method: "PUT",
+        url: "/v1/events/ai-event",
+        payload: { organiser: Sigs.QuantSig },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().organiser).toBe(Sigs.QuantSig);
+    });
+  });
+
+  describe("SIG Executive - DELETE /v1/events/:id", () => {
+    beforeEach(async () => {
+      await db.insert(eventsTable).values([
+        {
+          id: "ai-delete",
+          title: "AI Delete",
+          state: "draft",
+          aboutMarkdown: "md",
+          organiser: Sigs.EdinburghAI,
+          date: new Date(),
+        },
+        {
+          id: "quant-delete",
+          title: "Quant Delete",
+          state: "draft",
+          aboutMarkdown: "md",
+          organiser: Sigs.QuantSig,
+          date: new Date(),
+        },
+      ]);
+    });
+
+    it("should allow sig_executive to delete event for their SIG", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "DELETE",
+        url: "/v1/events/ai-delete",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().id).toBe("ai-delete");
+    });
+
+    it("should forbid sig_executive from deleting event for SIG they don't manage", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "DELETE",
+        url: "/v1/events/quant-delete",
+      });
+
+      expect(response.statusCode).toBe(403);
     });
   });
 });

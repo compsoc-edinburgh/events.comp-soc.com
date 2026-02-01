@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { Sigs } from "../core/constants.js";
+import { UserRole } from "./constants.js";
 
 export const UserContractSchema = z.object({
   email: z.email("Invalid email address"),
@@ -13,3 +15,16 @@ export const UserResponseSchema = UserContractSchema.extend({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
+
+export function canManageSig(
+  role: UserRole,
+  userSigs: Sigs[] | undefined,
+  targetSig: Sigs
+): boolean {
+  if (role === UserRole.Committee) return true;
+  return !!(role === UserRole.SigExecutive && userSigs?.includes(targetSig));
+}
+
+export function isEventManager(role: UserRole): boolean {
+  return role === UserRole.Committee || role === UserRole.SigExecutive;
+}

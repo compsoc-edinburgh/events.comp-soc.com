@@ -16,9 +16,14 @@ import {
   RegistrationFormAnswer,
   RegistrationStatus,
   UserRole,
+  Sigs,
 } from "@events.comp-soc.com/shared";
 
-export const usersRole = pgEnum("roles", [UserRole.Member, UserRole.Committee]);
+export const usersRole = pgEnum("roles", [
+  UserRole.Member,
+  UserRole.SigExecutive,
+  UserRole.Committee,
+]);
 
 export const eventState = pgEnum("eventState", [EventState.Draft, EventState.Published]);
 export const eventPriority = pgEnum("eventPriority", [EventPriority.Default, EventPriority.Pinned]);
@@ -36,6 +41,7 @@ export const usersTable = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   role: usersRole("role").default("member").notNull(),
+  sigs: json("sigs").$type<Sigs[]>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

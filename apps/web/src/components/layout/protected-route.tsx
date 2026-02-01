@@ -1,6 +1,6 @@
 import { LogIn, ShieldX } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { useCommitteeAuth } from '@/lib/auth.ts'
+import { useCommitteeAuth, useEventManagerAuth } from '@/lib/auth.ts'
 import { StatusCard } from '@/components/ui/status-card.tsx'
 import Window from '@/components/layout/window/window.tsx'
 import { EmptySheet } from '@/components/layout/sheet.tsx'
@@ -9,15 +9,16 @@ import { Spinner } from '@/components/ui/spinner.tsx'
 interface ProtectedRouteProps {
   children: ReactNode
   activeTab?: string
-  isRequireCommittee?: boolean
+  requireEventManager?: boolean
 }
 
 function ProtectedRoute({
   children,
   activeTab,
-  isRequireCommittee = true,
+  requireEventManager = false,
 }: ProtectedRouteProps) {
-  const { isLoaded, isAuthenticated, isCommittee } = useCommitteeAuth()
+  const { isLoaded, isAuthenticated } = useCommitteeAuth()
+  const { canManageEvents } = useEventManagerAuth()
 
   if (!isLoaded) {
     return (
@@ -35,7 +36,7 @@ function ProtectedRoute({
         <EmptySheet>
           <StatusCard
             title="Authentication required"
-            message="You need to sign in to access this page. Committee members only!"
+            message="You need to sign in to access this page."
             icon={<LogIn className="w-10 h-10" strokeWidth={1.5} />}
           />
         </EmptySheet>
@@ -43,13 +44,13 @@ function ProtectedRoute({
     )
   }
 
-  if (!isCommittee && isRequireCommittee) {
+  if (requireEventManager && !canManageEvents) {
     return (
       <Window activeTab={activeTab}>
         <EmptySheet>
           <StatusCard
             title="Access denied"
-            message="This area is restricted to committee members. Nice try though!"
+            message="This area is restricted to event managers. You need to be a committee member or SIG executive."
             icon={<ShieldX className="w-10 h-10" strokeWidth={1.5} />}
           />
         </EmptySheet>

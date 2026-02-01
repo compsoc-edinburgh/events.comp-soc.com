@@ -12,8 +12,12 @@ import {
   RegistrationContractSchema,
   RegistrationStatusBatchUpdateSchema,
   RegistrationUpdateContractSchema,
+  Sigs,
+  canManageSig,
 } from "@events.comp-soc.com/shared";
-import { requireAuth, requireCommittee } from "../../lib/auth-guard.js";
+import { requireAuth, requireEventManager } from "../../lib/auth-guard.js";
+import { eventService } from "../events/service.js";
+import { ForbiddenError } from "../../lib/errors.js";
 
 export const registrationRoutes = async (server: FastifyInstance) => {
   server.post("/", { preHandler: [requireAuth] }, async (request, reply) => {
@@ -36,8 +40,18 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     return reply.status(201).send(registration);
   });
 
-  server.post("/batch-accept", { preHandler: [requireCommittee] }, async (request, reply) => {
+  server.post("/batch-accept", { preHandler: [requireEventManager] }, async (request, reply) => {
     const { eventId } = RegistrationEventIdSchema.parse(request.params);
+    const { role, sigs } = request.user;
+
+    const event = await eventService.getEventForAuth({
+      db: server.db,
+      data: { id: eventId },
+    });
+
+    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+      throw new ForbiddenError("You cannot manage registrations for this event");
+    }
 
     const result = await registrationService.batchAcceptRegistration({
       db: server.db,
@@ -49,10 +63,20 @@ export const registrationRoutes = async (server: FastifyInstance) => {
 
   server.post(
     "/batch-update-status",
-    { preHandler: [requireCommittee] },
+    { preHandler: [requireEventManager] },
     async (request, reply) => {
       const { eventId } = RegistrationEventIdSchema.parse(request.params);
       const dto = RegistrationStatusBatchUpdateSchema.parse(request.body);
+      const { role, sigs } = request.user;
+
+      const event = await eventService.getEventForAuth({
+        db: server.db,
+        data: { id: eventId },
+      });
+
+      if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+        throw new ForbiddenError("You cannot manage registrations for this event");
+      }
 
       const data = UpdateBatchStatusRegistrationSchema.parse({
         eventId,
@@ -68,9 +92,19 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.get("/", { preHandler: [requireCommittee] }, async (request, reply) => {
+  server.get("/", { preHandler: [requireEventManager] }, async (request, reply) => {
     const params = RegistrationEventIdSchema.parse(request.params);
     const filters = RegistrationsQueryFilterSchema.parse(request.query);
+    const { role, sigs } = request.user;
+
+    const event = await eventService.getEventForAuth({
+      db: server.db,
+      data: { id: params.eventId },
+    });
+
+    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+      throw new ForbiddenError("You cannot view registrations for this event");
+    }
 
     const events = await registrationService.getRegistrations({
       db: server.db,
@@ -98,9 +132,19 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     return registration ? reply.status(200).send(registration) : reply.status(204).send();
   });
 
-  server.put("/:userId", { preHandler: [requireCommittee] }, async (request, reply) => {
+  server.put("/:userId", { preHandler: [requireEventManager] }, async (request, reply) => {
     const dto = RegistrationUpdateContractSchema.parse(request.body);
     const params = RegistrationParamsSchema.parse(request.params);
+    const { role, sigs } = request.user;
+
+    const event = await eventService.getEventForAuth({
+      db: server.db,
+      data: { id: params.eventId },
+    });
+
+    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+      throw new ForbiddenError("You cannot manage registrations for this event");
+    }
 
     const data = UpdateRegistrationSchema.parse({
       ...dto,
@@ -116,8 +160,18 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     return reply.status(200).send(updatedRegistration);
   });
 
-  server.get("/analytics", { preHandler: [requireCommittee] }, async (request, reply) => {
+  server.get("/analytics", { preHandler: [requireEventManager] }, async (request, reply) => {
     const { eventId } = RegistrationEventIdSchema.parse(request.params);
+    const { role, sigs } = request.user;
+
+    const event = await eventService.getEventForAuth({
+      db: server.db,
+      data: { id: eventId },
+    });
+
+    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+      throw new ForbiddenError("You cannot view analytics for this event");
+    }
 
     const analytics = await registrationService.getRegistrationAnalytics({
       db: server.db,
@@ -128,7 +182,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
   });
 
   server.delete("/:userId", { preHandler: [requireAuth] }, async (request, reply) => {
-    const { userId, role } = request.user;
+    const { userId, role, sigs } = request.user;
     const data = RegistrationParamsSchema.parse(request.params);
 
     const deletedRegistration = await registrationService.deleteRegistration({
@@ -136,6 +190,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data,
       userId,
       role,
+      sigs,
     });
 
     return reply.status(200).send(deletedRegistration);

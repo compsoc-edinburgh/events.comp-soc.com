@@ -47,6 +47,11 @@ export const SIG_COLORS: Record<Sigs, SIGColors> = {
   },
   [Sigs.BitSig]: { border: '#ff0000', background: '#ffffff', text: '#000000' },
   [Sigs.Compsoc]: { border: '#737373', background: '#262626', text: '#ffffff' },
+  [Sigs.NeuroTechSig]: {
+    border: '#ae4f94',
+    background: '#242324',
+    text: '#ffffff',
+  },
 }
 
 export const ALL_SIGS: Array<SIGInfo> = [
@@ -121,6 +126,12 @@ export const ALL_SIGS: Array<SIGInfo> = [
     name: 'CCSIG',
     logo: '/sigs/ccsig.webp',
     colors: SIG_COLORS[Sigs.CCSig],
+  },
+  {
+    id: Sigs.NeuroTechSig,
+    name: 'Edinburgh Neurotech',
+    logo: '/sigs/neurotech.webp',
+    colors: SIG_COLORS[Sigs.NeuroTechSig],
   },
 ]
 

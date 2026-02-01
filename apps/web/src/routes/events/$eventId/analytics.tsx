@@ -64,7 +64,7 @@ function AnalyticsRoute() {
     })
   })
   return (
-    <ProtectedRoute activeTab="/events">
+    <ProtectedRoute activeTab="/events" requireEventManager>
       <Window activeTab="/events">
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">

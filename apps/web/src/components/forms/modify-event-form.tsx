@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select.tsx'
 import { ALL_SIGS } from '@/config/sigs.ts'
+import { useEventManagerAuth } from '@/lib/auth.ts'
 import {
   Popover,
   PopoverContent,
@@ -122,6 +123,11 @@ function ModifyEventForm({
   isLoading?: boolean
 }) {
   const [open, setOpen] = useState(false)
+  const { isCommittee, sigs: userSigs } = useEventManagerAuth()
+
+  const availableSigs = isCommittee
+    ? ALL_SIGS
+    : ALL_SIGS.filter((sig) => userSigs?.includes(sig.id as Sigs))
 
   const form = useForm({
     defaultValues,
@@ -262,7 +268,7 @@ function ModifyEventForm({
                     <FieldLabel htmlFor={field.name}>Organiser</FieldLabel>
                     <Select
                       name={field.name}
-                      disabled={isLoading}
+                      disabled={isLoading || availableSigs.length <= 1}
                       value={field.state.value}
                       onValueChange={(value) =>
                         field.handleChange(value as typeof field.state.value)
@@ -275,13 +281,18 @@ function ModifyEventForm({
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {ALL_SIGS.map((sig) => (
+                        {availableSigs.map((sig) => (
                           <SelectItem key={sig.id} value={sig.id}>
                             {sig.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {!isCommittee && (
+                      <FieldDescription>
+                        You can only create events for your assigned SIGs
+                      </FieldDescription>
+                    )}
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}

@@ -8,7 +8,7 @@ import {
   UpdateRegistration,
 } from "./schema.js";
 import { eventStore } from "../events/store.js";
-import { UserRole } from "@events.comp-soc.com/shared";
+import { UserRole, Sigs, canManageSig } from "@events.comp-soc.com/shared";
 import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { registrationStore } from "./store.js";
 import { EventId } from "../events/schema.js";
@@ -166,11 +166,13 @@ export const registrationService = {
     data,
     userId,
     role,
+    sigs,
   }: {
     db: SqlContext;
     data: RegistrationParams;
     userId: string;
     role: UserRole;
+    sigs?: Sigs[];
   }) {
     const registration = await registrationStore.getByUserAndEvent({ db, data });
     if (!registration) {
@@ -178,10 +180,16 @@ export const registrationService = {
     }
 
     const isOwner = data.userId === userId;
-    const isCommittee = role === "committee";
 
-    if (!isOwner && !isCommittee) {
-      throw new UnauthorizedError("You do not have permission to delete this registration");
+    if (!isOwner) {
+      const event = await eventStore.findById({
+        db,
+        data: { id: data.eventId },
+      });
+
+      if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+        throw new UnauthorizedError("You do not have permission to delete this registration");
+      }
     }
 
     return await registrationStore.delete({ db, data });
