@@ -1,4 +1,4 @@
-import { eq, gte, and } from "drizzle-orm";
+import { eq, gte, and, SQL } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
 import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
 import { eventsTable, registrationsTable } from "../../db/schema.js";
@@ -39,17 +39,12 @@ export const eventStore = {
     const offset = (page - 1) * limit;
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
-    const conditions = [];
-
-    if (state) {
-      conditions.push(eq(eventsTable.state, state));
-    }
-
-    if (!includePast) {
-      conditions.push(gte(eventsTable.date, today));
-    }
+    const conditions = [
+      state ? eq(eventsTable.state, state) : null,
+      !includePast ? gte(eventsTable.date, today) : null,
+    ].filter((condition): condition is SQL => condition !== null);
 
     return db
       .select()
