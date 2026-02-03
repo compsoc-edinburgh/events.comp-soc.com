@@ -26,6 +26,10 @@ export const UpdateEventSchema = BaseEventSchema.omit({
 
 export const EventsQueryFilterSchema = QueryFilterSchema.extend({
   state: BaseEventSchema.shape.state.optional(),
+  includePast: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((val) => val === "true"),
 });
 
 export type EventId = z.infer<typeof EventIdSchema>;

@@ -11,7 +11,7 @@ import { StatusCard } from '@/components/ui/status-card.tsx'
 
 export const Route = createFileRoute('/events/draft')({
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(eventsQueryOptions('draft'))
+    await context.queryClient.ensureQueryData(eventsQueryOptions('draft', true))
   },
   component: DraftRoute,
   errorComponent: ({ error }) => (
@@ -32,7 +32,7 @@ export const Route = createFileRoute('/events/draft')({
 })
 
 function DraftRoute() {
-  const { data: events } = useSuspenseQuery(eventsQueryOptions('draft'))
+  const { data: events } = useSuspenseQuery(eventsQueryOptions('draft', true))
 
   return (
     <ProtectedRoute activeTab="/events/draft" requireEventManager>

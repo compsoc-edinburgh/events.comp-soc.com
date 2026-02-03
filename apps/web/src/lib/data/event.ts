@@ -51,6 +51,7 @@ export const fetchEvent = createServerFn({ method: 'GET' })
 const eventsFilterSchema = z
   .object({
     state: z.enum(EventState).optional(),
+    includePast: z.boolean().optional(),
   })
   .optional()
 
@@ -71,6 +72,7 @@ export const fetchEvents = createServerFn({ method: 'GET' })
         {
           params: {
             state: data?.state,
+            includePast: data?.includePast ? 'true' : undefined,
           },
           headers: {
             Authorization: `Bearer ${token}`,
@@ -165,10 +167,13 @@ export const deleteEvent = createServerFn({ method: 'POST' })
     return EventResponseSchema.parse(event)
   })
 
-export const eventsQueryOptions = (state?: 'draft' | 'published') =>
+export const eventsQueryOptions = (
+  state?: 'draft' | 'published',
+  includePast?: boolean,
+) =>
   queryOptions({
-    queryKey: ['events', { state }],
-    queryFn: () => fetchEvents({ data: { state } }),
+    queryKey: ['events', { state, includePast }],
+    queryFn: () => fetchEvents({ data: { state, includePast } }),
   })
 
 export const eventQueryOption = (eventId: string) =>
