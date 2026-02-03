@@ -64,6 +64,7 @@ function EventRoute() {
 
   const isDraft = event.state === 'draft'
   const isRegistered = !!registration
+  const isPastEvent = new Date(event.date) < new Date()
 
   const canManageEvent = canManage(event.organiser as Sigs)
 
@@ -180,14 +181,14 @@ function EventRoute() {
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
           {isDraft ? (
             <PublishEventButton eventId={eventId} />
-          ) : (
+          ) : !isPastEvent ? (
             <CreateRegisterEventButton
               disabled={isRegistered || isRegistrationLoading}
               form={event.form ?? []}
               title={event.title}
               eventId={eventId}
             />
-          )}
+          ) : null}
         </div>
       </Sheet>
     </Window>
