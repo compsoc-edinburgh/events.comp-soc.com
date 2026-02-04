@@ -72,7 +72,7 @@ export const fetchEvents = createServerFn({ method: 'GET' })
         {
           params: {
             state: data?.state,
-            includePast: data?.includePast ? 'true' : undefined,
+            ...(data?.includePast && { includePast: 'true' }),
           },
           headers: {
             Authorization: `Bearer ${token}`,
