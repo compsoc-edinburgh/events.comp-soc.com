@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 export function EmptySheet({ children }: { children: ReactNode }) {
   return (
     <Sheet>
-      <div className="flex items-center justify-center h-[81vh] md:h-[70vh] pb-48">
+      <div className="flex items-center justify-center h-[81vh] md:h-[73vh] pb-48">
         {children}
       </div>
     </Sheet>
