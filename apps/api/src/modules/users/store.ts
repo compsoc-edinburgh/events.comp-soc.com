@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
 import { CreateUser, UpdateUser, UserId } from "./schema.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
@@ -40,7 +40,9 @@ export const userStore = {
       .from(registrationsTable)
       .innerJoin(usersTable, eq(registrationsTable.userId, usersTable.id))
       .innerJoin(eventsTable, eq(registrationsTable.eventId, eventsTable.id))
-      .where(eq(registrationsTable.userId, id))
+      .where(
+        and(eq(registrationsTable.userId, id), gt(eventsTable.date, sql`NOW() - INTERVAL '1 day'`))
+      )
       .orderBy(registrationsTable.createdAt);
   },
 

@@ -24,7 +24,7 @@ function DocsToolbar({ children }: DocsToolbarProps) {
       className={cn(
         'md:flex',
         hasChildren ? 'flex' : 'hidden',
-        'sticky top-8 md:top-9 z-30 h-11 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl',
+        'sticky top-8 z-30 h-11 items-center justify-between px-3 py-1 bg-subnavbar border-b border-neutral-800 w-full shadow-2xl',
       )}
     >
       <div className="border-neutral-700 border p-1 w-full h-full rounded-sm items-center flex px-3">
