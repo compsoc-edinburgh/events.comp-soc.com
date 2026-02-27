@@ -4,7 +4,7 @@
   "main": "dist/app.js",
   "type": "module",
   "scripts": {
-    "start": "node dist/app.js",
+    "start": "node dist/src/app.js",
     "build": "tsc",
     "dev": "nodemon --watch src --exec tsx src/app.ts",
     "type-check": "tsc --noEmit",
