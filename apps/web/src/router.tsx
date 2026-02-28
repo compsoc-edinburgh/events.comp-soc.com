@@ -13,7 +13,6 @@ export const getRouter = () => {
       ...rqContext,
     },
     scrollRestoration: true,
-    notFoundMode: 'root',
     defaultPreloadStaleTime: 0,
     defaultPreload: 'intent',
   })

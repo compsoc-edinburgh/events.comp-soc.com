@@ -8,7 +8,7 @@ import {
   UserIcon,
 } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import type { Sigs } from '@events.comp-soc.com/shared'
+import { useAuth } from '@clerk/tanstack-react-start'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
@@ -53,20 +53,24 @@ export const Route = createFileRoute('/events/$eventId/')({
 })
 
 function EventRoute() {
+  const { userId } = useAuth()
   const navigate = useNavigate({ from: '/events/$eventId' })
   const { eventId } = Route.useParams()
+
   const { canManage } = useEventManagerAuth()
   const { data: event } = useSuspenseQuery(eventQueryOption(eventId))
-  const { data: registration, isLoading: isRegistrationLoading } = useQuery(
-    registrationQueryByUserOption(eventId),
-  )
+  const { data: registration, isLoading: isRegistrationLoading } = useQuery({
+    ...registrationQueryByUserOption(eventId),
+    enabled: Boolean(eventId) && Boolean(userId),
+  })
+
   const { full: date } = formatEventDate(event.date)
 
   const isDraft = event.state === 'draft'
-  const isRegistered = !!registration
+  const isRegistered = Boolean(registration)
   const isPastEvent = new Date(event.date) < new Date()
 
-  const canManageEvent = canManage(event.organiser as Sigs)
+  const canManageEvent = canManage(event.organiser)
 
   return (
     <Window
