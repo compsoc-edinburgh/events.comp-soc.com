@@ -3,6 +3,7 @@ import { Webhook } from "svix";
 import { clerkClient } from "@clerk/fastify";
 import { userService } from "../users/service.js";
 import { Nullable, Sigs, UserRole } from "@events.comp-soc.com/shared";
+import { NotFoundError } from "../../lib/errors.js";
 
 interface ClerkPublicMetadata {
   role?: UserRole;
@@ -21,9 +22,15 @@ interface ClerkUserEventData {
   public_metadata?: ClerkPublicMetadata;
 }
 
+interface ClerkDeletedUserEventData {
+  id?: string;
+  deleted: boolean;
+  object: string;
+}
+
 interface ClerkWebhookEvent {
   type: string;
-  data: ClerkUserEventData;
+  data: ClerkUserEventData | ClerkDeletedUserEventData;
 }
 
 export const clerkWebhookRoutes = async (server: FastifyInstance) => {
@@ -70,19 +77,20 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
       try {
         switch (type) {
           case "user.created": {
-            const primaryEmail = data.email_addresses.find(
-              (email) => email.id === data.primary_email_address_id
+            const userData = data as ClerkUserEventData;
+            const primaryEmail = userData.email_addresses.find(
+              (email) => email.id === userData.primary_email_address_id
             );
 
             if (!primaryEmail) {
               return reply.status(400).send({ error: "No primary email found" });
             }
 
-            const existingRole = data.public_metadata?.role;
-            const existingSigs = data.public_metadata?.sigs;
+            const existingRole = userData.public_metadata?.role;
+            const existingSigs = userData.public_metadata?.sigs;
 
             if (!existingRole) {
-              await clerkClient.users.updateUserMetadata(data.id, {
+              await clerkClient.users.updateUserMetadata(userData.id, {
                 publicMetadata: {
                   role: UserRole.Member,
                 },
@@ -92,23 +100,24 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             await userService.createUser({
               db: server.db,
               data: {
-                id: data.id,
+                id: userData.id,
                 email: primaryEmail.email_address,
-                firstName: data.first_name || "",
-                lastName: data.last_name || "",
+                firstName: userData.first_name || "",
+                lastName: userData.last_name || "",
                 sigs: existingSigs,
               },
             });
 
             server.log.info(
-              `Created user: ${data.id} with role: ${existingRole || UserRole.Member}`
+              `Created user: ${userData.id} with role: ${existingRole || UserRole.Member}`
             );
             break;
           }
 
           case "user.updated": {
-            const primaryEmail = data.email_addresses.find(
-              (email) => email.id === data.primary_email_address_id
+            const userData = data as ClerkUserEventData;
+            const primaryEmail = userData.email_addresses.find(
+              (email) => email.id === userData.primary_email_address_id
             );
 
             if (!primaryEmail) {
@@ -118,28 +127,43 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             await userService.updateUser({
               db: server.db,
               data: {
-                id: data.id,
+                id: userData.id,
                 email: primaryEmail.email_address,
-                firstName: data.first_name || "",
-                lastName: data.last_name || "",
+                firstName: userData.first_name || "",
+                lastName: userData.last_name || "",
               },
               role: "committee",
-              requesterId: `clerk_webhook_${data.id}`,
+              requesterId: `clerk_webhook_${userData.id}`,
             });
 
-            server.log.info(`Updated user: ${data.id}`);
+            server.log.info(`Updated user: ${userData.id}`);
             break;
           }
 
           case "user.deleted": {
-            await userService.deleteUser({
-              db: server.db,
-              data: { id: data.id },
-              role: "committee",
-              requesterId: `clerk_webhook_${data.id}`,
-            });
+            const deletedData = data as ClerkDeletedUserEventData;
+            if (!deletedData.id) {
+              server.log.warn(`user.deleted event missing id, skipping`);
+              break;
+            }
 
-            server.log.info(`Deleted user: ${data.id}`);
+            try {
+              await userService.deleteUser({
+                db: server.db,
+                data: { id: deletedData.id },
+                role: "committee",
+                requesterId: `clerk_webhook_${deletedData.id}`,
+              });
+
+              server.log.info(`Deleted user: ${deletedData.id}`);
+            } catch (error) {
+              if (error instanceof NotFoundError) {
+                server.log.info(`User ${deletedData.id} not found in DB, skipping deletion`);
+              } else {
+                server.log.info(`Unknown error`);
+              }
+            }
+
             break;
           }
 
