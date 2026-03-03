@@ -123,8 +123,8 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
                 firstName: data.first_name || "",
                 lastName: data.last_name || "",
               },
-              role: null,
-              requesterId: null,
+              role: "committee",
+              requesterId: `clerk_webhook_${data.id}`,
             });
 
             server.log.info(`Updated user: ${data.id}`);
@@ -136,7 +136,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
               db: server.db,
               data: { id: data.id },
               role: "committee",
-              requesterId: data.id,
+              requesterId: `clerk_webhook_${data.id}`,
             });
 
             server.log.info(`Deleted user: ${data.id}`);
