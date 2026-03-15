@@ -10,7 +10,7 @@ export const PAGE_METADATA = {
       content: 'width=device-width, initial-scale=1',
     },
     {
-      title: 'TanStack Start Starter',
+      title: 'CompSoc Events',
     },
   ],
   links: [
