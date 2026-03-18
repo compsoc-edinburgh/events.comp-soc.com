@@ -33,7 +33,6 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
-        <title>CompSoc Events</title>
       </head>
       <body className="bg-background">
         <ClerkProvider>
