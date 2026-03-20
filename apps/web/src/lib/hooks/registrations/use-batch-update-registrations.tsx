@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { RegistrationUpdateStatusBatch } from '@events.comp-soc.com/shared'
 import { batchUpdateStatus } from '@/lib/data/registration.ts'
+import { formatErrorMessage } from '@/lib/utils.ts'
 
 export function useBatchUpdateRegistrations(eventId: string, title: string) {
   const queryClient = useQueryClient()
@@ -24,7 +25,7 @@ export function useBatchUpdateRegistrations(eventId: string, title: string) {
     },
     onError: (error) => {
       toast.error('Failed to update students', {
-        description: error.message || 'Something went wrong',
+        description: formatErrorMessage(error.message),
       })
     },
   })

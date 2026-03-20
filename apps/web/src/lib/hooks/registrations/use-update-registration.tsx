@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { UpdateRegistrationRequest } from '@events.comp-soc.com/shared'
 import { updateRegistration } from '@/lib/data/registration.ts'
+import { formatErrorMessage } from '@/lib/utils.ts'
 
 export function useUpdateRegistration(eventId: string, title: string) {
   const queryClient = useQueryClient()
@@ -24,7 +25,7 @@ export function useUpdateRegistration(eventId: string, title: string) {
     },
     onError: (error) => {
       toast.error('Failed to update registration', {
-        description: error.message || 'Something went wrong',
+        description: formatErrorMessage(error.message),
       })
     },
   })

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { EventState } from '@events.comp-soc.com/shared'
 import { updateEvent } from '@/lib/data/event.ts'
+import { formatErrorMessage } from '@/lib/utils.ts'
 
 export function usePublishEvent(eventId: string) {
   const queryClient = useQueryClient()
@@ -19,7 +20,7 @@ export function usePublishEvent(eventId: string) {
     },
     onError: (error: Error) => {
       toast.error('Publish failed', {
-        description: error.message || 'Something went wrong',
+        description: formatErrorMessage(error.message),
       })
     },
   })

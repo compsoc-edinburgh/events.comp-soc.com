@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { CreateEventRequest } from '@events.comp-soc.com/shared'
 import { createEvent } from '@/lib/data/event.ts'
+import { formatErrorMessage } from '@/lib/utils.ts'
 
 export function useCreateEvent() {
   const { mutate, isPending } = useMutation({
@@ -13,7 +14,7 @@ export function useCreateEvent() {
     },
     onError: (error) => {
       toast.error('Failed to create event', {
-        description: error.message || 'Something went wrong',
+        description: formatErrorMessage(error.message),
       })
     },
   })

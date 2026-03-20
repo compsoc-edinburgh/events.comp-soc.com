@@ -6,6 +6,10 @@ export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
 }
 
+export function formatErrorMessage(message?: string) {
+  return message || 'Something went wrong'
+}
+
 export function formatEventDate(date: Date | string) {
   const d = new Date(date)
 
