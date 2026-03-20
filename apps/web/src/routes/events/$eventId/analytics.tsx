@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { BarChart3 } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getColumns } from '@/components/tables/registration-table/columns.tsx'
 import Window from '@/components/layout/window/window.tsx'
@@ -72,7 +71,6 @@ function AnalyticsRoute() {
           </div>
           <div>
             <div className="flex gap-2 items-center mt-1.5 text-neutral-400 text-sm">
-              <BarChart3 className="w-4 h-4" strokeWidth={1.5} />
               Analytics for {event.title}
             </div>
           </div>
