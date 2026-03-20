@@ -13,18 +13,7 @@ const DateTimeDisplay = () => {
     month: 'short',
   })
 
-  const time = new Date().toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-
-  return (
-    <>
-      <span>{date}</span>
-      <span>{time}</span>
-    </>
-  )
+  return <span>{date}</span>
 }
 
 const MobileDateTimeDisplay = () => {
@@ -34,17 +23,9 @@ const MobileDateTimeDisplay = () => {
     month: 'short',
   })
 
-  const time = new Date().toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-
   return (
     <div className="flex gap-3 text-sm font-medium text-neutral-500 tabular-nums px-4 py-2">
       <span>{date}</span>
-      <span>•</span>
-      <span>{time}</span>
     </div>
   )
 }

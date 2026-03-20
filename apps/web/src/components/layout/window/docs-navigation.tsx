@@ -10,8 +10,10 @@ interface DocsNavigationProps {
 
 function DocsNavigation({ activeTab }: DocsNavigationProps) {
   const { user, isLoaded } = useUser()
-  const isCommittee =
-    isLoaded && user?.publicMetadata.role === UserRole.Committee
+  const isEventManager =
+    isLoaded &&
+    (user?.publicMetadata.role === UserRole.Committee ||
+      user?.publicMetadata.role === UserRole.SigExecutive)
 
   return (
     <nav
@@ -22,7 +24,7 @@ function DocsNavigation({ activeTab }: DocsNavigationProps) {
         const isActive = activeTab === tab.path
         const isDisabled =
           tab.isClosedToCheck ||
-          (tab.requireCommittee && !isCommittee) ||
+          (tab.requireCommittee && !isEventManager) ||
           (tab.requireAuth && !user)
 
         if (isActive) {

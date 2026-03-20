@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { RegistrationContractSchema } from '@events.comp-soc.com/shared'
 import type {
   CustomField,
@@ -22,10 +23,19 @@ function CreateRegisterEventButton({
 }) {
   const [open, setOpen] = useState(false)
   const { isAuthenticated } = useCommitteeAuth()
+  const navigate = useNavigate()
   const { createRegistration, isCreating } = useCreateRegistration(
     eventId,
     title,
   )
+
+  const handleClick = () => {
+    if (!isAuthenticated) {
+      void navigate({ to: '/sign-in/$' })
+      return
+    }
+    setOpen(!open)
+  }
 
   const handleSubmit = (value: RegistrationFormAnswer) => {
     const data = RegistrationContractSchema.parse({
@@ -37,10 +47,7 @@ function CreateRegisterEventButton({
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(!open)}
-        disabled={!isAuthenticated || disabled}
-      >
+      <Button onClick={handleClick} disabled={disabled}>
         Register Now
       </Button>
       <EventRegistrationFormDialog
