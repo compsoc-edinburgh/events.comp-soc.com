@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { batchAcceptRegistration } from '@/lib/data/registration.ts'
+import { formatErrorMessage } from '@/lib/utils.ts'
 
 export function useBatchAcceptRegistrations(eventId: string, title: string) {
   const queryClient = useQueryClient()
@@ -22,7 +23,7 @@ export function useBatchAcceptRegistrations(eventId: string, title: string) {
     },
     onError: (error) => {
       toast.error('Failed to accept students', {
-        description: error.message || 'Something went wrong',
+        description: formatErrorMessage(error.message),
       })
     },
   })

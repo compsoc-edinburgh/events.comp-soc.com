@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
+import type { RegistrationStatus } from '@events.comp-soc.com/shared'
 import { getColumns } from '@/components/tables/registration-table/columns.tsx'
 import Window from '@/components/layout/window/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
@@ -56,12 +57,27 @@ function AnalyticsRoute() {
     event.capacity == analytics.countByStatus['accepted'] ||
     event.capacity === null
 
+  const isActionsDisabled = isUpdating || isBatchUpdating
+
   const columns = getColumns(event.form ?? [], (id, newStatus) => {
     updateRegistration({
       status: newStatus,
       userId: id,
     })
   })
+
+  const handleBatchUpdate = (
+    userIds: Array<string>,
+    newStatus: RegistrationStatus,
+  ) => {
+    batchUpdate({
+      data: {
+        userIds,
+        status: newStatus,
+      },
+    })
+  }
+
   return (
     <ProtectedRoute activeTab="/events" requireEventManager>
       <Window activeTab="/events">
@@ -116,15 +132,8 @@ function AnalyticsRoute() {
               isAddingDisabled={isAcceptanceDisabled}
               eventId={eventId}
               title={event.title}
-              isActionsDisabled={isUpdating || isBatchUpdating}
-              onBulkStatusChange={(userIds, newStatus) => {
-                batchUpdate({
-                  data: {
-                    userIds,
-                    status: newStatus,
-                  },
-                })
-              }}
+              isActionsDisabled={isActionsDisabled}
+              onBulkStatusChange={handleBatchUpdate}
             />
           </div>
         </Sheet>

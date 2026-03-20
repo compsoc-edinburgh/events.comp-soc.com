@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { deleteEvent } from '@/lib/data/event.ts'
+import { formatErrorMessage } from '@/lib/utils.ts'
 
 export function useDeleteEvent(eventId: string) {
   const queryClient = useQueryClient()
@@ -18,7 +19,7 @@ export function useDeleteEvent(eventId: string) {
     },
     onError: (error: Error) => {
       toast.error('Delete failed', {
-        description: error.message || 'Something went wrong',
+        description: formatErrorMessage(error.message),
       })
     },
   })
