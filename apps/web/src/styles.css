@@ -106,27 +106,27 @@ h4 {
   h4,
   h5,
   h6 {
-    @apply text-neutral-100 font-semibold mt-8 mb-4 first:mt-0;
+    @apply text-neutral-100 font-semibold mt-6 sm:mt-8 mb-3 sm:mb-4 first:mt-0;
   }
 
   h1 {
-    @apply text-3xl tracking-tight;
+    @apply text-2xl sm:text-[1.7rem] tracking-tight;
   }
 
   h2 {
-    @apply text-2xl tracking-tight border-b border-neutral-800/70 pb-2 mb-6;
+    @apply text-xl sm:text-2xl tracking-tight mb-4 sm:mb-6;
   }
 
   h3 {
-    @apply text-xl;
+    @apply text-lg sm:text-xl;
   }
 
   h4 {
-    @apply text-lg;
+    @apply text-base sm:text-lg;
   }
 
   p {
-    @apply text-neutral-400 my-5 first:mt-0 last:mb-0 text-[15px] leading-7;
+    @apply text-neutral-400 my-4 sm:my-5 first:mt-0 last:mb-0 text-sm sm:text-[15px] leading-6 sm:leading-7;
   }
 
   strong {
@@ -142,9 +142,20 @@ h4 {
     hover:text-neutral-100 hover:decoration-neutral-500 transition-colors;
   }
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    a {
+      @apply no-underline hover:no-underline;
+    }
+  }
+
   ul,
   ol {
-    @apply my-6 pl-6 space-y-3;
+    @apply my-4 sm:my-6 pl-5 sm:pl-6 space-y-2 sm:space-y-3;
   }
 
   ul {
@@ -165,11 +176,11 @@ h4 {
   }
 
   li {
-    @apply text-neutral-400 text-[15px];
+    @apply text-neutral-400 text-sm sm:text-[15px];
   }
 
   blockquote {
-    @apply border-l-2 border-neutral-700 pl-6 py-1 my-8
+    @apply border-l-2 border-neutral-700 pl-4 sm:pl-6 py-1 my-6 sm:my-8
     italic text-neutral-300 bg-neutral-900/40 rounded-r-sm;
 
     p {

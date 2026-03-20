@@ -16,7 +16,7 @@ export const RegistrationBlock: React.FC<RegistrationBlockProps> = ({
     <div className="bg-neutral-900 rounded-lg border border-neutral-800 p-4 mb-6 my-5">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1">
-          <h3 className="text-sm md:text-md font-medium text-nutral-400">
+          <h3 className="text-sm md:text-md font-medium text-neutral-400">
             Your Registration
           </h3>
           <span className="text-xs md:text-sm text-neutral-500">
