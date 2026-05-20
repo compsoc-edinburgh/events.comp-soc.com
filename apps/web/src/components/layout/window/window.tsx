@@ -1,6 +1,4 @@
 import type { ReactNode } from 'react'
-import DocsNavigation from '@/components/layout/window/docs-navigation.tsx'
-import DocsToolbar from '@/components/layout/window/docs-toolbar.tsx'
 
 interface WindowProps {
   children: ReactNode
@@ -8,15 +6,11 @@ interface WindowProps {
   toolbarContent?: ReactNode
 }
 
-function Window({ children, activeTab, toolbarContent }: WindowProps) {
+function Window({ children }: WindowProps) {
   return (
-    <>
-      <DocsToolbar>{toolbarContent}</DocsToolbar>
-      <div className="bg-background min-h-[70vh] flex items-center flex-col">
-        <DocsNavigation activeTab={activeTab} />
-        {children}
-      </div>
-    </>
+    <div className="bg-[#141414] min-h-[80vh] my-5 mx-5 border-[#2E2E2E] border rounded-lg">
+      {children}
+    </div>
   )
 }
 

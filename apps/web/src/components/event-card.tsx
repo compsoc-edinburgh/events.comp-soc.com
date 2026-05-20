@@ -17,7 +17,7 @@ function EventCard({ event }: EventCardProps) {
       params={{ eventId: String(event.id) }}
       className="block"
     >
-      <div className="group relative bg-surface border border-neutral-800 hover:border-neutral-600 rounded-md p-4 sm:p-5 transition-all duration-200 hover:shadow-lg hover:bg-neutral-800/30 cursor-pointer">
+      <div className="group relative bg-card border border-card-border hover:border-neutral-500 rounded-md p-4 sm:p-5 transition-all duration-200 hover:shadow-lg hover:bg-card-hover cursor-pointer">
         <div className="flex justify-between items-start gap-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 sm:gap-2 mb-2 flex-wrap">

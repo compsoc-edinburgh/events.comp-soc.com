@@ -35,11 +35,10 @@ function RootDocument({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-background">
+      <body className="bg-[#1f1f1f]">
         <ClerkProvider>
           <Toaster />
           <MainNavigation />
-          <WindowBar />
           {children}
           <TanStackDevtools
             config={{

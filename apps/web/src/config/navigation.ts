@@ -51,9 +51,9 @@ export const docsNavTabs: Array<NavTab> = [
 ]
 
 export const mainNavLinks: Array<NavLink> = [
-  { label: 'CompSoc', href: '/' },
-  { label: 'About', href: 'https://comp-soc.com', external: true },
-  { label: 'Team', href: 'https://comp-soc.com/team', external: true },
-  { label: 'News', href: 'https://comp-soc.com/news', external: true },
-  { label: 'Discord', href: 'https://discord.gg/fmp7p9Ca4y', external: true },
+  { label: 'CompSoc Events', href: '/' },
+  { label: 'Search', href: 'https://comp-soc.com', external: true },
+  { label: 'Committee', href: 'https://comp-soc.com/team', external: true },
+  { label: 'Analytics', href: 'https://comp-soc.com/news', external: true },
+  { label: 'More', href: 'https://discord.gg/fmp7p9Ca4y', external: true },
 ]
