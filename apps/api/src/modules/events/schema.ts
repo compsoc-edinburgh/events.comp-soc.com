@@ -30,12 +30,7 @@ export const EventsQueryFilterSchema = QueryFilterSchema.extend({
     .enum(["true", "false"])
     .optional()
     .transform((val) => val === "true"),
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(200)
-    .optional(),
+  search: z.string().trim().min(1).max(200).optional(),
   sigs: z
     .string()
     .optional()
@@ -45,7 +40,7 @@ export const EventsQueryFilterSchema = QueryFilterSchema.extend({
             .split(",")
             .map((s) => s.trim())
             .filter(Boolean)
-        : undefined,
+        : undefined
     ),
   date: z.iso.date().optional(),
 });

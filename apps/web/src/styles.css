@@ -7,9 +7,9 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   /* Surface hierarchy (3 primary tokens) */
-  --color-background: #1f1f1f;    /* body / page backdrop (lightest) */
-  --color-surface: #141414;       /* Window / main content surface (mid) */
-  --color-navigation: #0d0d0d;    /* navbar / top chrome (darkest) */
+  --color-background: #1f1f1f; /* body / page backdrop (lightest) */
+  --color-surface: #141414; /* Window / main content surface (mid) */
+  --color-navigation: #0d0d0d; /* navbar / top chrome (darkest) */
 
   /* Text */
   --color-foreground: #ececec;

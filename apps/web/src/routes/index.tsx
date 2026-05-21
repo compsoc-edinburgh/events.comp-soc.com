@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { Search, ServerCrash } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useAuth } from '@clerk/tanstack-react-start'
 import { EventPriority, RegistrationStatus } from '@events.comp-soc.com/shared'
@@ -19,16 +19,14 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from '@/components/ui/input-group.tsx'
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs.tsx'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip.tsx'
+import { Skeleton } from '@/components/ui/skeleton.tsx'
+import { useDebouncedValue } from '@/lib/hooks/use-debounced-value.ts'
 
 export const Route = createFileRoute('/')({
   loader: async ({ context }) => {
@@ -54,10 +52,11 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const { isSignedIn } = useAuth()
-  const { canManageEvents } = useEventManagerAuth()
+  const { canManageEvents, isLoaded: isAuthLoaded } = useEventManagerAuth()
 
   const [selectedSigs, setSelectedSigs] = useState<Array<string>>([])
   const [eventSearch, setEventSearch] = useState('')
+  const debouncedSearch = useDebouncedValue(eventSearch, 300)
   const [eventsTab, setEventsTab] = useState<'upcoming' | 'drafts'>('upcoming')
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
 
@@ -73,28 +72,34 @@ function App() {
     : undefined
 
   const sharedFilters = {
-    search: eventSearch,
+    search: debouncedSearch,
     sigs: selectedSigs,
     date: dateFilter,
   }
 
-  const { data: publishedEvents = [] } = useQuery({
-    ...eventsQueryOptions({ state: 'published', ...sharedFilters }),
-    enabled: eventsTab === 'upcoming',
-  })
-  const { data: draftEvents = [] } = useQuery({
+  const { data: publishedEvents = [], isPending: isPublishedPending } =
+    useQuery({
+      ...eventsQueryOptions({ state: 'published', ...sharedFilters }),
+      enabled: eventsTab === 'upcoming',
+      placeholderData: keepPreviousData,
+      staleTime: 30_000,
+    })
+  const { data: draftEvents = [], isPending: isDraftPending } = useQuery({
     ...eventsQueryOptions({
       state: 'draft',
       includePast: true,
       ...sharedFilters,
     }),
     enabled: canManageEvents && eventsTab === 'drafts',
+    placeholderData: keepPreviousData,
+    staleTime: 30_000,
   })
 
-  const { data: userRegistrations } = useQuery({
-    ...userRegistrationQueryOption(),
-    enabled: !!isSignedIn,
-  })
+  const { data: userRegistrations, isPending: isRegistrationsPending } =
+    useQuery({
+      ...userRegistrationQueryOption(),
+      enabled: !!isSignedIn,
+    })
 
   const now = Date.now()
   const myEvents = (userRegistrations ?? [])
@@ -105,6 +110,8 @@ function App() {
     )
 
   const events = eventsTab === 'drafts' ? draftEvents : publishedEvents
+  const isEventsLoading =
+    eventsTab === 'drafts' ? isDraftPending : isPublishedPending
 
   const pinnedEvents = events.filter(
     (event) => event.priority === EventPriority.Pinned,
@@ -165,7 +172,15 @@ function App() {
           <div className="min-w-0 flex flex-col">
             <h2 className="text-lg text-neutral-500 mb-4">Upcoming Events</h2>
 
-            {events.length === 0 && (
+            {isEventsLoading && (
+              <div className="grid gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-32.5 w-full" />
+                ))}
+              </div>
+            )}
+
+            {!isEventsLoading && events.length === 0 && (
               <div className="flex-1 flex flex-col items-center justify-center">
                 <img
                   src="/no-events.png"
@@ -181,16 +196,17 @@ function App() {
               </div>
             )}
 
-            {(pinnedEvents.length > 0 || defaultEvents.length > 0) && (
-              <div className="grid gap-4">
-                {pinnedEvents.map((event) => (
-                  <EventCard key={event.id} event={event} pinned />
-                ))}
-                {defaultEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
-            )}
+            {!isEventsLoading &&
+              (pinnedEvents.length > 0 || defaultEvents.length > 0) && (
+                <div className="grid gap-4">
+                  {pinnedEvents.map((event) => (
+                    <EventCard key={event.id} event={event} pinned />
+                  ))}
+                  {defaultEvents.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              )}
           </div>
 
           <aside className="md:sticky md:top-16 md:self-start md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
@@ -219,20 +235,35 @@ function App() {
               />
             </div>
 
-            <Tabs
-              value={eventsTab}
-              onValueChange={(v) => setEventsTab(v as 'upcoming' | 'drafts')}
-              className="mt-4"
-            >
-              <TabsList className="w-full">
-                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                {canManageEvents && (
-                  <TabsTrigger value="drafts">Drafts</TabsTrigger>
-                )}
-              </TabsList>
-            </Tabs>
+            {isAuthLoaded ? (
+              <Tabs
+                value={eventsTab}
+                onValueChange={(v) => setEventsTab(v as 'upcoming' | 'drafts')}
+                className="mt-4"
+              >
+                <TabsList className="w-full">
+                  <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                  {canManageEvents && (
+                    <TabsTrigger value="drafts">Drafts</TabsTrigger>
+                  )}
+                </TabsList>
+              </Tabs>
+            ) : (
+              <Skeleton className="mt-4 h-9 w-full" />
+            )}
 
-            {myEvents.length > 0 && (
+            {isSignedIn && isRegistrationsPending && (
+              <div className="mt-6">
+                <h2 className="text-lg text-neutral-500 mb-3">Your events</h2>
+                <div className="flex flex-col gap-1">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <Skeleton key={i} className="h-13.5 w-full" />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!isRegistrationsPending && myEvents.length > 0 && (
               <div className="mt-6">
                 <h2 className="text-lg text-neutral-500 mb-3">Your events</h2>
                 <ul className="flex flex-col gap-1">
