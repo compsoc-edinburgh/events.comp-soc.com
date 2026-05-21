@@ -10,6 +10,21 @@ import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { eventsQueryOptions } from '@/lib/data/event.ts'
 import { StatusCard } from '@/components/ui/status-card.tsx'
 import { ALL_SIGS } from '@/config/sigs.ts'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group.tsx'
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs.tsx'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip.tsx'
 
 export const Route = createFileRoute('/')({
   loader: async ({ context }) => {
@@ -35,21 +50,36 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const { data: events } = useSuspenseQuery(eventsQueryOptions('published'))
-  const [selectedSig, setSelectedSig] = useState<string | null>(null)
+  const [selectedSigs, setSelectedSigs] = useState<Array<string>>([])
   const [eventSearch, setEventSearch] = useState('')
+
+  const toggleSig = (id: string) =>
+    setSelectedSigs((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
+    )
+
   const [eventsTab, setEventsTab] = useState<'upcoming' | 'drafts'>('upcoming')
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
   const search = eventSearch.trim().toLowerCase()
   const matchesSearch = (event: { title: string }) =>
     search === '' || event.title.toLowerCase().includes(search)
+  const matchesSig = (event: { organiser?: string }) =>
+    selectedSigs.length === 0 ||
+    (event.organiser != null && selectedSigs.includes(event.organiser))
 
   const pinnedEvents = events.filter(
-    (event) => event.priority === EventPriority.Pinned && matchesSearch(event),
+    (event) =>
+      event.priority === EventPriority.Pinned &&
+      matchesSearch(event) &&
+      matchesSig(event),
   )
 
   const defaultEvents = events.filter(
-    (event) => event.priority === EventPriority.Default && matchesSearch(event),
+    (event) =>
+      event.priority === EventPriority.Default &&
+      matchesSearch(event) &&
+      matchesSig(event),
   )
 
   return (
@@ -58,26 +88,28 @@ function App() {
         <div className="grid grid-cols-1 md:grid-cols-[220px_1fr_240px] gap-6 md:gap-8">
           <aside className="md:sticky md:top-16 md:self-start md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
             <h2 className="text-lg text-neutral-500 mb-3">Search</h2>
-            <div className="relative mb-6">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-neutral-500 pointer-events-none" />
-              <input
-                type="text"
+            <InputGroup className="mb-6">
+              <InputGroupAddon>
+                <Search />
+              </InputGroupAddon>
+              <InputGroupInput
                 value={eventSearch}
                 onChange={(e) => setEventSearch(e.target.value)}
                 placeholder="Search events"
-                className="w-full bg-card border border-card-border rounded-sm pl-8 pr-3 py-1.5 text-xs text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500"
               />
-            </div>
+            </InputGroup>
+
+            <div className="mb-6" />
 
             <h2 className="text-lg text-neutral-500 mb-3">SIGs</h2>
             <ul className="flex flex-col gap-0.5">
               {ALL_SIGS.map((sig) => {
-                const isSelected = selectedSig === sig.id
+                const isSelected = selectedSigs.includes(sig.id)
                 return (
                   <li key={sig.id}>
                     <button
                       type="button"
-                      onClick={() => setSelectedSig(isSelected ? null : sig.id)}
+                      onClick={() => toggleSig(sig.id)}
                       className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-sm border transition-colors ${
                         isSelected
                           ? 'bg-card-hover border-neutral-500 text-white shadow-sm'
@@ -156,55 +188,78 @@ function App() {
               />
             </div>
 
-            <div className="mt-4 flex items-center gap-1 p-1 rounded-sm bg-card border border-card-border">
-              {(['upcoming', 'drafts'] as const).map((tab) => {
-                const isActive = eventsTab === tab
-                return (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setEventsTab(tab)}
-                    className={`flex-1 px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-card-hover text-neutral-100 shadow-sm'
-                        : 'text-neutral-500 hover:text-neutral-300'
-                    }`}
-                  >
-                    {tab === 'upcoming' ? 'Upcoming' : 'Drafts'}
-                  </button>
-                )
-              })}
-            </div>
+            <Tabs
+              value={eventsTab}
+              onValueChange={(v) => setEventsTab(v as 'upcoming' | 'drafts')}
+              className="mt-4"
+            >
+              <TabsList className="w-full">
+                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                <TabsTrigger value="drafts">Drafts</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
             <div className="mt-6">
               <h2 className="text-lg text-neutral-500 mb-3">Your events</h2>
               <ul className="flex flex-col gap-1">
-                {[
-                  {
-                    title: 'Intro to Haskell',
-                    when: 'Tomorrow · 18:00',
-                  },
-                  {
-                    title: 'CTF night with SIGINT',
-                    when: 'Fri · 19:00',
-                  },
-                  {
-                    title: 'Project Share showcase',
-                    when: 'Next Tue · 17:30',
-                  },
-                ].map((item) => (
-                  <li
-                    key={item.title}
-                    className="flex flex-col gap-0.5 px-2.5 py-2 rounded-sm hover:bg-card transition-colors cursor-pointer"
-                  >
-                    <span className="text-sm text-neutral-200 truncate">
-                      {item.title}
-                    </span>
-                    <span className="text-xs text-neutral-500">
-                      {item.when}
-                    </span>
-                  </li>
-                ))}
+                {(
+                  [
+                    {
+                      title: 'Intro to Haskell',
+                      when: 'Tomorrow · 18:00',
+                      status: 'accepted',
+                    },
+                    {
+                      title: 'CTF night with SIGINT',
+                      when: 'Fri · 19:00',
+                      status: 'pending',
+                    },
+                    {
+                      title: 'Project Share showcase',
+                      when: 'Next Tue · 17:30',
+                      status: 'rejected',
+                    },
+                  ] as const
+                ).map((item) => {
+                  const statusColor =
+                    item.status === 'accepted'
+                      ? 'bg-status-accepted'
+                      : item.status === 'pending'
+                        ? 'bg-status-pending'
+                        : 'bg-status-rejected'
+                  const statusLabel =
+                    item.status === 'accepted'
+                      ? 'Accepted'
+                      : item.status === 'pending'
+                        ? 'Pending'
+                        : 'Rejected'
+                  return (
+                    <li
+                      key={item.title}
+                      className="flex flex-col gap-0.5 px-2.5 py-2 rounded-sm hover:bg-card transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span
+                              className={`w-2 h-2 rounded-full shrink-0 ${statusColor}`}
+                              aria-label={statusLabel}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent side="left">
+                            {statusLabel}
+                          </TooltipContent>
+                        </Tooltip>
+                        <span className="text-sm text-neutral-200 truncate">
+                          {item.title}
+                        </span>
+                      </div>
+                      <span className="text-xs text-neutral-500 pl-4">
+                        {item.when}
+                      </span>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           </aside>

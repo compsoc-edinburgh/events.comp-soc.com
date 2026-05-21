@@ -35,7 +35,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <title>Compsoc Events</title>
         <HeadContent />
       </head>
-      <body className="bg-[#1f1f1f]">
+      <body className="bg-background">
         <ClerkProvider>
           <Toaster />
           <MainNavigation />

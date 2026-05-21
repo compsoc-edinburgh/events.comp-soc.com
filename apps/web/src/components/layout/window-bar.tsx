@@ -25,7 +25,7 @@ export function WindowBar({
       className={`
         ${isSticky ? 'sticky top-0 z-30' : 'relative'} 
         flex h-8 items-center justify-between px-2 sm:px-3 rounded-t-sm
-        bg-window border-b border-neutral-800 w-full
+        bg-navigation border-b border-card-border w-full
       `}
     >
       {controls}

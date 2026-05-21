@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   CalendarPlus,
   ChevronDown,
@@ -61,11 +61,33 @@ const NavPopover = ({
   label: string
   items: Array<PopoverItem>
 }) => {
+  const [open, setOpen] = useState(false)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const cancelClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+  }
+
+  const scheduleClose = () => {
+    cancelClose()
+    closeTimerRef.current = setTimeout(() => setOpen(false), 120)
+  }
+
+  useEffect(() => () => cancelClose(), [])
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
+          onMouseEnter={() => {
+            cancelClose()
+            setOpen(true)
+          }}
+          onMouseLeave={scheduleClose}
           className={`${navItemClass} inline-flex items-center gap-1 px-3 py-1.5 rounded-md hover:bg-white/5 data-[state=open]:bg-white/5`}
         >
           {label}
@@ -78,6 +100,9 @@ const NavPopover = ({
       <PopoverContent
         align="start"
         sideOffset={8}
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
+        onOpenAutoFocus={(e) => e.preventDefault()}
         className="w-48 p-1.5 bg-neutral-900 border-card-border"
       >
         <div className="flex flex-col">
@@ -303,7 +328,7 @@ function MainNavigation() {
 
   return (
     <>
-      <nav className="sticky top-0 z-30 flex h-12 items-center justify-between px-6 sm:px-8 lg:px-10 bg-[#121212]/70 backdrop-blur-md backdrop-saturate-150 border-b border-[#2E2E2E]">
+      <nav className="sticky top-0 z-30 flex h-12 items-center justify-between px-6 sm:px-8 lg:px-10 bg-navigation/70 backdrop-blur-md backdrop-saturate-150 border-b border-card-border">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center">
             <img
