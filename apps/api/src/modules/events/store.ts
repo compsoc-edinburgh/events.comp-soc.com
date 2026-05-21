@@ -1,4 +1,4 @@
-import { eq, gte, and, SQL } from "drizzle-orm";
+import { eq, gte, lt, and, ilike, inArray, SQL } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
 import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
 import { eventsTable, registrationsTable } from "../../db/schema.js";
@@ -35,15 +35,27 @@ export const eventStore = {
   },
 
   async get({ db, filters }: { db: SqlContext; filters: EventsQueryFilter }) {
-    const { page, limit, state, includePast } = filters;
+    const { page, limit, state, includePast, search, sigs, date } = filters;
     const offset = (page - 1) * limit;
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
+    let dayStart: Date | null = null;
+    let dayEnd: Date | null = null;
+    if (date) {
+      dayStart = new Date(`${date}T00:00:00.000Z`);
+      dayEnd = new Date(dayStart);
+      dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+    }
+
     const conditions = [
       state ? eq(eventsTable.state, state) : null,
-      !includePast ? gte(eventsTable.date, today) : null,
+      !includePast && !date ? gte(eventsTable.date, today) : null,
+      search ? ilike(eventsTable.title, `%${search}%`) : null,
+      sigs && sigs.length > 0 ? inArray(eventsTable.organiser, sigs) : null,
+      dayStart ? gte(eventsTable.date, dayStart) : null,
+      dayEnd ? lt(eventsTable.date, dayEnd) : null,
     ].filter((condition): condition is SQL => condition !== null);
 
     return db

@@ -1,8 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { Search, ServerCrash } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { EventPriority } from '@events.comp-soc.com/shared'
+import { useAuth } from '@clerk/tanstack-react-start'
+import { EventPriority, RegistrationStatus } from '@events.comp-soc.com/shared'
+import { userRegistrationQueryOption } from '@/lib/data/users.ts'
+import { formatEventDate } from '@/lib/utils.ts'
+import { useEventManagerAuth } from '@/lib/auth.ts'
 import EventCard from '@/components/event-card.tsx'
 import { Calendar } from '@/components/ui/calendar.tsx'
 import Window from '@/components/layout/window.tsx'
@@ -49,37 +53,64 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
-  const { data: events } = useSuspenseQuery(eventsQueryOptions('published'))
+  const { isSignedIn } = useAuth()
+  const { canManageEvents } = useEventManagerAuth()
+
   const [selectedSigs, setSelectedSigs] = useState<Array<string>>([])
   const [eventSearch, setEventSearch] = useState('')
+  const [eventsTab, setEventsTab] = useState<'upcoming' | 'drafts'>('upcoming')
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
 
   const toggleSig = (id: string) =>
     setSelectedSigs((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
     )
 
-  const [eventsTab, setEventsTab] = useState<'upcoming' | 'drafts'>('upcoming')
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const dateFilter = selectedDate
+    ? `${selectedDate.getFullYear()}-${String(
+        selectedDate.getMonth() + 1,
+      ).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
+    : undefined
 
-  const search = eventSearch.trim().toLowerCase()
-  const matchesSearch = (event: { title: string }) =>
-    search === '' || event.title.toLowerCase().includes(search)
-  const matchesSig = (event: { organiser?: string }) =>
-    selectedSigs.length === 0 ||
-    (event.organiser != null && selectedSigs.includes(event.organiser))
+  const sharedFilters = {
+    search: eventSearch,
+    sigs: selectedSigs,
+    date: dateFilter,
+  }
+
+  const { data: publishedEvents = [] } = useQuery({
+    ...eventsQueryOptions({ state: 'published', ...sharedFilters }),
+    enabled: eventsTab === 'upcoming',
+  })
+  const { data: draftEvents = [] } = useQuery({
+    ...eventsQueryOptions({
+      state: 'draft',
+      includePast: true,
+      ...sharedFilters,
+    }),
+    enabled: canManageEvents && eventsTab === 'drafts',
+  })
+
+  const { data: userRegistrations } = useQuery({
+    ...userRegistrationQueryOption(),
+    enabled: !!isSignedIn,
+  })
+
+  const now = Date.now()
+  const myEvents = (userRegistrations ?? [])
+    .filter((reg) => new Date(reg.eventDate).getTime() >= now)
+    .sort(
+      (a, b) =>
+        new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(),
+    )
+
+  const events = eventsTab === 'drafts' ? draftEvents : publishedEvents
 
   const pinnedEvents = events.filter(
-    (event) =>
-      event.priority === EventPriority.Pinned &&
-      matchesSearch(event) &&
-      matchesSig(event),
+    (event) => event.priority === EventPriority.Pinned,
   )
-
   const defaultEvents = events.filter(
-    (event) =>
-      event.priority === EventPriority.Default &&
-      matchesSearch(event) &&
-      matchesSig(event),
+    (event) => event.priority === EventPriority.Default,
   )
 
   return (
@@ -195,73 +226,67 @@ function App() {
             >
               <TabsList className="w-full">
                 <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                <TabsTrigger value="drafts">Drafts</TabsTrigger>
+                {canManageEvents && (
+                  <TabsTrigger value="drafts">Drafts</TabsTrigger>
+                )}
               </TabsList>
             </Tabs>
 
-            <div className="mt-6">
-              <h2 className="text-lg text-neutral-500 mb-3">Your events</h2>
-              <ul className="flex flex-col gap-1">
-                {(
-                  [
-                    {
-                      title: 'Intro to Haskell',
-                      when: 'Tomorrow · 18:00',
-                      status: 'accepted',
-                    },
-                    {
-                      title: 'CTF night with SIGINT',
-                      when: 'Fri · 19:00',
-                      status: 'pending',
-                    },
-                    {
-                      title: 'Project Share showcase',
-                      when: 'Next Tue · 17:30',
-                      status: 'rejected',
-                    },
-                  ] as const
-                ).map((item) => {
-                  const statusColor =
-                    item.status === 'accepted'
-                      ? 'bg-status-accepted'
-                      : item.status === 'pending'
-                        ? 'bg-status-pending'
-                        : 'bg-status-rejected'
-                  const statusLabel =
-                    item.status === 'accepted'
-                      ? 'Accepted'
-                      : item.status === 'pending'
-                        ? 'Pending'
-                        : 'Rejected'
-                  return (
-                    <li
-                      key={item.title}
-                      className="flex flex-col gap-0.5 px-2.5 py-2 rounded-sm hover:bg-card transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span
-                              className={`w-2 h-2 rounded-full shrink-0 ${statusColor}`}
-                              aria-label={statusLabel}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent side="left">
-                            {statusLabel}
-                          </TooltipContent>
-                        </Tooltip>
-                        <span className="text-sm text-neutral-200 truncate">
-                          {item.title}
-                        </span>
-                      </div>
-                      <span className="text-xs text-neutral-500 pl-4">
-                        {item.when}
-                      </span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
+            {myEvents.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-lg text-neutral-500 mb-3">Your events</h2>
+                <ul className="flex flex-col gap-1">
+                  {myEvents.map((reg) => {
+                    const { full: when } = formatEventDate(reg.eventDate)
+                    const statusColor =
+                      reg.status === RegistrationStatus.Accepted
+                        ? 'bg-status-accepted'
+                        : reg.status === RegistrationStatus.Pending
+                          ? 'bg-status-pending'
+                          : reg.status === RegistrationStatus.Waitlist
+                            ? 'bg-status-waitlist'
+                            : 'bg-status-rejected'
+                    const statusLabel =
+                      reg.status === RegistrationStatus.Accepted
+                        ? 'Accepted'
+                        : reg.status === RegistrationStatus.Pending
+                          ? 'Pending'
+                          : reg.status === RegistrationStatus.Waitlist
+                            ? 'Waitlist'
+                            : 'Rejected'
+                    return (
+                      <li key={reg.eventId}>
+                        <Link
+                          to="/events/$eventId"
+                          params={{ eventId: reg.eventId }}
+                          className="flex flex-col gap-0.5 px-2.5 py-2 rounded-sm hover:bg-card transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span
+                                  className={`w-2 h-2 rounded-full shrink-0 ${statusColor}`}
+                                  aria-label={statusLabel}
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent side="left">
+                                {statusLabel}
+                              </TooltipContent>
+                            </Tooltip>
+                            <span className="text-sm text-neutral-200 truncate">
+                              {reg.eventTitle ?? 'Untitled event'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-neutral-500 pl-4">
+                            {when}
+                          </span>
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )}
           </aside>
         </div>
 

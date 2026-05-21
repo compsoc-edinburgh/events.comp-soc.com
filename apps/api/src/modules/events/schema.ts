@@ -30,6 +30,24 @@ export const EventsQueryFilterSchema = QueryFilterSchema.extend({
     .enum(["true", "false"])
     .optional()
     .transform((val) => val === "true"),
+  search: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .optional(),
+  sigs: z
+    .string()
+    .optional()
+    .transform((val) =>
+      val
+        ? val
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : undefined,
+    ),
+  date: z.iso.date().optional(),
 });
 
 export type EventId = z.infer<typeof EventIdSchema>;

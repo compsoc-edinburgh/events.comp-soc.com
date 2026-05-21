@@ -52,6 +52,9 @@ const eventsFilterSchema = z
   .object({
     state: z.enum(EventState).optional(),
     includePast: z.boolean().optional(),
+    search: z.string().optional(),
+    sigs: z.array(z.string()).optional(),
+    date: z.string().optional(),
   })
   .optional()
 
@@ -73,6 +76,13 @@ export const fetchEvents = createServerFn({ method: 'GET' })
           params: {
             state: data?.state,
             ...(data?.includePast && { includePast: 'true' }),
+            ...(data?.search && data.search.trim() !== ''
+              ? { search: data.search.trim() }
+              : {}),
+            ...(data?.sigs && data.sigs.length > 0
+              ? { sigs: data.sigs.join(',') }
+              : {}),
+            ...(data?.date ? { date: data.date } : {}),
           },
           headers: {
             Authorization: `Bearer ${token}`,
@@ -167,14 +177,39 @@ export const deleteEvent = createServerFn({ method: 'POST' })
     return EventResponseSchema.parse(event)
   })
 
+export interface EventsQueryParams {
+  state?: 'draft' | 'published'
+  includePast?: boolean
+  search?: string
+  sigs?: Array<string>
+  date?: string
+}
+
 export const eventsQueryOptions = (
-  state?: 'draft' | 'published',
+  stateOrParams?: 'draft' | 'published' | EventsQueryParams,
   includePast?: boolean,
-) =>
-  queryOptions({
-    queryKey: ['events', { state, includePast }],
-    queryFn: () => fetchEvents({ data: { state, includePast } }),
+) => {
+  const params: EventsQueryParams =
+    typeof stateOrParams === 'object' && stateOrParams !== null
+      ? stateOrParams
+      : { state: stateOrParams, includePast }
+
+  const normalised = {
+    state: params.state,
+    includePast: params.includePast,
+    search: params.search?.trim() ? params.search.trim() : undefined,
+    sigs:
+      params.sigs && params.sigs.length > 0
+        ? [...params.sigs].sort()
+        : undefined,
+    date: params.date,
+  }
+
+  return queryOptions({
+    queryKey: ['events', normalised],
+    queryFn: () => fetchEvents({ data: normalised }),
   })
+}
 
 export const eventQueryOption = (eventId: string) =>
   queryOptions({
