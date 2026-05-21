@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { WindowControls } from '@/components/layout/window/window-bar.tsx'
+import { WindowControls } from '@/components/layout/window-bar.tsx'
 
 interface AuthWindowProps {
   children: ReactNode

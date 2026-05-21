@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ServerCrash } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import Window from '@/components/layout/window/window.tsx'
+import Window from '@/components/layout/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import EventCard from '@/components/event-card.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'

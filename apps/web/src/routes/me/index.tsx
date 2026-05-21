@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { userRegistrationQueryOption } from '@/lib/data/users.ts'
-import Window from '@/components/layout/window/window.tsx'
+import Window from '@/components/layout/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'

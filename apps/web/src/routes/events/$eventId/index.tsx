@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { useAuth } from '@clerk/tanstack-react-start'
-import Window from '@/components/layout/window/window.tsx'
+import Window from '@/components/layout/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Markdown } from '@/components/markdown.tsx'
 import GoogleMaps from '@/components/google-maps.tsx'

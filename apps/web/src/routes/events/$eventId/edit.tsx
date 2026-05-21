@@ -6,7 +6,7 @@ import ModifyEventForm, {
   EventFormSchema,
   FormToRequest,
 } from '@/components/forms/modify-event-form.tsx'
-import Window from '@/components/layout/window/window.tsx'
+import Window from '@/components/layout/window.tsx'
 import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'

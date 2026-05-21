@@ -5,7 +5,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { Minimize2, MinusIcon, XIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { WindowBar } from '@/components/layout/window/window-bar.tsx'
+import { WindowBar } from '@/components/layout/window-bar.tsx'
 
 function Dialog({
   ...props

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils.ts'
 import { Button } from '@/components/ui/button.tsx'
-import { WindowControls } from '@/components/layout/window/window-bar.tsx'
+import { WindowControls } from '@/components/layout/window-bar.tsx'
 
 interface StatusCardProps {
   title: string

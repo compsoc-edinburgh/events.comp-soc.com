@@ -2,7 +2,7 @@ import { LogIn, ShieldX } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useCommitteeAuth, useEventManagerAuth } from '@/lib/auth.ts'
 import { StatusCard } from '@/components/ui/status-card.tsx'
-import Window from '@/components/layout/window/window.tsx'
+import Window from '@/components/layout/window.tsx'
 import { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Spinner } from '@/components/ui/spinner.tsx'
 
