@@ -45,7 +45,7 @@ const MobileDateTimeDisplay = () => {
 }
 
 const navItemClass =
-  'text-sm text-neutral-300 hover:text-white transition-colors cursor-pointer'
+  'text-sm font-semibold text-neutral-300 hover:text-white transition-colors cursor-pointer'
 
 interface PopoverItem {
   label: string
@@ -66,16 +66,19 @@ const NavPopover = ({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className={`${navItemClass} flex items-center gap-1 px-3 py-1.5 rounded-md hover:bg-white/5 data-[state=open]:bg-white/5`}
+          className={`${navItemClass} inline-flex items-center gap-1 px-3 py-1.5 rounded-md hover:bg-white/5 data-[state=open]:bg-white/5`}
         >
           {label}
-          <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+          <ChevronDown
+            className="w-3.5 h-3.5 text-neutral-500"
+            aria-hidden="true"
+          />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
         sideOffset={8}
-        className="w-56 p-1.5 bg-popover border-card-border"
+        className="w-48 p-1.5 bg-neutral-900 border-card-border"
       >
         <div className="flex flex-col">
           {items.map((item) => {
@@ -170,12 +173,12 @@ const committeeItems: Array<PopoverItem> = [
   {
     label: 'Create event',
     href: '/events/create',
-    icon: <CalendarPlus className="w-4 h-4" />,
+    icon: <CalendarPlus className="w-4 h-4 text-red-700" />,
   },
   {
     label: 'Draft events',
     href: '/events/draft',
-    icon: <FileText className="w-4 h-4" />,
+    icon: <FileText className="w-4 h-4 text-yellow-700" />,
   },
 ]
 
@@ -184,19 +187,19 @@ const moreItems: Array<PopoverItem> = [
     label: 'Discord',
     href: 'https://discord.gg/fmp7p9Ca4y',
     external: true,
-    icon: <MessageCircle className="w-4 h-4" />,
+    icon: <MessageCircle className="w-3.5 h-3.5 text-green-700" />,
   },
   {
     label: 'Committee site',
     href: 'https://comp-soc.com/team',
     external: true,
-    icon: <Users className="w-4 h-4" />,
+    icon: <Users className="w-3.5 h-3.5 text-violet-700" />,
   },
   {
     label: 'CompSoc news',
     href: 'https://comp-soc.com/news',
     external: true,
-    icon: <FileText className="w-4 h-4" />,
+    icon: <FileText className="w-3.5 h-3.5 text-cyan-700" />,
   },
 ]
 
@@ -245,16 +248,21 @@ const MobileMenu = ({
         >
           CompSoc Events
         </Link>
-        <a
-          href="https://comp-soc.com"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to="/"
           className="flex items-center gap-3 px-4 py-3 rounded-md text-base text-neutral-300 hover:bg-neutral-800"
           onClick={onClose}
         >
           <Search className="w-4 h-4 text-neutral-400" />
           Search
-        </a>
+        </Link>
+        <Link
+          to="/analytics"
+          className="flex items-center gap-3 px-4 py-3 rounded-md text-base text-neutral-300 hover:bg-neutral-800"
+          onClick={onClose}
+        >
+          Analytics
+        </Link>
 
         <div className="px-4 pt-4 pb-1 text-xs uppercase tracking-wide text-neutral-500">
           Committee
@@ -306,13 +314,9 @@ function MainNavigation() {
           </Link>
 
           <div className="md:flex hidden items-center gap-1">
-            <NavTextLink href="https://comp-soc.com" external>
-              Search
-            </NavTextLink>
+            <NavTextLink href="/">Search</NavTextLink>
             <NavPopover label="Committee" items={committeeItems} />
-            <NavTextLink href="https://comp-soc.com/news" external>
-              Analytics
-            </NavTextLink>
+            <NavTextLink href="/analytics">Analytics</NavTextLink>
             <NavPopover label="More" items={moreItems} />
           </div>
         </div>

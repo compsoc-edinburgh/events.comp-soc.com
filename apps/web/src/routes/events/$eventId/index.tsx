@@ -75,6 +75,7 @@ function EventRoute() {
   return (
     <Window
       activeTab="/events"
+      maxWidth="3xl"
       toolbarContent={
         canManageEvent ? (
           <div className="flex items-center justify-center gap-3">

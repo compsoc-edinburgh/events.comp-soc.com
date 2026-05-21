@@ -56,7 +56,7 @@ function App() {
     <Window activeTab="/">
       <Sheet>
         <div className="grid grid-cols-1 md:grid-cols-[220px_1fr_240px] gap-6 md:gap-8">
-          <aside>
+          <aside className="md:sticky md:top-16 md:self-start md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
             <h2 className="text-lg text-neutral-500 mb-3">Search</h2>
             <div className="relative mb-6">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-neutral-500 pointer-events-none" />
@@ -80,8 +80,8 @@ function App() {
                       onClick={() => setSelectedSig(isSelected ? null : sig.id)}
                       className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-sm border transition-colors ${
                         isSelected
-                          ? 'bg-card border-card-border'
-                          : 'border-transparent hover:bg-card/60'
+                          ? 'bg-card-hover border-neutral-500 text-white shadow-sm'
+                          : 'border-transparent hover:bg-card hover:border-card-border'
                       }`}
                     >
                       <img
@@ -99,7 +99,7 @@ function App() {
             </ul>
           </aside>
 
-          <div className="min-w-0 min-h-[72vh] flex flex-col">
+          <div className="min-w-0 flex flex-col">
             <h2 className="text-lg text-neutral-500 mb-4">Upcoming Events</h2>
 
             {events.length === 0 && (
@@ -110,7 +110,7 @@ function App() {
                   draggable={false}
                   onContextMenu={(e) => e.preventDefault()}
                   onDragStart={(e) => e.preventDefault()}
-                  className="w-96 h-96 object-contain select-none [-webkit-user-drag:none] [-webkit-touch-callout:none]"
+                  className="w-60 h-60 object-contain select-none [-webkit-user-drag:none] [-webkit-touch-callout:none]"
                 />
                 <p className="text-md font-semibold text-neutral-700">
                   No events in the queue (yet)
@@ -118,38 +118,19 @@ function App() {
               </div>
             )}
 
-            {pinnedEvents.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <h2 className="text-lg font-semibold text-neutral-500">
-                    Pinned Events
-                  </h2>
-                </div>
-                <div className="grid gap-4">
-                  {pinnedEvents.map((event) => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {defaultEvents.length > 0 && (
-              <div className={pinnedEvents.length > 0 ? 'mt-8' : ''}>
-                <div className="flex items-center gap-2 mb-4">
-                  <h2 className="text-lg font-semibold text-neutral-500">
-                    Next Events
-                  </h2>
-                </div>
-                <div className="grid gap-4">
-                  {defaultEvents.map((event) => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
+            {(pinnedEvents.length > 0 || defaultEvents.length > 0) && (
+              <div className="grid gap-4">
+                {pinnedEvents.map((event) => (
+                  <EventCard key={event.id} event={event} pinned />
+                ))}
+                {defaultEvents.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
               </div>
             )}
           </div>
 
-          <aside>
+          <aside className="md:sticky md:top-16 md:self-start md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
             <h2 className="text-lg font-semibold text-neutral-500 mb-3">
               Calendar
             </h2>
@@ -159,7 +140,19 @@ function App() {
                 selected={selectedDate}
                 onSelect={setSelectedDate}
                 className="w-full bg-transparent p-2"
-                classNames={{ root: 'w-full' }}
+                classNames={{
+                  root: 'w-full',
+                  month_caption:
+                    'flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) bg-card-muted/60 rounded-sm',
+                  caption_label:
+                    'select-none text-sm font-medium text-neutral-400',
+                  button_previous:
+                    'size-(--cell-size) p-0 select-none text-white hover:bg-card-hover hover:text-white aria-disabled:opacity-50 inline-flex items-center justify-center rounded-md [&_svg]:!text-white [&_svg]:!fill-white [&_svg]:!w-3 [&_svg]:!h-3',
+                  button_next:
+                    'size-(--cell-size) p-0 select-none text-white hover:bg-card-hover hover:text-white aria-disabled:opacity-50 inline-flex items-center justify-center rounded-md [&_svg]:!text-white [&_svg]:!fill-white [&_svg]:!w-3 [&_svg]:!h-3',
+                  today:
+                    'bg-card-hover text-neutral-200 rounded-md data-[selected=true]:rounded-none',
+                }}
               />
             </div>
 
@@ -181,6 +174,38 @@ function App() {
                   </button>
                 )
               })}
+            </div>
+
+            <div className="mt-6">
+              <h2 className="text-lg text-neutral-500 mb-3">Your events</h2>
+              <ul className="flex flex-col gap-1">
+                {[
+                  {
+                    title: 'Intro to Haskell',
+                    when: 'Tomorrow · 18:00',
+                  },
+                  {
+                    title: 'CTF night with SIGINT',
+                    when: 'Fri · 19:00',
+                  },
+                  {
+                    title: 'Project Share showcase',
+                    when: 'Next Tue · 17:30',
+                  },
+                ].map((item) => (
+                  <li
+                    key={item.title}
+                    className="flex flex-col gap-0.5 px-2.5 py-2 rounded-sm hover:bg-card transition-colors cursor-pointer"
+                  >
+                    <span className="text-sm text-neutral-200 truncate">
+                      {item.title}
+                    </span>
+                    <span className="text-xs text-neutral-500">
+                      {item.when}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </aside>
         </div>

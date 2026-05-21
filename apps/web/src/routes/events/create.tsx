@@ -57,7 +57,7 @@ function CreateRoute() {
 
   return (
     <ProtectedRoute activeTab="/events/create" requireEventManager>
-      <Window activeTab="/events/create">
+      <Window activeTab="/events/create" maxWidth="3xl">
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
             Create Event

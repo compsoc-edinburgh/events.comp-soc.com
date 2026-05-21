@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MeIndexRouteImport } from './routes/me/index'
 import { Route as SignUpSplatRouteImport } from './routes/sign-up.$'
@@ -19,6 +20,11 @@ import { Route as EventsEventIdIndexRouteImport } from './routes/events/$eventId
 import { Route as EventsEventIdEditRouteImport } from './routes/events/$eventId/edit'
 import { Route as EventsEventIdAnalyticsRouteImport } from './routes/events/$eventId/analytics'
 
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -67,6 +73,7 @@ const EventsEventIdAnalyticsRoute = EventsEventIdAnalyticsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/events/create': typeof EventsCreateRoute
   '/events/draft': typeof EventsDraftRoute
   '/sign-in/$': typeof SignInSplatRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/events/create': typeof EventsCreateRoute
   '/events/draft': typeof EventsDraftRoute
   '/sign-in/$': typeof SignInSplatRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/events/create': typeof EventsCreateRoute
   '/events/draft': typeof EventsDraftRoute
   '/sign-in/$': typeof SignInSplatRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/analytics'
     | '/events/create'
     | '/events/draft'
     | '/sign-in/$'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/analytics'
     | '/events/create'
     | '/events/draft'
     | '/sign-in/$'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/analytics'
     | '/events/create'
     | '/events/draft'
     | '/sign-in/$'
@@ -137,6 +149,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   EventsCreateRoute: typeof EventsCreateRoute
   EventsDraftRoute: typeof EventsDraftRoute
   SignInSplatRoute: typeof SignInSplatRoute
@@ -149,6 +162,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -217,6 +237,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
   EventsCreateRoute: EventsCreateRoute,
   EventsDraftRoute: EventsDraftRoute,
   SignInSplatRoute: SignInSplatRoute,
