@@ -7,9 +7,9 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   /* Surface hierarchy (3 primary tokens) */
-  --color-background: #1f1f1f; /* body / page backdrop (lightest) */
+  --color-background: #0d0c0c; /* body / page backdrop (lightest) */
   --color-surface: #141414; /* Window / main content surface (mid) */
-  --color-navigation: #0d0d0d; /* navbar / top chrome (darkest) */
+  --color-navigation: #0e0d0d; /* navbar / top chrome (darkest) */
 
   /* Text */
   --color-foreground: #ececec;
@@ -36,8 +36,8 @@
   --color-muted: #1a1a1a;
 
   /* Inputs / borders */
-  --color-border: #2a2a2a;
-  --color-input: #1a1a1a;
+  --color-border: #3a3a3a;
+  --color-input: #2a2a2a;
   --color-divider: #2a2a2a;
 
   --color-destructive: #7f1d1d;

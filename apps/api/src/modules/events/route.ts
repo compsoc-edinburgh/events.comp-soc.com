@@ -55,7 +55,7 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const { role, sigs } = request.user;
 
     if (!canManageSig(role, sigs, dto.organiser as Sigs)) {
-      throw new ForbiddenError("You cannot create events for this SIG");
+      throw new ForbiddenError("You cannot create events for this Sig");
     }
 
     const generatedId = nanoid();
@@ -89,11 +89,11 @@ export const eventRoutes = async (server: FastifyInstance) => {
     }
 
     if (!canManageSig(role, sigs, existingEvent.organiser as Sigs)) {
-      throw new ForbiddenError("You cannot edit events for this SIG");
+      throw new ForbiddenError("You cannot edit events for this Sig");
     }
 
     if (dto.organiser && !canManageSig(role, sigs, dto.organiser as Sigs)) {
-      throw new ForbiddenError("You cannot transfer events to this SIG");
+      throw new ForbiddenError("You cannot transfer events to this Sig");
     }
 
     const data = UpdateEventSchema.parse({
@@ -124,7 +124,7 @@ export const eventRoutes = async (server: FastifyInstance) => {
     }
 
     if (!canManageSig(role, sigs, existingEvent.organiser as Sigs)) {
-      throw new ForbiddenError("You cannot delete events for this SIG");
+      throw new ForbiddenError("You cannot delete events for this Sig");
     }
 
     const deletedEvent = await eventService.deleteEvent({

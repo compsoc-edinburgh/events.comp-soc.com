@@ -1,20 +1,20 @@
 import { Sigs } from '@events.comp-soc.com/shared'
 import type { Nullable } from '@events.comp-soc.com/shared'
 
-export interface SIGColors {
+export interface SigColors {
   border: string
   background: string
   text: string
 }
 
-export interface SIGInfo {
+export interface SigInfo {
   id: string
   name: string
   logo: string
-  colors: SIGColors
+  colors: SigColors
 }
 
-export const SIG_COLORS: Record<Sigs, SIGColors> = {
+export const SIG_COLORS: Record<Sigs, SigColors> = {
   [Sigs.ProjectShare]: {
     border: '#ffffff',
     background: '#7a16f5',
@@ -54,7 +54,7 @@ export const SIG_COLORS: Record<Sigs, SIGColors> = {
   },
 }
 
-export const ALL_SIGS: Array<SIGInfo> = [
+export const ALL_SIGS: Array<SigInfo> = [
   {
     id: Sigs.Compsoc,
     name: 'CompSoc',
@@ -75,25 +75,25 @@ export const ALL_SIGS: Array<SIGInfo> = [
   },
   {
     id: Sigs.TypeSig,
-    name: 'TypeSIG',
+    name: 'TypeSig',
     logo: '/sigs/typesig.webp',
     colors: SIG_COLORS[Sigs.TypeSig],
   },
   {
     id: Sigs.SigInt,
-    name: 'SIGINT',
+    name: 'SigInt',
     logo: '/sigs/sigint.webp',
     colors: SIG_COLORS[Sigs.SigInt],
   },
   {
     id: Sigs.QuantSig,
-    name: 'QuantSIG',
+    name: 'QuantSig',
     logo: '/sigs/quant.svg',
     colors: SIG_COLORS[Sigs.QuantSig],
   },
   {
     id: Sigs.GameDevSig,
-    name: 'GameDevSIG',
+    name: 'GameDevSig',
     logo: '/sigs/gamedev.webp',
     colors: SIG_COLORS[Sigs.GameDevSig],
   },
@@ -111,19 +111,19 @@ export const ALL_SIGS: Array<SIGInfo> = [
   },
   {
     id: Sigs.BitSig,
-    name: 'BitSIG',
+    name: 'BitSig',
     logo: '/sigs/bitsig.png',
     colors: SIG_COLORS[Sigs.BitSig],
   },
   {
     id: Sigs.CloudSig,
-    name: 'CloudSIG',
+    name: 'CloudSig',
     logo: '/sigs/cloud.png',
     colors: SIG_COLORS[Sigs.CloudSig],
   },
   {
     id: Sigs.CCSig,
-    name: 'CCSIG',
+    name: 'CCSig',
     logo: '/sigs/ccsig.webp',
     colors: SIG_COLORS[Sigs.CCSig],
   },
@@ -135,10 +135,10 @@ export const ALL_SIGS: Array<SIGInfo> = [
   },
 ]
 
-export const getSigById = (sigId: string): Nullable<SIGInfo> => {
+export const getSigById = (sigId: string): Nullable<SigInfo> => {
   return ALL_SIGS.find((sig) => sig.id === sigId) ?? null
 }
 
-export const getSigColors = (sigId: Sigs): SIGColors => {
+export const getSigColors = (sigId: Sigs): SigColors => {
   return SIG_COLORS[sigId]
 }

@@ -50,7 +50,7 @@ function ProtectedRoute({
         <EmptySheet>
           <StatusCard
             title="Access denied"
-            message="This area is restricted to event managers. You need to be a committee member or SIG executive."
+            message="This area is restricted to event managers. You need to be a committee member or Sig executive."
             icon={<ShieldX className="w-10 h-10" strokeWidth={1.5} />}
           />
         </EmptySheet>

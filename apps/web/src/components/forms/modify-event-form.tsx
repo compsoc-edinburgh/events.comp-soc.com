@@ -290,7 +290,7 @@ function ModifyEventForm({
                     </Select>
                     {!isCommittee && (
                       <FieldDescription>
-                        You can only create events for your assigned SIGs
+                        You can only create events for your assigned Sigs
                       </FieldDescription>
                     )}
                     {isInvalid && (

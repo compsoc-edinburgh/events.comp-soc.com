@@ -123,7 +123,7 @@ function App() {
   return (
     <Window activeTab="/">
       <Sheet>
-        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr_240px] gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] lg:grid-cols-[240px_1fr_260px] gap-6 md:gap-8">
           <aside className="md:sticky md:top-16 md:self-start md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
             <h2 className="text-lg text-neutral-500 mb-3">Search</h2>
             <InputGroup className="mb-6">
@@ -139,34 +139,55 @@ function App() {
 
             <div className="mb-6" />
 
-            <h2 className="text-lg text-neutral-500 mb-3">SIGs</h2>
-            <ul className="flex flex-col gap-0.5">
-              {ALL_SIGS.map((sig) => {
-                const isSelected = selectedSigs.includes(sig.id)
-                return (
-                  <li key={sig.id}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSig(sig.id)}
-                      className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-sm border transition-colors ${
-                        isSelected
-                          ? 'bg-card-hover border-neutral-500 text-white shadow-sm'
-                          : 'border-transparent hover:bg-card hover:border-card-border'
-                      }`}
-                    >
-                      <img
-                        src={sig.logo}
-                        alt={`${sig.name} logo`}
-                        className="h-5 w-5 object-contain shrink-0"
-                      />
-                      <span className="text-sm text-neutral-200 truncate">
-                        {sig.name}
-                      </span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+            <h2 className="text-lg text-neutral-500 mb-3">Sigs</h2>
+            <div className="relative -mx-4 md:mx-0">
+              <ul
+                className="
+                  flex flex-row gap-2 overflow-x-auto px-4 pb-2
+                  md:flex-col md:gap-0.5 md:overflow-visible md:px-0 md:pb-0
+                  [scrollbar-width:none] [-ms-overflow-style:none]
+                  [&::-webkit-scrollbar]:hidden
+                "
+              >
+                {ALL_SIGS.map((sig) => {
+                  const isSelected = selectedSigs.includes(sig.id)
+                  return (
+                    <li key={sig.id} className="shrink-0 md:shrink">
+                      <button
+                        type="button"
+                        onClick={() => toggleSig(sig.id)}
+                        className={`
+                          flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors
+                          md:w-full md:gap-3 md:px-2.5 md:py-2 md:rounded-sm
+                          ${
+                            isSelected
+                              ? 'bg-card-hover border-neutral-500 text-white shadow-sm'
+                              : 'bg-card border-card-border md:bg-transparent md:border-transparent hover:bg-card md:hover:border-card-border'
+                          }
+                        `}
+                      >
+                        <img
+                          src={sig.logo}
+                          alt={`${sig.name} logo`}
+                          className="h-4 w-4 md:h-5 md:w-5 object-contain shrink-0"
+                        />
+                        <span className="text-sm md:text-[15px] text-neutral-200 whitespace-nowrap md:truncate">
+                          {sig.name}
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+              <div
+                aria-hidden="true"
+                className="md:hidden pointer-events-none absolute left-0 top-0 bottom-2 w-6 bg-linear-to-r from-surface to-transparent"
+              />
+              <div
+                aria-hidden="true"
+                className="md:hidden pointer-events-none absolute right-0 top-0 bottom-2 w-6 bg-linear-to-l from-surface to-transparent"
+              />
+            </div>
           </aside>
 
           <div className="min-w-0 flex flex-col">
@@ -209,7 +230,7 @@ function App() {
               )}
           </div>
 
-          <aside className="md:sticky md:top-16 md:self-start md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
+          <aside className="hidden lg:block lg:sticky lg:top-16 lg:self-start lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto">
             <h2 className="text-lg font-semibold text-neutral-500 mb-3">
               Calendar
             </h2>
@@ -218,13 +239,14 @@ function App() {
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
-                className="w-full bg-transparent p-2"
+                className="mx-auto bg-transparent p-2 [--cell-size:--spacing(8)]"
                 classNames={{
-                  root: 'w-full',
+                  root: 'w-fit',
                   month_caption:
                     'flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) bg-card-muted/60 rounded-sm',
                   caption_label:
                     'select-none text-sm font-medium text-neutral-400',
+                  week: 'flex w-full mt-1',
                   button_previous:
                     'size-(--cell-size) p-0 select-none text-white hover:bg-card-hover hover:text-white aria-disabled:opacity-50 inline-flex items-center justify-center rounded-md [&_svg]:!text-white [&_svg]:!fill-white [&_svg]:!w-3 [&_svg]:!h-3',
                   button_next:
@@ -304,11 +326,11 @@ function App() {
                                 {statusLabel}
                               </TooltipContent>
                             </Tooltip>
-                            <span className="text-sm text-neutral-200 truncate">
+                            <span className="text-[15px] text-neutral-200 truncate">
                               {reg.eventTitle ?? 'Untitled event'}
                             </span>
                           </div>
-                          <span className="text-xs text-neutral-500 pl-4">
+                          <span className="text-sm text-neutral-500 pl-4">
                             {when}
                           </span>
                         </Link>
@@ -321,129 +343,50 @@ function App() {
           </aside>
         </div>
 
-        <div className="mt-16 mx-auto max-w-4xl grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2 items-center">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-neutral-100 leading-tight mb-6">
-              Looks like you reached the bottom of the events
-            </h2>
-            <p className="text-neutral-400 mb-4 max-w-xl">
-              CompSoc and our Special Interest Groups have plenty more in the
-              pipeline. New hackathons, talks, workshops and socials are added
-              all the time.
-            </p>
-            <p className="text-neutral-400 max-w-xl mb-6">
-              Join our Discord to keep up with what's happening, hear about
-              events before they go live, and meet the people building things
-              with you.
-            </p>
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-[240px_1fr] lg:grid-cols-[240px_1fr_260px] gap-6 md:gap-8">
+          <div className="hidden md:block" />
+          <div className="space-y-24 min-w-0">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2 items-center">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-neutral-100 leading-tight mb-6">
+                  Looks like you reached the bottom of the events
+                </h2>
+                <p className="text-neutral-400 mb-4 max-w-xl">
+                  CompSoc and our Special Interest Groups have plenty more in
+                  the pipeline. New hackathons, talks, workshops and socials are
+                  added all the time.
+                </p>
+                <p className="text-neutral-400 max-w-xl mb-6">
+                  Join our Discord to keep up with what's happening, hear about
+                  events before they go live, and meet the people building
+                  things with you.
+                </p>
 
-            <a
-              href="https://discord.gg/compsoc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block"
-            >
-              <button className="bg-[#4752c4] rounded-sm p-0 cursor-pointer group mt-2">
-                <span className="block px-3 py-1 rounded-sm text-base bg-[#5865f2] text-white -translate-y-1 transition-transform group-active:-translate-y-0.5">
-                  Discord
-                </span>
-              </button>
-            </a>
+                <a
+                  href="https://discord.gg/compsoc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block"
+                >
+                  <button className="bg-[#4752c4] rounded-sm p-0 cursor-pointer group mt-2">
+                    <span className="block px-3 py-1 rounded-sm text-base bg-[#5865f2] text-white -translate-y-1 transition-transform group-active:-translate-y-0.5">
+                      Discord
+                    </span>
+                  </button>
+                </a>
+              </div>
+
+              <img
+                src="/mascot-discord.png"
+                alt="CompSoc mascot"
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
+                className="w-64 h-64 md:w-56 md:h-56 object-contain shrink-0 mx-auto md:mx-0 mt-6 md:mt-0 select-none pointer-events-auto [-webkit-user-drag:none] [-webkit-touch-callout:none]"
+              />
+            </div>
           </div>
-
-          <img
-            src="/mascot-discord.png"
-            alt="CompSoc mascot"
-            draggable={false}
-            onContextMenu={(e) => e.preventDefault()}
-            onDragStart={(e) => e.preventDefault()}
-            className="w-40 h-40 md:w-68 md:h-68 object-contain shrink-0 mx-auto md:mx-0 select-none pointer-events-auto [-webkit-user-drag:none] [-webkit-touch-callout:none]"
-          />
-        </div>
-
-        <div className="mt-24 mx-auto max-w-4xl">
-          <h2 className="text-xl sm:text-2xl font-bold text-neutral-100 leading-tight mb-3">
-            Flagship events from CompSoc
-          </h2>
-          <p className="text-neutral-400 mb-8 max-w-3xl">
-            While you're waiting for events, take a look at some of the major
-            ones we host.
-          </p>
-
-          <div className="overflow-x-auto border border-card-border rounded-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-card-border bg-card/40">
-                  <th className="w-10 px-4 py-3 text-xs font-semibold text-neutral-400 align-top">
-                    #
-                  </th>
-                  <th className="px-4 py-3 text-sm font-semibold text-neutral-200 align-top">
-                    Event
-                  </th>
-                  <th className="px-4 py-3 text-sm font-semibold text-neutral-200 align-top">
-                    About
-                  </th>
-                  <th className="px-4 py-3 text-sm font-semibold text-neutral-200 align-top whitespace-nowrap">
-                    Highlights
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {
-                    title: 'Hack The Burgh',
-                    when: 'Late February',
-                    description:
-                      '24-hour hackathon open to all students. Sponsor challenges, workshops, and the chance to ship something fast.',
-                    stats: ['200+ hackers', '£8,000 in prizes'],
-                  },
-                  {
-                    title: 'InfBall',
-                    when: 'Mid April',
-                    description:
-                      'End-of-year informatics ball — three-course meal, drinks, music, and an after-party. 4th years get priority access.',
-                    stats: ['250+ attendees', '8+ years running'],
-                  },
-                  {
-                    title: 'Student Tech Meetup',
-                    when: 'Monthly',
-                    description:
-                      'Talks from industry and academia. Past speakers include the designer of Haskell and engineers from Meta and Spotify.',
-                    stats: ['30–70 attendees', 'Free entry'],
-                  },
-                ].map((flagship, index) => (
-                  <tr
-                    key={flagship.title}
-                    className="border-b border-card-border last:border-b-0 hover:bg-card/40 transition-colors"
-                  >
-                    <td className="px-4 py-4 text-sm text-neutral-500 align-top tabular-nums">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <span className="text-sm font-semibold text-neutral-100">
-                        {flagship.title}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 align-top text-sm text-neutral-400 max-w-md">
-                      {flagship.description}
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <div className="flex flex-col gap-1.5">
-                        {flagship.stats.map((stat) => (
-                          <span
-                            key={stat}
-                            className="text-xs text-neutral-300 whitespace-nowrap"
-                          >
-                            {stat}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <div className="hidden lg:block" />
         </div>
 
         <div className="mt-24 mb-8 text-center text-xs text-neutral-600">
