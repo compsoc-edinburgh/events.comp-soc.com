@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="apps/web/public/mascot-discord.png" alt="CompSoc mascot" width="220" />
+  <img src="apps/web/public/page-images/mascot-discord.webp" alt="CompSoc mascot" width="220" />
 </p>
 
 <h1 align="center">CompSoc Events Platform</h1>

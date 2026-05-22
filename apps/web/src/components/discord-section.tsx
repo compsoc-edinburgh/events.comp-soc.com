@@ -1,6 +1,6 @@
 const DiscordMascotImage = () => (
   <img
-    src="/mascot-discord.png"
+    src="/page-images/mascot-discord.webp"
     alt="CompSoc mascot"
     draggable={false}
     onContextMenu={(e) => e.preventDefault()}

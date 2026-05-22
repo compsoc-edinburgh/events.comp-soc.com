@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 interface EmptyStateProps {
-  /** Path to an image in `public/`, e.g. `/no-events.png`. Omit for text-only. */
+  /** Path to an image in `public/`, e.g. `/no-events.webp`. Omit for text-only. */
   image?: string
   imageAlt?: string
   title?: string

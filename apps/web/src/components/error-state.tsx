@@ -24,7 +24,7 @@ function ErrorState({
   return (
     <div className="w-full min-h-[85vh] flex flex-col items-center justify-center px-4">
       <img
-        src="/error.png"
+        src="/page-images/wrench.webp"
         alt="Error"
         draggable={false}
         onContextMenu={(e) => e.preventDefault()}

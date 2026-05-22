@@ -21,7 +21,7 @@ export const PAGE_METADATA = {
     {
       rel: 'preconnect',
       href: 'https://fonts.gstatic.com',
-      crossOrigin: 'anonymous' as 'anonymous',
+      crossOrigin: 'anonymous' as const,
     },
     {
       rel: 'stylesheet',

@@ -190,7 +190,7 @@ export const eventsQueryOptions = (
   includePast?: boolean,
 ) => {
   const params: EventsQueryParams =
-    typeof stateOrParams === 'object' && stateOrParams !== null
+    typeof stateOrParams === 'object'
       ? stateOrParams
       : { state: stateOrParams, includePast }
 

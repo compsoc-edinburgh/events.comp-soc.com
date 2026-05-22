@@ -16,7 +16,7 @@ function NotFound() {
   return (
     <div className="w-full min-h-[85vh] flex flex-col items-center justify-center px-4">
       <img
-        src="/404.png"
+        src="/page-images/404.webp"
         alt="Page not found"
         draggable={false}
         onContextMenu={(e) => e.preventDefault()}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 /**
- * Returns the input value after it has been stable for `delay` ms.
+ * Returns the input value after it has been stable for `delay` Ms.
  * Useful for debouncing inputs that drive expensive operations (network, etc.).
  */
 export function useDebouncedValue<T>(value: T, delay = 300): T {
