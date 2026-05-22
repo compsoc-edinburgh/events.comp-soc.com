@@ -7,18 +7,27 @@ import {
   MenuIcon,
   MessageCircle,
   Search,
+  Settings,
   Users,
-  XIcon,
 } from 'lucide-react'
 import { SignOutButton, useAuth } from '@clerk/tanstack-react-start'
 import type { ReactNode } from 'react'
 import { Spinner } from '@/components/ui/spinner.tsx'
 import { Button } from '@/components/ui/button.tsx'
+import { useEventManagerAuth } from '@/lib/auth.ts'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover.tsx'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet.tsx'
 
 const DateTimeDisplay = () => {
   const date = new Date().toLocaleDateString('en-GB', {
@@ -173,32 +182,16 @@ const SignUpButton = () => (
   </Link>
 )
 
-const MobileMenuToggle = ({
-  isOpen,
-  onClick,
-}: {
-  isOpen: boolean
-  onClick: () => void
-}) => (
-  <button
-    className="md:hidden p-1.5 hover:bg-neutral-800 rounded transition-colors"
-    onClick={onClick}
-    aria-label="Toggle menu"
-    aria-expanded={isOpen}
-  >
-    {isOpen ? (
-      <XIcon className="w-5 h-5 text-neutral-400" />
-    ) : (
-      <MenuIcon className="w-5 h-5 text-neutral-400" />
-    )}
-  </button>
-)
-
 const committeeItems: Array<PopoverItem> = [
   {
     label: 'Create event',
     href: '/events/create',
-    icon: <CalendarPlus className="w-4 h-4 text-red-700" />,
+    icon: <CalendarPlus className="w-4 h-4" />,
+  },
+  {
+    label: 'Configuration',
+    href: '/configuration',
+    icon: <Settings className="w-4 h-4" />,
   },
 ]
 
@@ -207,38 +200,47 @@ const moreItems: Array<PopoverItem> = [
     label: 'Discord',
     href: 'https://discord.gg/fmp7p9Ca4y',
     external: true,
-    icon: <MessageCircle className="w-3.5 h-3.5 text-green-700" />,
+    icon: <MessageCircle className="w-3.5 h-3.5" />,
   },
   {
     label: 'Committee site',
     href: 'https://comp-soc.com/team',
     external: true,
-    icon: <Users className="w-3.5 h-3.5 text-violet-700" />,
+    icon: <Users className="w-3.5 h-3.5" />,
   },
   {
     label: 'CompSoc news',
     href: 'https://comp-soc.com/news',
     external: true,
-    icon: <FileText className="w-3.5 h-3.5 text-cyan-700" />,
+    icon: <FileText className="w-3.5 h-3.5" />,
   },
 ]
 
+const SectionHeading = ({ children }: { children: ReactNode }) => (
+  <div className="px-3 pt-5 pb-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+    {children}
+  </div>
+)
+
 const MobileMenu = ({
-  isOpen,
-  onClose,
+  isSignedIn,
+  isAuthLoaded,
+  canManageEvents,
+  onNavigate,
 }: {
-  isOpen: boolean
-  onClose: () => void
+  isSignedIn: boolean
+  isAuthLoaded: boolean
+  canManageEvents: boolean
+  onNavigate: () => void
 }) => {
-  if (!isOpen) return null
+  const itemClass =
+    'flex items-center gap-3 px-3 py-2.5 rounded-md text-[15px] text-neutral-200 hover:bg-card-hover active:bg-card-hover transition-colors'
+  const iconClass = '[&_svg]:!w-4 [&_svg]:!h-4 text-neutral-400'
 
   const renderItem = (item: PopoverItem) => {
-    const content = (
-      <div
-        className="flex items-center gap-3 px-4 py-3 rounded-md text-base text-neutral-200 hover:bg-neutral-800"
-        onClick={onClose}
-      >
-        <span className="text-neutral-400">{item.icon}</span>
+    const inner = (
+      <div className={itemClass} onClick={onNavigate}>
+        <span className={iconClass}>{item.icon}</span>
         <span>{item.label}</span>
       </div>
     )
@@ -249,77 +251,92 @@ const MobileMenu = ({
         target="_blank"
         rel="noopener noreferrer"
       >
-        {content}
+        {inner}
       </a>
     ) : (
       <Link key={item.href} to={item.href}>
-        {content}
+        {inner}
       </Link>
     )
   }
 
   return (
-    <div className="md:hidden fixed inset-0 top-12 z-50 bg-surface/95 backdrop-blur-sm border-t border-neutral-800">
-      <div className="flex flex-col p-4 gap-1">
-        <Link
-          to="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-md text-base text-white font-medium hover:bg-neutral-800"
-          onClick={onClose}
-        >
-          CompSoc Events
-        </Link>
-        <Link
-          to="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-md text-base text-neutral-300 hover:bg-neutral-800"
-          onClick={onClose}
-        >
+    <>
+      <SheetHeader className="sr-only">
+        <SheetTitle>Navigation menu</SheetTitle>
+        <SheetDescription>
+          Jump to a page or open an external resource.
+        </SheetDescription>
+      </SheetHeader>
+
+      <div className="flex-1 overflow-y-auto p-3">
+        <Link to="/" className={itemClass} onClick={onNavigate}>
           <Search className="w-4 h-4 text-neutral-400" />
           Search
         </Link>
-        <Link
-          to="/analytics"
-          className="flex items-center gap-3 px-4 py-3 rounded-md text-base text-neutral-300 hover:bg-neutral-800"
-          onClick={onClose}
-        >
-          Analytics
-        </Link>
 
-        <div className="px-4 pt-4 pb-1 text-xs uppercase tracking-wide text-neutral-500">
-          Committee
-        </div>
-        {committeeItems.map(renderItem)}
+        {isSignedIn && (
+          <Link to="/me" className={itemClass} onClick={onNavigate}>
+            <CalendarPlus className="w-4 h-4 text-neutral-400" />
+            My events
+          </Link>
+        )}
 
-        <div className="px-4 pt-4 pb-1 text-xs uppercase tracking-wide text-neutral-500">
-          More
-        </div>
+        {canManageEvents && (
+          <>
+            <SectionHeading>Committee</SectionHeading>
+            {committeeItems.map(renderItem)}
+            <Link to="/analytics" className={itemClass} onClick={onNavigate}>
+              <FileText className="w-4 h-4 text-neutral-400" />
+              Analytics
+            </Link>
+          </>
+        )}
+
+        <SectionHeading>More</SectionHeading>
         {moreItems.map(renderItem)}
-
-        <div className="h-px bg-neutral-800 my-3" />
-
-        <MobileDateTimeDisplay />
       </div>
-    </div>
+
+      <div className="border-t border-card-border px-3 py-3 flex items-center justify-between gap-3">
+        <MobileDateTimeDisplay />
+        {isAuthLoaded ? (
+          isSignedIn ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onNavigate}
+              className="shrink-0"
+            >
+              <SignOutButton />
+            </Button>
+          ) : (
+            <Link
+              to="/sign-in/$"
+              params={{ _splat: '' }}
+              onClick={onNavigate}
+              className="shrink-0"
+            >
+              <button className="bg-red-900 rounded-sm p-0 cursor-pointer group mt-1">
+                <span className="block px-3 py-1 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5">
+                  Sign In
+                </span>
+              </button>
+            </Link>
+          )
+        ) : (
+          <Spinner className="text-neutral-700 shrink-0" />
+        )}
+      </div>
+    </>
   )
 }
 
 function MainNavigation() {
   const { userId, isLoaded } = useAuth()
+  const { canManageEvents } = useEventManagerAuth()
+  const isSignedIn = !!userId
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-  const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev)
   const closeMobileMenu = () => setMobileMenuOpen(false)
-
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [mobileMenuOpen])
 
   return (
     <>
@@ -335,8 +352,13 @@ function MainNavigation() {
 
           <div className="md:flex hidden items-center gap-1">
             <NavTextLink href="/">Search</NavTextLink>
-            <NavPopover label="Committee" items={committeeItems} />
-            <NavTextLink href="/analytics">Analytics</NavTextLink>
+            {canManageEvents && (
+              <NavPopover label="Committee" items={committeeItems} />
+            )}
+            {canManageEvents && (
+              <NavTextLink href="/analytics">Analytics</NavTextLink>
+            )}
+            {isSignedIn && <NavTextLink href="/me">My events</NavTextLink>}
             <NavPopover label="More" items={moreItems} />
           </div>
         </div>
@@ -346,26 +368,43 @@ function MainNavigation() {
             <DateTimeDisplay />
           </div>
 
-          {isLoaded ? (
-            !userId ? (
-              <SignUpButton />
+          <div className="hidden md:flex items-center">
+            {isLoaded ? (
+              !userId ? (
+                <SignUpButton />
+              ) : (
+                <Button variant="outline" size="sm">
+                  <SignOutButton />
+                </Button>
+              )
             ) : (
-              <Button variant="outline" size="sm">
-                <SignOutButton />
-              </Button>
-            )
-          ) : (
-            <Spinner className="text-neutral-700" />
-          )}
+              <Spinner className="text-neutral-700" />
+            )}
+          </div>
 
-          <MobileMenuToggle
-            isOpen={mobileMenuOpen}
-            onClick={toggleMobileMenu}
-          />
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                className="md:hidden p-1.5 hover:bg-card-hover rounded transition-colors"
+                aria-label="Open menu"
+              >
+                <MenuIcon className="w-5 h-5 text-neutral-400" />
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="md:hidden bg-navigation border-card-border w-[85vw] sm:max-w-sm flex flex-col p-0 gap-0"
+            >
+              <MobileMenu
+                isSignedIn={isSignedIn}
+                isAuthLoaded={isLoaded}
+                canManageEvents={canManageEvents}
+                onNavigate={closeMobileMenu}
+              />
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
-
-      <MobileMenu isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
     </>
   )
 }

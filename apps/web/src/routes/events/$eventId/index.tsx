@@ -168,9 +168,8 @@ function EventRoute() {
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
           {isDraft ? (
             <PublishEventButton eventId={eventId} />
-          ) : !isPastEvent ? (
+          ) : !isPastEvent && !isRegistered && !isRegistrationLoading ? (
             <CreateRegisterEventButton
-              disabled={isRegistered || isRegistrationLoading}
               form={event.form ?? []}
               title={event.title}
               eventId={eventId}
