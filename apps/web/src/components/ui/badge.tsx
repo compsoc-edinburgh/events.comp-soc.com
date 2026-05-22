@@ -34,8 +34,7 @@ const badgeVariants = cva(
 )
 
 interface BadgeProps
-  extends ComponentProps<'span'>,
-    VariantProps<typeof badgeVariants> {}
+  extends ComponentProps<'span'>, VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, size, ...props }: BadgeProps) {
   return (

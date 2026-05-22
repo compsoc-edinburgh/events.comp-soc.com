@@ -17,8 +17,7 @@ function CalendarPanel({ selected, onSelect }: CalendarPanelProps) {
           root: 'w-fit',
           month_caption:
             'flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) bg-card-muted/60 rounded-sm',
-          caption_label:
-            'select-none text-sm font-medium text-neutral-400',
+          caption_label: 'select-none text-sm font-medium text-neutral-400',
           week: 'flex w-full mt-1',
           button_previous:
             'size-(--cell-size) p-0 select-none text-white hover:bg-card-hover hover:text-white aria-disabled:opacity-50 inline-flex items-center justify-center rounded-md [&_svg]:!text-white [&_svg]:!fill-white [&_svg]:!w-3 [&_svg]:!h-3',
