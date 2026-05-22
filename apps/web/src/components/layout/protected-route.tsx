@@ -1,10 +1,9 @@
-import { LogIn, ShieldX } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useCommitteeAuth, useEventManagerAuth } from '@/lib/auth.ts'
-import { StatusCard } from '@/components/ui/status-card.tsx'
 import Window from '@/components/layout/window.tsx'
 import { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Spinner } from '@/components/ui/spinner.tsx'
+import NotFound from '@/components/not-found.tsx'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -30,32 +29,11 @@ function ProtectedRoute({
     )
   }
 
-  if (!isAuthenticated) {
-    return (
-      <Window activeTab={activeTab}>
-        <EmptySheet>
-          <StatusCard
-            title="Authentication required"
-            message="You need to sign in to access this page."
-            icon={<LogIn className="w-10 h-10" strokeWidth={1.5} />}
-          />
-        </EmptySheet>
-      </Window>
-    )
-  }
-
-  if (requireEventManager && !canManageEvents) {
-    return (
-      <Window activeTab={activeTab}>
-        <EmptySheet>
-          <StatusCard
-            title="Access denied"
-            message="This area is restricted to event managers. You need to be a committee member or Sig executive."
-            icon={<ShieldX className="w-10 h-10" strokeWidth={1.5} />}
-          />
-        </EmptySheet>
-      </Window>
-    )
+  // We intentionally don't distinguish "not signed in" from "not allowed" —
+  // both render the generic 404 so the existence of protected pages isn't
+  // leaked to unauthenticated or unauthorised users.
+  if (!isAuthenticated || (requireEventManager && !canManageEvents)) {
+    return <NotFound />
   }
 
   return <>{children}</>

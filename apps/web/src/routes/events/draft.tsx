@@ -1,13 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ServerCrash } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import Window from '@/components/layout/window.tsx'
-import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
+import Sheet from '@/components/layout/sheet.tsx'
 import EventCard from '@/components/event-card.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import { eventsQueryOptions } from '@/lib/data/event.ts'
-import { StatusCard } from '@/components/ui/status-card.tsx'
+import ErrorState from '@/components/error-state.tsx'
 
 export const Route = createFileRoute('/events/draft')({
   loader: async ({ context }) => {
@@ -16,16 +15,13 @@ export const Route = createFileRoute('/events/draft')({
   component: DraftRoute,
   errorComponent: ({ error }) => (
     <Window activeTab="/">
-      <EmptySheet>
-        <StatusCard
-          title="Oops.. Something happened with events"
-          message={
-            error.message ||
-            'The events API decided to take an unscheduled coffee break.'
-          }
-          icon={<ServerCrash className="w-10 h-10" strokeWidth={1.5} />}
-        />
-      </EmptySheet>
+      <ErrorState
+        title="We couldn't load drafts"
+        message={
+          error.message ||
+          'The events API is having a bad day. Try again in a moment.'
+        }
+      />
     </Window>
   ),
   pendingMs: 200,

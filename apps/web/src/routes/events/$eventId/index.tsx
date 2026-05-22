@@ -4,18 +4,17 @@ import {
   ClockIcon,
   MapPin,
   PencilIcon,
-  ServerCrash,
   UserIcon,
 } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { useAuth } from '@clerk/tanstack-react-start'
 import Window from '@/components/layout/window.tsx'
-import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
+import Sheet from '@/components/layout/sheet.tsx'
+import ErrorState from '@/components/error-state.tsx'
 import { Markdown } from '@/components/markdown.tsx'
 import GoogleMaps from '@/components/google-maps.tsx'
 import { SigBadge } from '@/components/sigs-badge.tsx'
 import { Button } from '@/components/ui/button.tsx'
-import { StatusCard } from '@/components/ui/status-card.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
 import DraftBadge from '@/components/draft-badge.tsx'
 import { useEventManagerAuth } from '@/lib/auth.ts'
@@ -37,18 +36,13 @@ export const Route = createFileRoute('/events/$eventId/')({
   },
   component: EventRoute,
   errorComponent: ({ error }) => (
-    <Window activeTab="/">
-      <EmptySheet>
-        <StatusCard
-          title="Oops.. Something happened with this event"
-          message={
-            error.message ||
-            'The events API decided to take an unscheduled coffee break.'
-          }
-          icon={<ServerCrash className="w-10 h-10" strokeWidth={1.5} />}
-        />
-      </EmptySheet>
-    </Window>
+      <ErrorState
+        title="We couldn't load this event"
+        message={
+          error.message ||
+          "Either it doesn't exist anymore, or the events API is having a bad day. Try again in a moment."
+        }
+      />
   ),
 })
 

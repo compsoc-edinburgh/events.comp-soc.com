@@ -2,7 +2,15 @@ import { useRouter } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
 
-function NotFound() {
+interface ErrorStateProps {
+  title?: string
+  message?: string
+}
+
+function ErrorState({
+  title = 'Something went wrong',
+  message = 'CompSocOS hit a snag loading this. Try again in a moment.',
+}: ErrorStateProps) {
   const router = useRouter()
 
   const handleGoBack = () => {
@@ -16,18 +24,18 @@ function NotFound() {
   return (
     <div className="w-full min-h-[85vh] flex flex-col items-center justify-center px-4">
       <img
-        src="/404.png"
-        alt="Page not found"
+        src="/error.png"
+        alt="Error"
         draggable={false}
         onContextMenu={(e) => e.preventDefault()}
         onDragStart={(e) => e.preventDefault()}
-        className="w-64 h-64 sm:w-80 sm:h-80 object-contain select-none [-webkit-user-drag:none] [-webkit-touch-callout:none]"
+        className="w-32 h-32 object-contain select-none [-webkit-user-drag:none] [-webkit-touch-callout:none]"
       />
       <h1 className="mt-6 text-2xl sm:text-3xl font-bold text-neutral-100">
-        Page not found
+        {title}
       </h1>
       <p className="mt-2 text-sm sm:text-base text-neutral-500 text-center max-w-md">
-        CompSocOS isn't ready to display this page yet.
+        {message}
       </p>
       <Button onClick={handleGoBack} className="mt-6">
         <ArrowLeft className="w-4 h-4" />
@@ -37,4 +45,4 @@ function NotFound() {
   )
 }
 
-export default NotFound
+export default ErrorState

@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ServerCrash } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import type { z } from 'zod'
 import ModifyEventForm, {
@@ -7,11 +6,11 @@ import ModifyEventForm, {
   FormToRequest,
 } from '@/components/forms/modify-event-form.tsx'
 import Window from '@/components/layout/window.tsx'
-import Sheet, { EmptySheet } from '@/components/layout/sheet.tsx'
+import Sheet from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
-import { StatusCard } from '@/components/ui/status-card.tsx'
+import ErrorState from '@/components/error-state.tsx'
 import { useUpdateEvent } from '@/lib/hooks/events/use-update-event.tsx'
 
 export const Route = createFileRoute('/events/$eventId/edit')({
@@ -20,18 +19,13 @@ export const Route = createFileRoute('/events/$eventId/edit')({
   },
   component: EditEventRoute,
   errorComponent: ({ error }) => (
-    <Window activeTab="/">
-      <EmptySheet>
-        <StatusCard
-          title="Oops.. Something happened with this event"
-          message={
-            error.message ||
-            'The events API decided to take an unscheduled coffee break.'
-          }
-          icon={<ServerCrash className="w-10 h-10" strokeWidth={1.5} />}
-        />
-      </EmptySheet>
-    </Window>
+      <ErrorState
+        title="We couldn't load this event"
+        message={
+          error.message ||
+          "Either it doesn't exist anymore, or the events API is having a bad day. Try again in a moment."
+        }
+      />
   ),
 })
 

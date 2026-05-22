@@ -19,7 +19,7 @@ function RouteComponent() {
   const registrations = data === null ? [] : data
 
   return (
-    <ProtectedRoute activeTab="/me" isRequireCommittee={false}>
+    <ProtectedRoute activeTab="/me">
       <Window activeTab="/me">
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
