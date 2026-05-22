@@ -13,6 +13,7 @@ import Window from '@/components/layout/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { eventsQueryOptions } from '@/lib/data/event.ts'
 import ErrorState from '@/components/error-state.tsx'
+import EmptyState from '@/components/empty-state.tsx'
 import { ALL_SIGS } from '@/config/sigs.ts'
 import {
   InputGroup,
@@ -36,13 +37,13 @@ export const Route = createFileRoute('/')({
   },
   component: App,
   errorComponent: ({ error }) => (
-      <ErrorState
-        title="We couldn't load events"
-        message={
-          error.message ||
-          'The events API is having a bad day. Try again in a moment.'
-        }
-      />
+    <ErrorState
+      title="We couldn't load events"
+      message={
+        error.message ||
+        'The events API is having a bad day. Try again in a moment.'
+      }
+    />
   ),
   pendingMs: 200,
 })
@@ -56,6 +57,9 @@ function App() {
   const debouncedSearch = useDebouncedValue(eventSearch, 300)
   const [eventsTab, setEventsTab] = useState<'upcoming' | 'drafts'>('upcoming')
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [myEventsExpanded, setMyEventsExpanded] = useState(false)
+
+  const MY_EVENTS_PREVIEW = 5
 
   const toggleSig = (id: string) =>
     setSelectedSigs((prev) =>
@@ -118,7 +122,7 @@ function App() {
   )
 
   return (
-    <Window activeTab="/">
+    <Window>
       <Sheet>
         <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] lg:grid-cols-[240px_1fr_260px] gap-6 md:gap-8">
           <aside className="md:sticky md:top-16 md:self-start md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
@@ -199,19 +203,11 @@ function App() {
             )}
 
             {!isEventsLoading && events.length === 0 && (
-              <div className="flex-1 flex flex-col items-center justify-center">
-                <img
-                  src="/no-events.png"
-                  alt="No events"
-                  draggable={false}
-                  onContextMenu={(e) => e.preventDefault()}
-                  onDragStart={(e) => e.preventDefault()}
-                  className="w-60 h-60 object-contain select-none [-webkit-user-drag:none] [-webkit-touch-callout:none]"
-                />
-                <p className="text-md font-semibold text-neutral-700">
-                  No events in the queue (yet)
-                </p>
-              </div>
+              <EmptyState
+                image="/no-events.png"
+                imageAlt="No events"
+                title="No events in the queue (yet)"
+              />
             )}
 
             {!isEventsLoading &&
@@ -286,7 +282,10 @@ function App() {
               <div className="mt-6">
                 <h2 className="text-lg text-neutral-500 mb-3">Your events</h2>
                 <ul className="flex flex-col gap-1">
-                  {myEvents.map((reg) => {
+                  {(myEventsExpanded
+                    ? myEvents
+                    : myEvents.slice(0, MY_EVENTS_PREVIEW)
+                  ).map((reg) => {
                     const { full: when } = formatEventDate(reg.eventDate)
                     const statusColor =
                       reg.status === RegistrationStatus.Accepted
@@ -335,6 +334,17 @@ function App() {
                     )
                   })}
                 </ul>
+                {myEvents.length > MY_EVENTS_PREVIEW && (
+                  <button
+                    type="button"
+                    onClick={() => setMyEventsExpanded((v) => !v)}
+                    className="mt-2 w-full text-left px-2.5 py-1.5 text-xs text-neutral-500 hover:text-neutral-200 transition-colors"
+                  >
+                    {myEventsExpanded
+                      ? 'Show less'
+                      : `Show all (${myEvents.length})`}
+                  </button>
+                )}
               </div>
             )}
           </aside>

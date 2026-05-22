@@ -44,7 +44,7 @@ function RegistrationsByDateChart({ data }: RegistrationsByDateChartProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="max-h-[260px] w-full">
           <LineChart
             accessibilityLayer
             data={chartData}

@@ -9,8 +9,8 @@ export const Route = createFileRoute('/analytics')({
 
 function AnalyticsRoute() {
   return (
-    <ProtectedRoute activeTab="/analytics" requireEventManager>
-      <Window activeTab="/analytics">
+    <ProtectedRoute requireEventManager>
+      <Window>
         <Sheet>
           <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">
             Analytics

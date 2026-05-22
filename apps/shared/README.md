@@ -36,7 +36,7 @@ import {
   RegistrationStatus,
   Sigs,
   canManageSig,
-} from '@events.comp-soc.com/shared'
+} from "@events.comp-soc.com/shared";
 ```
 
 Run `pnpm --filter @events.comp-soc.com/shared build` after editing schemas to refresh `dist/` for the other apps.

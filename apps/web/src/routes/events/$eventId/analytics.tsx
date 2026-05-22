@@ -79,21 +79,19 @@ function AnalyticsRoute() {
   }
 
   return (
-    <ProtectedRoute activeTab="/events" requireEventManager>
-      <Window activeTab="/events">
+    <ProtectedRoute requireEventManager>
+      <Window maxWidth="5xl">
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
             Event Analytics
           </div>
-          <div>
-            <div className="flex gap-2 items-center mt-1.5 text-neutral-400 text-sm">
-              Analytics for {event.title}
-            </div>
+          <div className="flex gap-2 items-center mt-1.5 text-neutral-400 text-sm">
+            Analytics for {event.title}
           </div>
 
           <Separator className="my-5" />
 
-          <div className="flex flex-col gap-5">
+          <div className="grid gap-5 md:grid-cols-2">
             <RegistrationByStatus
               data={analytics.countByStatus}
               totalCount={analytics.totalCount}
@@ -101,29 +99,29 @@ function AnalyticsRoute() {
             <RegistrationsByDateChart data={analytics.countByDate} />
           </div>
 
-          <div className="my-5">
+          <div className="mt-8">
             <div className="text-base text-neutral-400">Form breakdown</div>
             <Separator className="mb-5" />
-            <div className="flex flex-col gap-5">
-              {Object.entries(analytics.countByAnswers).map(
-                ([id, answerData]) => (
-                  <SelectAnalyticsBarChart
-                    key={id}
-                    title={answerData.label}
-                    data={answerData.data}
-                  />
-                ),
-              )}
-
-              {Object.keys(analytics.countByAnswers).length === 0 && (
-                <div className="col-span-full py-10 text-center text-neutral-500 border border-dashed rounded-lg border-neutral-800">
-                  No multiple-choice questions found in this event form.
-                </div>
-              )}
-            </div>
+            {Object.keys(analytics.countByAnswers).length === 0 ? (
+              <div className="py-10 text-center text-sm text-neutral-500 border border-dashed rounded-lg border-card-border">
+                No multiple-choice questions found in this event form.
+              </div>
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2">
+                {Object.entries(analytics.countByAnswers).map(
+                  ([id, answerData]) => (
+                    <SelectAnalyticsBarChart
+                      key={id}
+                      title={answerData.label}
+                      data={answerData.data}
+                    />
+                  ),
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="my-5">
+          <div className="mt-8">
             <div className="text-base text-neutral-400">Registrations</div>
             <Separator className="mb-5" />
             <DataTable

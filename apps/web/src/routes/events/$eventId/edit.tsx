@@ -19,13 +19,13 @@ export const Route = createFileRoute('/events/$eventId/edit')({
   },
   component: EditEventRoute,
   errorComponent: ({ error }) => (
-      <ErrorState
-        title="We couldn't load this event"
-        message={
-          error.message ||
-          "Either it doesn't exist anymore, or the events API is having a bad day. Try again in a moment."
-        }
-      />
+    <ErrorState
+      title="We couldn't load this event"
+      message={
+        error.message ||
+        "Either it doesn't exist anymore, or the events API is having a bad day. Try again in a moment."
+      }
+    />
   ),
 })
 
@@ -74,8 +74,8 @@ function EditEventRoute() {
   }
 
   return (
-    <ProtectedRoute activeTab="/events" requireEventManager>
-      <Window activeTab="/events">
+    <ProtectedRoute requireEventManager>
+      <Window>
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
             Edit Event

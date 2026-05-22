@@ -36,13 +36,13 @@ export const Route = createFileRoute('/events/$eventId/')({
   },
   component: EventRoute,
   errorComponent: ({ error }) => (
-      <ErrorState
-        title="We couldn't load this event"
-        message={
-          error.message ||
-          "Either it doesn't exist anymore, or the events API is having a bad day. Try again in a moment."
-        }
-      />
+    <ErrorState
+      title="We couldn't load this event"
+      message={
+        error.message ||
+        "Either it doesn't exist anymore, or the events API is having a bad day. Try again in a moment."
+      }
+    />
   ),
 })
 
@@ -67,59 +67,47 @@ function EventRoute() {
   const canManageEvent = canManage(event.organiser)
 
   return (
-    <Window
-      activeTab="/events"
-      maxWidth="3xl"
-      toolbarContent={
-        canManageEvent ? (
-          <div className="flex items-center justify-center gap-3">
-            <Tooltip>
-              <TooltipTrigger className="flex items-center justify-center">
-                <Button
-                  variant="ghost"
-                  className="w-6 h-6"
-                  size="icon"
-                  onClick={() => {
-                    void navigate({
-                      to: '/events/$eventId/edit',
-                    })
-                  }}
-                >
-                  <PencilIcon className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Edit</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger className="flex items-center justify-center">
-                <Button
-                  variant="ghost"
-                  className="w-6 h-6"
-                  size="icon"
-                  onClick={() => {
-                    void navigate({
-                      to: '/events/$eventId/analytics',
-                    })
-                  }}
-                >
-                  <ChartPieIcon className="w-4 h-4 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Analytics</p>
-              </TooltipContent>
-            </Tooltip>
-            <DeleteEventButton eventId={eventId} />
-          </div>
-        ) : null
-      }
-    >
+    <Window maxWidth="3xl">
       <Sheet>
-        <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
-          {event.title}
+        <div className="flex items-start justify-between gap-3">
+          <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
+            {event.title}
+          </div>
+          {canManageEvent && (
+            <div className="flex items-center gap-2 shrink-0">
+              <Tooltip>
+                <TooltipTrigger className="flex items-center justify-center">
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => {
+                      void navigate({ to: '/events/$eventId/edit' })
+                    }}
+                  >
+                    <PencilIcon className="w-4 h-4 text-neutral-400 hover:text-white transition-colors" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger className="flex items-center justify-center">
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => {
+                      void navigate({ to: '/events/$eventId/analytics' })
+                    }}
+                  >
+                    <ChartPieIcon className="w-4 h-4 text-neutral-400 hover:text-white transition-colors" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Analytics</TooltipContent>
+              </Tooltip>
+              <DeleteEventButton eventId={eventId} />
+            </div>
+          )}
         </div>
+
         <div className="flex gap-2 mt-2.5">
           {isDraft && <DraftBadge />}
           <SigBadge sig={event.organiser} size="sm" />

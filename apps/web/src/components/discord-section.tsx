@@ -52,4 +52,4 @@ function DiscordSection() {
   )
 }
 
-export default DiscordSection;
+export default DiscordSection

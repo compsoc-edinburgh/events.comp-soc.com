@@ -21,8 +21,8 @@
 
 This is a **pnpm monorepo**. Each app has its own README with setup, scripts and deeper details.
 
-| Package                                              | Description                                                | Tech Stack                                                                                  |
-| ---------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [`apps/web`](./apps/web/README.md)                   | Frontend — browse events, register, manage Sigs.           | React 19, TanStack Start, TanStack Router, TanStack Query, Tailwind CSS v4, Clerk, Radix UI |
-| [`apps/api`](./apps/api/README.md)                   | REST API — events, registrations, auth, webhooks.          | Fastify, Drizzle ORM, PostgreSQL, Zod, Clerk                                                |
-| [`apps/shared`](./apps/shared/README.md)             | Shared Zod schemas, types and constants used by both apps. | Zod, TypeScript                                                                             |
+| Package                                  | Description                                                | Tech Stack                                                                                  |
+| ---------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`apps/web`](./apps/web/README.md)       | Frontend — browse events, register, manage Sigs.           | React 19, TanStack Start, TanStack Router, TanStack Query, Tailwind CSS v4, Clerk, Radix UI |
+| [`apps/api`](./apps/api/README.md)       | REST API — events, registrations, auth, webhooks.          | Fastify, Drizzle ORM, PostgreSQL, Zod, Clerk                                                |
+| [`apps/shared`](./apps/shared/README.md) | Shared Zod schemas, types and constants used by both apps. | Zod, TypeScript                                                                             |

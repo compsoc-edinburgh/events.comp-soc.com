@@ -1,20 +1,18 @@
 import type { ReactNode } from 'react'
 
-type WindowMaxWidth = 'full' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl'
+/** `full` = the default page width (capped at the global max). */
+type WindowMaxWidth = 'full' | '3xl' | '4xl' | '5xl' | '6xl'
 
 const maxWidthClass: Record<WindowMaxWidth, string> = {
   full: 'max-w-7xl',
-  '3xl': 'max-w-3xl ',
-  '4xl': 'max-w-4xl ',
-  '5xl': 'max-w-5xl ',
-  '6xl': 'max-w-6xl ',
-  '7xl': 'max-w-7xl ',
+  '3xl': 'max-w-3xl',
+  '4xl': 'max-w-4xl',
+  '5xl': 'max-w-5xl',
+  '6xl': 'max-w-6xl',
 }
 
 interface WindowProps {
   children: ReactNode
-  activeTab?: string
-  toolbarContent?: ReactNode
   maxWidth?: WindowMaxWidth
 }
 

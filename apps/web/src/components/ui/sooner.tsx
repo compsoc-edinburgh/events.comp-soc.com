@@ -28,9 +28,26 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
+          // Default toast
           '--normal-bg': 'var(--color-popover)',
           '--normal-text': 'var(--color-popover-foreground)',
-          '--normal-border': 'var(--color-border)',
+          '--normal-border': 'var(--color-card-border)',
+          // Success
+          '--success-bg': 'var(--color-status-accepted-bg)',
+          '--success-text': 'var(--color-status-accepted)',
+          '--success-border': 'var(--color-status-accepted-border)',
+          // Error
+          '--error-bg': 'var(--color-status-rejected-bg)',
+          '--error-text': 'var(--color-status-rejected)',
+          '--error-border': 'var(--color-status-rejected-border)',
+          // Warning
+          '--warning-bg': 'var(--color-status-pending-bg)',
+          '--warning-text': 'var(--color-status-pending)',
+          '--warning-border': 'var(--color-status-pending-border)',
+          // Info — reuse the popover surface, neutral
+          '--info-bg': 'var(--color-popover)',
+          '--info-text': 'var(--color-popover-foreground)',
+          '--info-border': 'var(--color-card-border)',
           '--border-radius': 'var(--radius)',
         } as CSSProperties
       }

@@ -200,11 +200,6 @@ const committeeItems: Array<PopoverItem> = [
     href: '/events/create',
     icon: <CalendarPlus className="w-4 h-4 text-red-700" />,
   },
-  {
-    label: 'Draft events',
-    href: '/events/draft',
-    icon: <FileText className="w-4 h-4 text-yellow-700" />,
-  },
 ]
 
 const moreItems: Array<PopoverItem> = [

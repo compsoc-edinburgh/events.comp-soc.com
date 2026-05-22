@@ -1,19 +1,16 @@
 import type { ReactNode } from 'react'
 import { useCommitteeAuth, useEventManagerAuth } from '@/lib/auth.ts'
 import Window from '@/components/layout/window.tsx'
-import { EmptySheet } from '@/components/layout/sheet.tsx'
 import { Spinner } from '@/components/ui/spinner.tsx'
 import NotFound from '@/components/not-found.tsx'
 
 interface ProtectedRouteProps {
   children: ReactNode
-  activeTab?: string
   requireEventManager?: boolean
 }
 
 function ProtectedRoute({
   children,
-  activeTab,
   requireEventManager = false,
 }: ProtectedRouteProps) {
   const { isLoaded, isAuthenticated } = useCommitteeAuth()
@@ -21,10 +18,10 @@ function ProtectedRoute({
 
   if (!isLoaded) {
     return (
-      <Window activeTab={activeTab}>
-        <EmptySheet>
+      <Window>
+        <div className="flex items-center justify-center min-h-[60vh]">
           <Spinner className="w-8 h-8 text-neutral-600" />
-        </EmptySheet>
+        </div>
       </Window>
     )
   }

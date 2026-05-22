@@ -11,10 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as MeIndexRouteImport } from './routes/me/index'
 import { Route as SignUpSplatRouteImport } from './routes/sign-up.$'
 import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
-import { Route as EventsDraftRouteImport } from './routes/events/draft'
 import { Route as EventsCreateRouteImport } from './routes/events/create'
 import { Route as EventsEventIdIndexRouteImport } from './routes/events/$eventId/index'
 import { Route as EventsEventIdEditRouteImport } from './routes/events/$eventId/edit'
@@ -30,11 +28,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MeIndexRoute = MeIndexRouteImport.update({
-  id: '/me/',
-  path: '/me/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignUpSplatRoute = SignUpSplatRouteImport.update({
   id: '/sign-up/$',
   path: '/sign-up/$',
@@ -43,11 +36,6 @@ const SignUpSplatRoute = SignUpSplatRouteImport.update({
 const SignInSplatRoute = SignInSplatRouteImport.update({
   id: '/sign-in/$',
   path: '/sign-in/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventsDraftRoute = EventsDraftRouteImport.update({
-  id: '/events/draft',
-  path: '/events/draft',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsCreateRoute = EventsCreateRouteImport.update({
@@ -75,10 +63,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/events/create': typeof EventsCreateRoute
-  '/events/draft': typeof EventsDraftRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
-  '/me': typeof MeIndexRoute
   '/events/$eventId/analytics': typeof EventsEventIdAnalyticsRoute
   '/events/$eventId/edit': typeof EventsEventIdEditRoute
   '/events/$eventId': typeof EventsEventIdIndexRoute
@@ -87,10 +73,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/events/create': typeof EventsCreateRoute
-  '/events/draft': typeof EventsDraftRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
-  '/me': typeof MeIndexRoute
   '/events/$eventId/analytics': typeof EventsEventIdAnalyticsRoute
   '/events/$eventId/edit': typeof EventsEventIdEditRoute
   '/events/$eventId': typeof EventsEventIdIndexRoute
@@ -100,10 +84,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/events/create': typeof EventsCreateRoute
-  '/events/draft': typeof EventsDraftRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
-  '/me/': typeof MeIndexRoute
   '/events/$eventId/analytics': typeof EventsEventIdAnalyticsRoute
   '/events/$eventId/edit': typeof EventsEventIdEditRoute
   '/events/$eventId/': typeof EventsEventIdIndexRoute
@@ -114,10 +96,8 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/events/create'
-    | '/events/draft'
     | '/sign-in/$'
     | '/sign-up/$'
-    | '/me'
     | '/events/$eventId/analytics'
     | '/events/$eventId/edit'
     | '/events/$eventId'
@@ -126,10 +106,8 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/events/create'
-    | '/events/draft'
     | '/sign-in/$'
     | '/sign-up/$'
-    | '/me'
     | '/events/$eventId/analytics'
     | '/events/$eventId/edit'
     | '/events/$eventId'
@@ -138,10 +116,8 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/events/create'
-    | '/events/draft'
     | '/sign-in/$'
     | '/sign-up/$'
-    | '/me/'
     | '/events/$eventId/analytics'
     | '/events/$eventId/edit'
     | '/events/$eventId/'
@@ -151,10 +127,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   EventsCreateRoute: typeof EventsCreateRoute
-  EventsDraftRoute: typeof EventsDraftRoute
   SignInSplatRoute: typeof SignInSplatRoute
   SignUpSplatRoute: typeof SignUpSplatRoute
-  MeIndexRoute: typeof MeIndexRoute
   EventsEventIdAnalyticsRoute: typeof EventsEventIdAnalyticsRoute
   EventsEventIdEditRoute: typeof EventsEventIdEditRoute
   EventsEventIdIndexRoute: typeof EventsEventIdIndexRoute
@@ -176,13 +150,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/me/': {
-      id: '/me/'
-      path: '/me'
-      fullPath: '/me'
-      preLoaderRoute: typeof MeIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sign-up/$': {
       id: '/sign-up/$'
       path: '/sign-up/$'
@@ -195,13 +162,6 @@ declare module '@tanstack/react-router' {
       path: '/sign-in/$'
       fullPath: '/sign-in/$'
       preLoaderRoute: typeof SignInSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/events/draft': {
-      id: '/events/draft'
-      path: '/events/draft'
-      fullPath: '/events/draft'
-      preLoaderRoute: typeof EventsDraftRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events/create': {
@@ -239,10 +199,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   EventsCreateRoute: EventsCreateRoute,
-  EventsDraftRoute: EventsDraftRoute,
   SignInSplatRoute: SignInSplatRoute,
   SignUpSplatRoute: SignUpSplatRoute,
-  MeIndexRoute: MeIndexRoute,
   EventsEventIdAnalyticsRoute: EventsEventIdAnalyticsRoute,
   EventsEventIdEditRoute: EventsEventIdEditRoute,
   EventsEventIdIndexRoute: EventsEventIdIndexRoute,
