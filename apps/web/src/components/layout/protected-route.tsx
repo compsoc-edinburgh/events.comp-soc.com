@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useCommitteeAuth, useEventManagerAuth } from '@/lib/auth.ts'
 import Window from '@/components/layout/window.tsx'
 import { Spinner } from '@/components/ui/spinner.tsx'
-import NotFound from '@/components/not-found.tsx'
+import NotFound from '@/components/layout/not-found.tsx'
 
 interface ProtectedRouteProps {
   children: ReactNode

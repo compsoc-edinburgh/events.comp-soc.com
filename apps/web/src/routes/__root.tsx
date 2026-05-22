@@ -15,7 +15,7 @@ import type { ReactNode } from 'react'
 import type { QueryClient } from '@tanstack/react-query'
 import MainNavigation from '@/components/layout/main-navigation.tsx'
 import { Toaster } from '@/components/ui/sooner.tsx'
-import NotFound from '@/components/not-found.tsx'
+import NotFound from '@/components/layout/not-found.tsx'
 import { PAGE_METADATA } from '@/config/meta.ts'
 
 interface MyRouterContext {

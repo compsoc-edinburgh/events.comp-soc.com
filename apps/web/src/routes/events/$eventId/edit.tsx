@@ -10,7 +10,7 @@ import Sheet from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
-import ErrorState from '@/components/error-state.tsx'
+import ErrorState from '@/components/layout/error-state.tsx'
 import { useUpdateEvent } from '@/lib/hooks/events/use-update-event.tsx'
 
 export const Route = createFileRoute('/events/$eventId/edit')({

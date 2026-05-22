@@ -7,7 +7,7 @@ import { RegistrationStatus } from '@events.comp-soc.com/shared'
 import Window from '@/components/layout/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
-import EmptyState from '@/components/empty-state.tsx'
+import EmptyState from '@/components/layout/empty-state.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { userRegistrationQueryOption } from '@/lib/data/users.ts'
 import { formatEventDate } from '@/lib/utils.ts'
@@ -140,12 +140,12 @@ function MeRoute() {
               {isPending ? (
                 <div className="grid gap-4">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <Skeleton key={i} className="h-[130px] w-full" />
+                    <Skeleton key={i} className="h-32.5 w-full" />
                   ))}
                 </div>
               ) : filtered.length === 0 ? (
                 <EmptyState
-                  image="/no-events.png"
+                  image="/page-images/no-events.webp"
                   imageAlt="No registrations"
                   title={
                     registrations.length === 0

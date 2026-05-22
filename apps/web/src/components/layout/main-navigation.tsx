@@ -384,12 +384,14 @@ function MainNavigation() {
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <button
-                className="md:hidden p-1.5 hover:bg-card-hover rounded transition-colors"
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="md:hidden text-neutral-400 hover:text-white"
                 aria-label="Open menu"
               >
-                <MenuIcon className="w-5 h-5 text-neutral-400" />
-              </button>
+                <MenuIcon className="w-5 h-5" />
+              </Button>
             </SheetTrigger>
             <SheetContent
               side="right"

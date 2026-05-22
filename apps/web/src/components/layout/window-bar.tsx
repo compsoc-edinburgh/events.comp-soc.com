@@ -2,7 +2,7 @@ import { ChevronDown, Minimize2, MinusIcon, XIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 export const WindowControls = () => (
-  <div className="hidden sm:flex gap-2 items-center w-20 h-full">
+  <div className="flex gap-2 items-center w-20 h-full">
     <XIcon className="w-3.5 h-3.5 text-neutral-500 hover:text-neutral-300 transition-colors" />
     <MinusIcon className="w-3.5 h-3.5 text-neutral-500 hover:text-neutral-300 transition-colors" />
     <Minimize2 className="w-3.5 h-3.5 text-neutral-500 hover:text-neutral-300 transition-colors" />

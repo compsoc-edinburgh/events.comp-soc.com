@@ -19,7 +19,7 @@ interface WindowProps {
 function Window({ children, maxWidth = 'full' }: WindowProps) {
   return (
     <div
-      className={`bg-surface min-h-[80vh] my-2 mx-2 md:mx-auto lg:my-5 border-card-border border rounded-lg ${maxWidthClass[maxWidth]}`}
+      className={`bg-surface my-2 mx-2 md:mx-auto lg:my-5 border-card-border border rounded-lg ${maxWidthClass[maxWidth]}`}
     >
       {children}
     </div>

@@ -10,11 +10,12 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { useAuth } from '@clerk/tanstack-react-start'
 import Window from '@/components/layout/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
-import ErrorState from '@/components/error-state.tsx'
+import ErrorState from '@/components/layout/error-state.tsx'
 import { Markdown } from '@/components/markdown.tsx'
 import GoogleMaps from '@/components/google-maps.tsx'
 import { SigBadge } from '@/components/sigs-badge.tsx'
 import { Button } from '@/components/ui/button.tsx'
+import { Separator } from '@/components/ui/separator.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
 import DraftBadge from '@/components/draft-badge.tsx'
 import { useEventManagerAuth } from '@/lib/auth.ts'
@@ -149,7 +150,7 @@ function EventRoute() {
         {event.aboutMarkdown && (
           <div className="my-5">
             <div className="text-base text-neutral-400">About</div>
-            <div className="h-px bg-neutral-800" />
+            <Separator className="mt-1" />
             <Markdown className="mt-4" content={event.aboutMarkdown} />
           </div>
         )}
@@ -157,7 +158,7 @@ function EventRoute() {
         {event.locationURL && (
           <div className="my-5">
             <div className="text-base text-neutral-400">Location</div>
-            <div className="h-px bg-neutral-800" />
+            <Separator className="mt-1" />
             <GoogleMaps
               locationURL={event.locationURL}
               locationName={event.location}
