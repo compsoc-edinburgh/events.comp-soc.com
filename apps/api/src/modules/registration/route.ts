@@ -3,7 +3,6 @@ import {
   CreateRegistrationSchema,
   RegistrationEventIdSchema,
   RegistrationParamsSchema,
-  RegistrationsQueryFilterSchema,
   UpdateBatchStatusRegistrationSchema,
   UpdateRegistrationSchema,
 } from "./schema.js";
@@ -12,6 +11,7 @@ import {
   RegistrationContractSchema,
   RegistrationStatusBatchUpdateSchema,
   RegistrationUpdateContractSchema,
+  RegistrationsQueryFilterSchema,
   Sigs,
   canManageSig,
 } from "@events.comp-soc.com/shared";

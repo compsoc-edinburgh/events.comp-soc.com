@@ -1,8 +1,14 @@
 import { eventStore } from "./store.js";
 import { SqlContext } from "../../db/db.js";
-import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
+import { CreateEvent, EventId, UpdateEvent } from "./schema.js";
 import { NotFoundError } from "../../lib/errors.js";
-import { UserRole, EventState, Nullable, Sigs } from "@events.comp-soc.com/shared";
+import {
+  EventState,
+  EventsQueryFilter,
+  Nullable,
+  Sigs,
+  UserRole,
+} from "@events.comp-soc.com/shared";
 
 export const eventService = {
   async getEvents({

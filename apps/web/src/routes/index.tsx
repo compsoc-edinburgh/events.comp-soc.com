@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Search } from 'lucide-react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useAuth } from '@clerk/tanstack-react-start'
 import type { EventsTab } from '@/components/home/upcoming-tabs.tsx'
 import { userRegistrationQueryOption } from '@/lib/data/users.ts'
@@ -86,15 +86,20 @@ function App() {
     staleTime: 30_000,
   })
 
+  const todayIso = useMemo(() => {
+    const d = new Date()
+    d.setUTCHours(0, 0, 0, 0)
+    return d.toISOString()
+  }, [])
+
   const { data: userRegistrations, isPending: isRegistrationsPending } =
     useQuery({
-      ...userRegistrationQueryOption(),
+      ...userRegistrationQueryOption({ from: todayIso }),
       enabled: !!isSignedIn,
     })
 
-  const now = Date.now()
   const myEvents = (userRegistrations ?? [])
-    .filter((reg) => new Date(reg.eventDate).getTime() >= now)
+    .slice()
     .sort(
       (a, b) =>
         new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(),

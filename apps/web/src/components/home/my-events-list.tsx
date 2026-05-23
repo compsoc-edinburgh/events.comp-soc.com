@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { RegistrationStatus } from '@events.comp-soc.com/shared'
 import type { Registration } from '@events.comp-soc.com/shared'
 import {
   Tooltip,
@@ -9,6 +8,10 @@ import {
 } from '@/components/ui/tooltip.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { Button } from '@/components/ui/button.tsx'
+import {
+  RegistrationStatusDot,
+  STATUS_LABEL,
+} from '@/components/registration-status.tsx'
 import { formatEventDate } from '@/lib/utils.ts'
 
 const PREVIEW_COUNT = 5
@@ -51,22 +54,6 @@ function MyEventsList({
       <ul className="flex flex-col gap-1">
         {visible.map((reg) => {
           const { full: when } = formatEventDate(reg.eventDate)
-          const statusColor =
-            reg.status === RegistrationStatus.Accepted
-              ? 'bg-status-accepted'
-              : reg.status === RegistrationStatus.Pending
-                ? 'bg-status-pending'
-                : reg.status === RegistrationStatus.Waitlist
-                  ? 'bg-status-waitlist'
-                  : 'bg-status-rejected'
-          const statusLabel =
-            reg.status === RegistrationStatus.Accepted
-              ? 'Accepted'
-              : reg.status === RegistrationStatus.Pending
-                ? 'Pending'
-                : reg.status === RegistrationStatus.Waitlist
-                  ? 'Waitlist'
-                  : 'Rejected'
           return (
             <li key={reg.eventId}>
               <Link
@@ -77,12 +64,11 @@ function MyEventsList({
                 <div className="flex items-center gap-2 min-w-0">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span
-                        className={`w-2 h-2 rounded-full shrink-0 ${statusColor}`}
-                        aria-label={statusLabel}
-                      />
+                      <RegistrationStatusDot status={reg.status} />
                     </TooltipTrigger>
-                    <TooltipContent side="left">{statusLabel}</TooltipContent>
+                    <TooltipContent side="left">
+                      {STATUS_LABEL[reg.status]}
+                    </TooltipContent>
                   </Tooltip>
                   <span className="text-[15px] text-neutral-200 truncate">
                     {reg.eventTitle ?? 'Untitled event'}

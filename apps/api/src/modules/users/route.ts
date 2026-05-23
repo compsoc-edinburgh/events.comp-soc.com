@@ -1,7 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { CreateUserSchema, UserIdSchema, UpdateUserSchema } from "./schema.js";
+import { CreateUserSchema, UpdateUserSchema, UserIdSchema } from "./schema.js";
 import { userService } from "./service.js";
-import { UpdateUserContractSchema, UserContractSchema } from "@events.comp-soc.com/shared";
+import {
+  UpdateUserContractSchema,
+  UserContractSchema,
+  UserRegistrationsQueryFilterSchema,
+} from "@events.comp-soc.com/shared";
 import { requireAuth } from "../../lib/auth-guard.js";
 
 export const userRoutes = async (server: FastifyInstance) => {
@@ -23,12 +27,14 @@ export const userRoutes = async (server: FastifyInstance) => {
 
   server.get("/registrations", { preHandler: [requireAuth] }, async (request, reply) => {
     const { userId } = request.user;
+    const filters = UserRegistrationsQueryFilterSchema.parse(request.query);
 
     const registrations = await userService.getUserRegistrations({
       db: server.db,
       data: {
         id: userId,
       },
+      filters,
     });
 
     if (registrations && registrations.length > 0) {

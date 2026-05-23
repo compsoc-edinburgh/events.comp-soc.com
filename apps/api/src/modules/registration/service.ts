@@ -3,12 +3,16 @@ import {
   CreateRegistration,
   RegistrationEventId,
   RegistrationParams,
-  RegistrationsQueryFilter,
   UpdateBatchRegistration,
   UpdateRegistration,
 } from "./schema.js";
 import { eventStore } from "../events/store.js";
-import { UserRole, Sigs, canManageSig } from "@events.comp-soc.com/shared";
+import {
+  RegistrationsQueryFilter,
+  Sigs,
+  UserRole,
+  canManageSig,
+} from "@events.comp-soc.com/shared";
 import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { registrationStore } from "./store.js";
 import { EventId } from "../events/schema.js";

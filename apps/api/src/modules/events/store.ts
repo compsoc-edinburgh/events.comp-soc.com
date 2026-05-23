@@ -1,7 +1,8 @@
 import { eq, gte, lt, and, ilike, inArray, SQL } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
-import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
+import { CreateEvent, EventId, UpdateEvent } from "./schema.js";
 import { eventsTable, registrationsTable } from "../../db/schema.js";
+import type { EventsQueryFilter } from "@events.comp-soc.com/shared";
 
 export const eventStore = {
   async create({ db, data }: { db: SqlContext; data: CreateEvent }) {
@@ -35,8 +36,7 @@ export const eventStore = {
   },
 
   async get({ db, filters }: { db: SqlContext; filters: EventsQueryFilter }) {
-    const { page, limit, state, includePast, search, sigs, date } = filters;
-    const offset = (page - 1) * limit;
+    const { state, includePast, search, sigs, date } = filters;
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -62,8 +62,6 @@ export const eventStore = {
       .select()
       .from(eventsTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .limit(limit)
-      .offset(offset)
       .orderBy(eventsTable.date);
   },
 

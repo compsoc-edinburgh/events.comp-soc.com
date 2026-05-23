@@ -1,7 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
-import { UserIdSchema } from "../users/schema.js";
 
 export const BaseRegistrationSchema = createInsertSchema(registrationsTable);
 
@@ -37,11 +36,6 @@ export const UpdateBatchStatusRegistrationSchema = z.object({
   status: BaseRegistrationSchema.shape.status,
 });
 
-export const RegistrationsQueryFilterSchema = z.object({
-  userId: UserIdSchema.shape.id.optional(),
-  status: BaseRegistrationSchema.shape.status.optional(),
-});
-
 export const RegistrationParamsSchema = z.object({
   userId: BaseRegistrationSchema.shape.userId,
   eventId: BaseRegistrationSchema.shape.eventId,
@@ -54,7 +48,6 @@ export const RegistrationEventIdSchema = z.object({
 export type CreateRegistration = z.infer<typeof CreateRegistrationSchema>;
 export type UpdateRegistration = z.infer<typeof UpdateRegistrationSchema>;
 export type RegistrationParams = z.infer<typeof RegistrationParamsSchema>;
-export type RegistrationsQueryFilter = z.infer<typeof RegistrationsQueryFilterSchema>;
 export type RegistrationEventId = z.infer<typeof RegistrationEventIdSchema>;
 export type UpdateBatchRegistration = z.infer<typeof UpdateBatchStatusRegistrationSchema>;
 

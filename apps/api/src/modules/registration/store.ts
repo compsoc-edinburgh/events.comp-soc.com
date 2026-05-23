@@ -4,7 +4,6 @@ import {
   CreateRegistration,
   FormAnalyticsEntry,
   RegistrationParams,
-  RegistrationsQueryFilter,
   RegistrationStoreSelection,
   UpdateBatchRegistration,
   UpdateRegistration,
@@ -12,7 +11,7 @@ import {
 import { SqlContext } from "../../db/db.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import { EventId } from "../events/schema.js";
-import { CustomField } from "@events.comp-soc.com/shared";
+import { CustomField, RegistrationsQueryFilter } from "@events.comp-soc.com/shared";
 
 export const registrationStore = {
   async create({ db, data }: { db: SqlContext; data: CreateRegistration }) {

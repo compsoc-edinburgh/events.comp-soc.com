@@ -1,8 +1,8 @@
 import { SqlContext } from "../../db/db.js";
-import { CreateUser, UserId, UpdateUser } from "./schema.js";
+import { CreateUser, UpdateUser, UserId } from "./schema.js";
 import { NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { userStore } from "./store.js";
-import { Nullable, UserRole } from "@events.comp-soc.com/shared";
+import { Nullable, UserRegistrationsQueryFilter, UserRole } from "@events.comp-soc.com/shared";
 
 export const userService = {
   async getUserById({
@@ -35,8 +35,16 @@ export const userService = {
     return userStore.create({ db, data });
   },
 
-  async getUserRegistrations({ db, data }: { db: SqlContext; data: UserId }) {
-    return userStore.getRegistrationsById({ db, data });
+  async getUserRegistrations({
+    db,
+    data,
+    filters,
+  }: {
+    db: SqlContext;
+    data: UserId;
+    filters?: UserRegistrationsQueryFilter;
+  }) {
+    return userStore.getRegistrationsById({ db, data, filters });
   },
 
   async updateUser({

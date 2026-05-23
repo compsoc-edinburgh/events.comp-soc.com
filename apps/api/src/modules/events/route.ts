@@ -1,16 +1,12 @@
 import { FastifyInstance } from "fastify";
 import { getAuth } from "@clerk/fastify";
-import {
-  CreateEventSchema,
-  EventIdSchema,
-  EventsQueryFilterSchema,
-  UpdateEventSchema,
-} from "./schema.js";
+import { CreateEventSchema, EventIdSchema, UpdateEventSchema } from "./schema.js";
 import { eventService } from "./service.js";
 import {
   EventContractSchema,
-  UpdateEventContractSchema,
+  EventsQueryFilterSchema,
   Sigs,
+  UpdateEventContractSchema,
   canManageSig,
 } from "@events.comp-soc.com/shared";
 import { nanoid } from "nanoid";
