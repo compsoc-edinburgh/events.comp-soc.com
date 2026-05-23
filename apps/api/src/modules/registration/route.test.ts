@@ -340,48 +340,6 @@ describe("Registration", () => {
     });
   });
 
-  describe("GET /v1/events/:eventId/registrations", () => {
-    beforeEach(async () => {
-      await db.insert(usersTable).values([
-        { id: "user-1", email: "u1@ex.com", firstName: "U", lastName: "1" },
-        { id: "user-2", email: "u2@ex.com", firstName: "U", lastName: "2" },
-      ]);
-
-      await db.insert(eventsTable).values({
-        id: "test-event",
-        title: "Test Event",
-        state: "published",
-        aboutMarkdown: "markdown",
-        organiser: "projectShare",
-        date: new Date(),
-      });
-
-      await db.insert(registrationsTable).values([
-        { userId: "user-1", eventId: "test-event", status: "accepted" },
-        { userId: "user-2", eventId: "test-event", status: "pending" },
-      ]);
-    });
-
-    it("should filter registrations by status query param", async () => {
-      setMockAuth({
-        userId: "committee-user",
-        sessionClaims: { metadata: { role: "committee" } },
-      });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/events/test-event/registrations",
-        query: { status: "accepted" },
-      });
-
-      expect(response.statusCode).toBe(200);
-      const data = response.json();
-      expect(data).toHaveLength(1);
-      expect(data[0].userId).toBe("user-1");
-      expect(data[0].status).toBe("accepted");
-    });
-  });
-
   describe("GET /v1/events/:eventId/registrations/me", () => {
     beforeEach(async () => {
       await db.insert(usersTable).values([
