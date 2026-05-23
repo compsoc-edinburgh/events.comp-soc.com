@@ -66,7 +66,16 @@ export async function apiRequest<T>(
 
     return { data: res.data, status: res.status }
   } catch (err) {
-    console.error(err)
+    const status =
+      typeof err === 'object' &&
+      err !== null &&
+      'response' in err &&
+      typeof (err as { response?: { status?: unknown } }).response?.status ===
+        'number'
+        ? (err as { response: { status: number } }).response.status
+        : 'unknown'
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error(`API request failed (status: ${status}): ${message}`)
     throw new Error(errorMessage ?? 'API request failed')
   }
 }

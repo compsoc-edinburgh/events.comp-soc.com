@@ -12,8 +12,8 @@
     "check": "prettier --write . && eslint --fix"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.61.3",
-    "@clerk/tanstack-react-start": "^0.27.17",
+    "@clerk/clerk-react": "^5.61.6",
+    "@clerk/tanstack-react-start": "^0.29.11",
     "@clerk/themes": "^2.4.57",
     "@events.comp-soc.com/shared": "workspace:*",
     "@radix-ui/react-checkbox": "^1.3.3",
