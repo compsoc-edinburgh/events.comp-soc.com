@@ -9,6 +9,8 @@ const DiscordMascotImage = () => (
   />
 )
 
+const DISCORD_URL = 'https://discord.gg/fmp7p9Ca4y'
+
 function DiscordSection() {
   return (
     <div className="mt-16 grid grid-cols-1 md:grid-cols-[240px_1fr] lg:grid-cols-[240px_1fr_260px] gap-6 md:gap-8">
@@ -31,7 +33,7 @@ function DiscordSection() {
             </p>
 
             <a
-              href="https://discord.gg/compsoc"
+              href={DISCORD_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block"
