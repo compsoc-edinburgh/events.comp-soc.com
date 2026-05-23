@@ -69,7 +69,7 @@ export const ALL_SIGS: Array<SigInfo> = [
   },
   {
     id: Sigs.Tardis,
-    name: 'TARDIS',
+    name: 'Tardis',
     logo: '/sigs/tardis.webp',
     colors: SIG_COLORS[Sigs.Tardis],
   },
