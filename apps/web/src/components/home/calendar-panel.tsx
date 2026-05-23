@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Calendar } from '@/components/ui/calendar.tsx'
 
 interface CalendarPanelProps {
@@ -6,12 +7,27 @@ interface CalendarPanelProps {
 }
 
 function CalendarPanel({ selected, onSelect }: CalendarPanelProps) {
+  const today = useMemo(() => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
+
+  const startMonth = useMemo(() => {
+    const d = new Date()
+    d.setDate(1)
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
+
   return (
     <div className="w-full rounded-sm bg-card border border-card-border overflow-hidden">
       <Calendar
         mode="single"
         selected={selected}
         onSelect={onSelect}
+        disabled={{ before: today }}
+        startMonth={startMonth}
         className="mx-auto bg-transparent p-2 [--cell-size:--spacing(8)]"
         classNames={{
           root: 'w-fit',
@@ -25,6 +41,8 @@ function CalendarPanel({ selected, onSelect }: CalendarPanelProps) {
             'size-(--cell-size) p-0 select-none text-white hover:bg-card-hover hover:text-white aria-disabled:opacity-50 inline-flex items-center justify-center rounded-md [&_svg]:!text-white [&_svg]:!fill-white [&_svg]:!w-3 [&_svg]:!h-3',
           today:
             'bg-card-hover text-neutral-200 rounded-md data-[selected=true]:rounded-none',
+          disabled:
+            '[&_button]:!text-neutral-500 [&_button]:!opacity-100 pointer-events-none',
         }}
       />
     </div>
