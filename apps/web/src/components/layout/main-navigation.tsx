@@ -314,13 +314,11 @@ const MobileMenu = ({
               to="/sign-in/$"
               params={{ _splat: '' }}
               onClick={onNavigate}
-              className="shrink-0"
+              className="shrink-0 bg-red-900 rounded-sm p-0 group mt-1 inline-block"
             >
-              <button className="bg-red-900 rounded-sm p-0 cursor-pointer group mt-1">
-                <span className="block px-3 py-1 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5">
-                  Sign In
-                </span>
-              </button>
+              <span className="block px-3 py-1 rounded-sm text-sm bg-primary text-primary-foreground -translate-y-1 transition-transform group-active:-translate-y-0.5">
+                Sign In
+              </span>
             </Link>
           )
         ) : (
