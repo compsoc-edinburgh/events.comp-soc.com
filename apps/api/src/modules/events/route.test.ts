@@ -88,6 +88,54 @@ describe("Event", () => {
       expect(data).toHaveLength(2);
       expect(data[0].state).toBe("draft");
     });
+
+    it("should filter published events by inclusive date range", async () => {
+      setMockAuth({ userId: null, sessionClaims: null });
+
+      await db.insert(eventsTable).values([
+        {
+          id: "archive-start",
+          title: "Archive January",
+          state: "published",
+          aboutMarkdown: "md",
+          organiser: "soc",
+          date: new Date("2026-01-01T12:00:00.000Z"),
+        },
+        {
+          id: "archive-end",
+          title: "Archive May",
+          state: "published",
+          aboutMarkdown: "md",
+          organiser: "soc",
+          date: new Date("2026-05-22T12:00:00.000Z"),
+        },
+        {
+          id: "archive-today",
+          title: "Archive Today",
+          state: "published",
+          aboutMarkdown: "md",
+          organiser: "soc",
+          date: new Date("2026-05-23T12:00:00.000Z"),
+        },
+        {
+          id: "archive-draft",
+          title: "Archive Draft",
+          state: "draft",
+          aboutMarkdown: "md",
+          organiser: "soc",
+          date: new Date("2026-03-01T12:00:00.000Z"),
+        },
+      ]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events?state=published&includePast=true&dateFrom=2026-01-01&dateTo=2026-05-22&search=Archive",
+      });
+
+      expect(response.statusCode).toBe(200);
+      const ids = response.json().map((event: { id: string }) => event.id);
+      expect(ids).toEqual(["archive-start", "archive-end"]);
+    });
   });
 
   describe("GET /v1/events/:id", () => {

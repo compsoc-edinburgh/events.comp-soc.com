@@ -2,7 +2,7 @@ import { eq, gte, lt, and, ilike, inArray, SQL } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
 import { CreateEvent, EventId, UpdateEvent } from "./schema.js";
 import { eventsTable, registrationsTable } from "../../db/schema.js";
-import type { EventsQueryFilter } from "@events.comp-soc.com/shared";
+import type { EventsQueryFilter, Nullable } from "@events.comp-soc.com/shared";
 
 export const eventStore = {
   async create({ db, data }: { db: SqlContext; data: CreateEvent }) {
@@ -36,26 +36,36 @@ export const eventStore = {
   },
 
   async get({ db, filters }: { db: SqlContext; filters: EventsQueryFilter }) {
-    const { state, includePast, search, sigs, date } = filters;
+    const { state, includePast, search, sigs, date, dateFrom, dateTo } = filters;
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
-    let dayStart: Date | null = null;
-    let dayEnd: Date | null = null;
-    if (date) {
-      dayStart = new Date(`${date}T00:00:00.000Z`);
-      dayEnd = new Date(dayStart);
+    const toUtcDayStart = (value: string) => new Date(`${value}T00:00:00.000Z`);
+    const toExclusiveUtcDayEnd = (value: string) => {
+      const dayEnd = toUtcDayStart(value);
       dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+      return dayEnd;
+    };
+
+    let rangeStart: Nullable<Date> = null;
+    let rangeEnd: Nullable<Date> = null;
+
+    if (date) {
+      rangeStart = toUtcDayStart(date);
+      rangeEnd = toExclusiveUtcDayEnd(date);
+    } else {
+      rangeStart = dateFrom ? toUtcDayStart(dateFrom) : null;
+      rangeEnd = dateTo ? toExclusiveUtcDayEnd(dateTo) : null;
     }
 
     const conditions = [
       state ? eq(eventsTable.state, state) : null,
-      !includePast && !date ? gte(eventsTable.date, today) : null,
+      !includePast && !date && !dateFrom && !dateTo ? gte(eventsTable.date, today) : null,
       search ? ilike(eventsTable.title, `%${search}%`) : null,
       sigs && sigs.length > 0 ? inArray(eventsTable.organiser, sigs) : null,
-      dayStart ? gte(eventsTable.date, dayStart) : null,
-      dayEnd ? lt(eventsTable.date, dayEnd) : null,
+      rangeStart ? gte(eventsTable.date, rangeStart) : null,
+      rangeEnd ? lt(eventsTable.date, rangeEnd) : null,
     ].filter((condition): condition is SQL => condition !== null);
 
     return db

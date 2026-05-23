@@ -8,6 +8,7 @@ import { EventState } from "./constants.js";
  * The wire format is HTTP query-string flat values:
  * - `sigs` is a comma-joined string (`sigs=foo,bar`) and parses to `string[]`.
  * - `includePast` is the string `"true"` / `"false"` and parses to a boolean.
+ * - `dateFrom` and `dateTo` are inclusive `YYYY-MM-DD` bounds.
  *
  * Consumers (api route + web fetch helper) both rely on the transforms here.
  */
@@ -30,6 +31,8 @@ export const EventsQueryFilterSchema = z.object({
         : undefined
     ),
   date: z.iso.date().optional(),
+  dateFrom: z.iso.date().optional(),
+  dateTo: z.iso.date().optional(),
 });
 
 export type EventsQueryFilter = z.infer<typeof EventsQueryFilterSchema>;

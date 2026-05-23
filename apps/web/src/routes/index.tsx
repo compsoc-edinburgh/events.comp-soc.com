@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { useAuth } from '@clerk/tanstack-react-start'
 import type { EventsTab } from '@/components/home/upcoming-tabs.tsx'
+import type { EventsQueryParams } from '@/lib/data/event.ts'
 import { userRegistrationQueryOption } from '@/lib/data/users.ts'
 import { useEventManagerAuth } from '@/lib/auth.ts'
 import Window from '@/components/layout/window.tsx'
@@ -22,6 +23,7 @@ import CalendarPanel from '@/components/home/calendar-panel.tsx'
 import UpcomingTabs from '@/components/home/upcoming-tabs.tsx'
 import EventsList from '@/components/home/events-list.tsx'
 import MyEventsList from '@/components/home/my-events-list.tsx'
+import { formatDateFilter } from '@/lib/utils.ts'
 
 export const Route = createFileRoute('/')({
   loader: async ({ context }) => {
@@ -55,33 +57,64 @@ function App() {
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
     )
 
-  const dateFilter = selectedDate
-    ? `${selectedDate.getFullYear()}-${String(
-        selectedDate.getMonth() + 1,
-      ).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
-    : undefined
+  const handleEventsTabChange = (tab: EventsTab) => {
+    if (tab === 'drafts' && !canManageEvents) return
 
-  const sharedFilters = {
-    search: debouncedSearch,
-    sigs: selectedSigs,
-    date: dateFilter,
+    setEventsTab(tab)
+    setSelectedDate(undefined)
   }
 
-  const { data: publishedEvents = [], isPending: isPublishedPending } =
-    useQuery({
-      ...eventsQueryOptions({ state: 'published', ...sharedFilters }),
-      enabled: eventsTab === 'upcoming',
-      placeholderData: keepPreviousData,
-      staleTime: 30_000,
-    })
+  const dateFilter = selectedDate ? formatDateFilter(selectedDate) : undefined
 
-  const { data: draftEvents = [], isPending: isDraftPending } = useQuery({
-    ...eventsQueryOptions({
-      state: 'draft',
-      includePast: true,
-      ...sharedFilters,
+  const archiveRange = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    return {
+      dateFrom: formatDateFilter(new Date(today.getFullYear(), 0, 1)),
+      dateTo: formatDateFilter(yesterday),
+    }
+  }, [])
+
+  const sharedFilters = useMemo(
+    () => ({
+      search: debouncedSearch,
+      sigs: selectedSigs,
+      date: dateFilter,
     }),
-    enabled: canManageEvents && eventsTab === 'drafts',
+    [dateFilter, debouncedSearch, selectedSigs],
+  )
+
+  const activeEventFilters = useMemo<EventsQueryParams>(() => {
+    if (eventsTab === 'drafts') {
+      return {
+        state: 'draft',
+        includePast: true,
+        ...sharedFilters,
+      }
+    }
+
+    if (eventsTab === 'archive') {
+      return {
+        state: 'published',
+        includePast: true,
+        ...sharedFilters,
+        ...archiveRange,
+      }
+    }
+
+    return {
+      state: 'published',
+      ...sharedFilters,
+    }
+  }, [archiveRange, eventsTab, sharedFilters])
+
+  const { data: events = [], isPending: isEventsLoading } = useQuery({
+    ...eventsQueryOptions(activeEventFilters),
+    enabled: eventsTab !== 'drafts' || canManageEvents,
     placeholderData: keepPreviousData,
     staleTime: 30_000,
   })
@@ -105,9 +138,12 @@ function App() {
         new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(),
     )
 
-  const events = eventsTab === 'drafts' ? draftEvents : publishedEvents
-  const isEventsLoading =
-    eventsTab === 'drafts' ? isDraftPending : isPublishedPending
+  const eventsTitle =
+    eventsTab === 'drafts'
+      ? 'Draft Events'
+      : eventsTab === 'archive'
+        ? 'Event Archive'
+        : 'Upcoming Events'
 
   return (
     <Window>
@@ -131,7 +167,7 @@ function App() {
           </aside>
 
           <div className="min-w-0 flex flex-col">
-            <h2 className="text-lg text-neutral-500 mb-4">Upcoming Events</h2>
+            <h2 className="text-lg text-neutral-500 mb-4">{eventsTitle}</h2>
             <EventsList events={events} isLoading={isEventsLoading} />
           </div>
 
@@ -139,10 +175,14 @@ function App() {
             <h2 className="text-lg font-semibold text-neutral-500 mb-3">
               Calendar
             </h2>
-            <CalendarPanel selected={selectedDate} onSelect={setSelectedDate} />
+            <CalendarPanel
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              mode={eventsTab === 'archive' ? 'archive' : 'upcoming'}
+            />
             <UpcomingTabs
               value={eventsTab}
-              onChange={setEventsTab}
+              onChange={handleEventsTabChange}
               canManageEvents={canManageEvents}
               isAuthLoaded={isAuthLoaded}
             />

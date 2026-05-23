@@ -1,7 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 
-export type EventsTab = 'upcoming' | 'drafts'
+export type EventsTab = 'upcoming' | 'drafts' | 'archive'
 
 interface UpcomingTabsProps {
   value: EventsTab
@@ -16,13 +16,10 @@ function UpcomingTabs({
   canManageEvents,
   isAuthLoaded,
 }: UpcomingTabsProps) {
+  // While we don't know yet if the user is committee, render a placeholder so
+  // the Drafts tab doesn't pop in after the rest of the strip has rendered.
   if (!isAuthLoaded) {
     return <Skeleton className="mt-4 h-9 w-full" />
-  }
-
-  // Tabs only make sense for committee members who can toggle to drafts.
-  if (!canManageEvents) {
-    return null
   }
 
   return (
@@ -33,7 +30,8 @@ function UpcomingTabs({
     >
       <TabsList className="w-full">
         <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-        <TabsTrigger value="drafts">Drafts</TabsTrigger>
+        {canManageEvents && <TabsTrigger value="drafts">Drafts</TabsTrigger>}
+        <TabsTrigger value="archive">Archive</TabsTrigger>
       </TabsList>
     </Tabs>
   )

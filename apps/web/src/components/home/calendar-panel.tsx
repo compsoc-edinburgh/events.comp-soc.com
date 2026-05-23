@@ -4,21 +4,41 @@ import { Calendar } from '@/components/ui/calendar.tsx'
 interface CalendarPanelProps {
   selected: Date | undefined
   onSelect: (date: Date | undefined) => void
+  mode?: 'upcoming' | 'archive'
 }
 
-function CalendarPanel({ selected, onSelect }: CalendarPanelProps) {
-  const today = useMemo(() => {
-    const d = new Date()
-    d.setHours(0, 0, 0, 0)
-    return d
+function CalendarPanel({
+  selected,
+  onSelect,
+  mode = 'upcoming',
+}: CalendarPanelProps) {
+  const bounds = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    const startOfCurrentMonth = new Date(today)
+    startOfCurrentMonth.setDate(1)
+
+    const startOfCurrentYear = new Date(today.getFullYear(), 0, 1)
+
+    const archiveEndMonth =
+      yesterday.getTime() >= startOfCurrentYear.getTime()
+        ? yesterday
+        : startOfCurrentYear
+
+    return {
+      today,
+      yesterday,
+      startOfCurrentMonth,
+      startOfCurrentYear,
+      archiveEndMonth,
+    }
   }, [])
 
-  const startMonth = useMemo(() => {
-    const d = new Date()
-    d.setDate(1)
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
+  const isArchive = mode === 'archive'
 
   return (
     <div className="w-full rounded-sm bg-card border border-card-border overflow-hidden">
@@ -26,8 +46,18 @@ function CalendarPanel({ selected, onSelect }: CalendarPanelProps) {
         mode="single"
         selected={selected}
         onSelect={onSelect}
-        disabled={{ before: today }}
-        startMonth={startMonth}
+        disabled={
+          isArchive
+            ? [
+                { before: bounds.startOfCurrentYear },
+                { after: bounds.yesterday },
+              ]
+            : { before: bounds.today }
+        }
+        startMonth={
+          isArchive ? bounds.startOfCurrentYear : bounds.startOfCurrentMonth
+        }
+        endMonth={isArchive ? bounds.archiveEndMonth : undefined}
         className="mx-auto bg-transparent p-2 [--cell-size:--spacing(8)]"
         classNames={{
           root: 'w-fit',

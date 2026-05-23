@@ -40,6 +40,8 @@ const eventsFilterInputSchema = z
     search: z.string().optional(),
     sigs: z.array(z.string()).optional(),
     date: z.string().optional(),
+    dateFrom: z.string().optional(),
+    dateTo: z.string().optional(),
   })
   .optional()
 
@@ -57,6 +59,8 @@ export const fetchEvents = createServerFn({ method: 'GET' })
         sigs:
           data?.sigs && data.sigs.length > 0 ? data.sigs.join(',') : undefined,
         date: data?.date,
+        dateFrom: data?.dateFrom,
+        dateTo: data?.dateTo,
       },
       errorMessage: 'Failed to load events',
     })
@@ -105,6 +109,8 @@ export interface EventsQueryParams {
   search?: string
   sigs?: Array<string>
   date?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
 export const eventsQueryOptions = (
@@ -125,6 +131,8 @@ export const eventsQueryOptions = (
         ? [...params.sigs].sort()
         : undefined,
     date: params.date,
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
   }
 
   return queryOptions({
