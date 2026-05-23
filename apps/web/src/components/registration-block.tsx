@@ -14,13 +14,11 @@ export function RegistrationBlock({ registration }: RegistrationBlockProps) {
 
   return (
     <Card className="my-3 p-1 gap-0">
-      <h3 className="text-sm md:text-md font-medium text-neutral-400 py-1 px-3 w-full bg-neutral-800 rounded-t-md">
+      <h3 className="text-sm font-medium text-neutral-400 py-1 px-3 w-full bg-neutral-800 rounded-t-md">
         Your Registration
       </h3>
       <div className="flex items-center justify-between gap-3 py-3 px-3">
-        <span className="text-sm md:text-md text-neutral-200">
-          Registered on {date}
-        </span>
+        <span className="text-sm text-neutral-200">Registered on {date}</span>
         <RegistrationStatusBadge status={registration.status} size="sm" />
       </div>
     </Card>
@@ -30,7 +28,7 @@ export function RegistrationBlock({ registration }: RegistrationBlockProps) {
 export function RegistrationBlockSkeleton() {
   return (
     <Card className="my-3 p-1 gap-0">
-      <h3 className="text-sm md:text-md font-medium text-neutral-400 py-1 px-3 w-full bg-neutral-800 rounded-t-md">
+      <h3 className="text-sm font-medium text-neutral-400 py-1 px-3 w-full bg-neutral-800 rounded-t-md">
         Your Registration
       </h3>
       <div className="flex items-center justify-between gap-3 py-3 px-3">
@@ -54,11 +52,11 @@ export function SubmitRegistrationBlock({
 }: SubmitRegistrationBlockProps) {
   return (
     <Card className="my-3 p-1 gap-0">
-      <h3 className="text-sm md:text-md font-medium text-neutral-400 py-1 px-3 w-full bg-neutral-800 rounded-t-md">
+      <h3 className="text-sm font-medium text-neutral-400 py-1 px-3 w-full bg-neutral-800 rounded-t-md">
         Registration
       </h3>
       <div className="flex flex-col gap-3 pt-3 px-3">
-        <p className="text-sm md:text-md text-neutral-200">
+        <p className="text-sm text-neutral-200">
           Welcome! To join the event, please register below.
         </p>
         <CreateRegisterEventButton

@@ -38,7 +38,7 @@ function EmptyState({
         />
       )}
       {title && (
-        <p className="mt-4 text-md font-semibold text-neutral-700">{title}</p>
+        <p className="mt-4 text-base font-semibold text-neutral-700">{title}</p>
       )}
       {description && (
         <p className="mt-2 text-sm text-neutral-500 max-w-md">{description}</p>

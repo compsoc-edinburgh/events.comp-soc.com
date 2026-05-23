@@ -36,11 +36,11 @@ function DiscordSection() {
               rel="noopener noreferrer"
               className="inline-block"
             >
-              <button className="bg-[#4752c4] rounded-sm p-0 cursor-pointer group mt-2">
+              <div className="bg-[#4752c4] rounded-sm p-0 cursor-pointer group mt-2">
                 <span className="block px-3 py-1 rounded-sm text-base bg-[#5865f2] text-white -translate-y-1 transition-transform group-active:-translate-y-0.5">
                   Discord
                 </span>
-              </button>
+              </div>
             </a>
           </div>
 
