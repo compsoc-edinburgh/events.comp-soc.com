@@ -31,3 +31,7 @@ export function formatEventDate(date: Date | string) {
     full: `${datePart} - ${timePart}`,
   }
 }
+
+export function isHistoricalEvent(date: Date | string, now = new Date()) {
+  return new Date(date).getTime() < now.getTime()
+}

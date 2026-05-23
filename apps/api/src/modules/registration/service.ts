@@ -8,6 +8,7 @@ import {
 } from "./schema.js";
 import { eventStore } from "../events/store.js";
 import {
+  EventState,
   RegistrationsQueryFilter,
   Sigs,
   UserRole,
@@ -16,6 +17,7 @@ import {
 import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { registrationStore } from "./store.js";
 import { EventId } from "../events/schema.js";
+import { validateRegistrationAnswers } from "./utils.js";
 
 export const registrationService = {
   async createRegistration({ db, data }: { db: SqlContext; data: CreateRegistration }) {
@@ -25,9 +27,18 @@ export const registrationService = {
         data: { id: data.eventId },
       });
 
-      if (event.state === "draft") {
+      if (!event || event.state === EventState.Draft) {
         throw new NotFoundError(`Event with ${data.eventId} not found`);
       }
+
+      if (event.date.getTime() < Date.now()) {
+        throw new ConflictError("Registration is closed for this event");
+      }
+
+      const answers = validateRegistrationAnswers({
+        form: event.form,
+        answers: data.answers,
+      });
 
       const existing = await registrationStore.getByUserAndEvent({
         db: tx,
@@ -40,7 +51,7 @@ export const registrationService = {
 
       return await registrationStore.create({
         db: tx,
-        data: { ...data, status: "pending" },
+        data: { ...data, answers, status: "pending" },
       });
     });
   },

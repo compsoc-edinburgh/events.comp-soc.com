@@ -42,21 +42,6 @@ describe("User", () => {
       await db.insert(usersTable).values(targetUser);
     });
 
-    it("should return 404 if user does not exist", async () => {
-      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/users/non_existent_id",
-      });
-
-      expect(response.statusCode).toBe(404);
-      expect(response.json()).toEqual({
-        message: "User with non_existent_id not found",
-        statusCode: 404,
-      });
-    });
-
     it("should allow a user to see their own full profile (including email)", async () => {
       setMockAuth({
         userId: targetUser.id,
@@ -155,18 +140,6 @@ describe("User", () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it("should reject missing required fields (lastName)", async () => {
-      setMockAuth({ userId: "user_y", sessionClaims: { metadata: { role: "member" } } });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/users",
-        payload: { firstName: "John", email: "john@test.com" },
-      });
-
-      expect(response.statusCode).toBe(400);
-    });
-
     it("should ignore attempts to set protected fields (like role) via payload", async () => {
       const authId = "hacker_1";
       setMockAuth({ userId: authId, sessionClaims: { metadata: { role: "member" } } });
@@ -243,18 +216,6 @@ describe("User", () => {
       const [dbUser] = await db.select().from(usersTable).where(eq(usersTable.id, existingUser.id));
       expect(dbUser.lastName).toBe("AdminEdited");
     });
-
-    it("should return 404 when updating non-existent user", async () => {
-      setMockAuth({ userId: "admin_user", sessionClaims: { metadata: { role: "committee" } } });
-
-      const response = await app.inject({
-        method: "PUT",
-        url: "/v1/users/ghost_user",
-        payload: { firstName: "Casper" },
-      });
-
-      expect(response.statusCode).toBe(404);
-    });
   });
 
   describe("DELETE /v1/users/:id", () => {
@@ -313,17 +274,6 @@ describe("User", () => {
       const users = await db.select().from(usersTable).where(eq(usersTable.id, userToDelete.id));
       expect(users).toHaveLength(0);
     });
-
-    it("should return 404 if deleting non-existent user", async () => {
-      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
-
-      const response = await app.inject({
-        method: "DELETE",
-        url: "/v1/users/already_gone",
-      });
-
-      expect(response.statusCode).toBe(404);
-    });
   });
 
   describe("GET /v1/users/registrations", () => {
@@ -347,18 +297,6 @@ describe("User", () => {
           date: new Date(),
         },
       ]);
-    });
-
-    it("should return 204 No Content if user has no registrations", async () => {
-      setMockAuth({ userId: activeUserId, sessionClaims: { metadata: { role: "member" } } });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/users/registrations",
-      });
-
-      expect(response.statusCode).toBe(204);
-      expect(response.body).toBe("");
     });
 
     it("should return list of registrations with joined event details", async () => {

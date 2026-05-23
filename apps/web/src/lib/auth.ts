@@ -4,7 +4,7 @@ import {
   canManageSig,
   isEventManager,
 } from '@events.comp-soc.com/shared'
-import type { Sigs } from '@events.comp-soc.com/shared'
+import type { Nullable, Sigs } from '@events.comp-soc.com/shared'
 
 interface PublicMetadata {
   role?: UserRole
@@ -47,7 +47,7 @@ export function useEventManagerAuth() {
     return canManageSig(role, sigs, targetSig)
   }
 
-  const getManageableSigs = (): Array<Sigs> | null => {
+  const getManageableSigs = (): Nullable<Array<Sigs>> => {
     if (isCommittee) return null
     if (isSigExecutive && sigs) return sigs
     return []

@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator.tsx'
 import { eventQueryOption } from '@/lib/data/event.ts'
 import DraftBadge from '@/components/draft-badge.tsx'
 import { useEventManagerAuth } from '@/lib/auth.ts'
-import { formatEventDate } from '@/lib/utils.ts'
+import { formatEventDate, isHistoricalEvent } from '@/lib/utils.ts'
 import DeleteEventButton from '@/components/controlls/delete-event-button.tsx'
 import PublishEventButton from '@/components/controlls/publish-event-button.tsx'
 import { registrationQueryByUserOption } from '@/lib/data/registration.ts'
@@ -65,9 +65,10 @@ function EventRoute() {
   const { full: date } = formatEventDate(event.date)
 
   const isDraft = event.state === 'draft'
-  const isPastEvent = new Date(event.date) < new Date()
+  const isPastEvent = isHistoricalEvent(event.date)
 
   const canManageEvent = canManage(event.organiser)
+  const canModifyEvent = canManageEvent && !isPastEvent
 
   return (
     <Window maxWidth="3xl">
@@ -78,20 +79,22 @@ function EventRoute() {
           </div>
           {canManageEvent && (
             <div className="flex items-center gap-2 shrink-0">
-              <Tooltip>
-                <TooltipTrigger className="flex items-center justify-center">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => {
-                      void navigate({ to: '/events/$eventId/edit' })
-                    }}
-                  >
-                    <PencilIcon className="w-4 h-4 text-neutral-400 hover:text-white transition-colors" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit</TooltipContent>
-              </Tooltip>
+              {canModifyEvent && (
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center justify-center">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => {
+                        void navigate({ to: '/events/$eventId/edit' })
+                      }}
+                    >
+                      <PencilIcon className="w-4 h-4 text-neutral-400 hover:text-white transition-colors" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit</TooltipContent>
+                </Tooltip>
+              )}
               <Tooltip>
                 <TooltipTrigger className="flex items-center justify-center">
                   <Button
@@ -106,7 +109,7 @@ function EventRoute() {
                 </TooltipTrigger>
                 <TooltipContent>Analytics</TooltipContent>
               </Tooltip>
-              <DeleteEventButton eventId={eventId} />
+              {canModifyEvent && <DeleteEventButton eventId={eventId} />}
             </div>
           )}
         </div>
@@ -156,7 +159,7 @@ function EventRoute() {
           />
         ) : null}
 
-        {isDraft && canManageEvent && (
+        {isDraft && canModifyEvent && (
           <div className="my-5">
             <PublishEventButton eventId={eventId} />
           </div>

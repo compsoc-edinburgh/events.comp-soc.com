@@ -11,6 +11,7 @@ import {
   Users,
 } from 'lucide-react'
 import { SignOutButton, useAuth } from '@clerk/tanstack-react-start'
+import type { Nullable } from '@events.comp-soc.com/shared'
 import type { ReactNode } from 'react'
 import { Spinner } from '@/components/ui/spinner.tsx'
 import { Button } from '@/components/ui/button.tsx'
@@ -71,7 +72,7 @@ const NavPopover = ({
   items: Array<PopoverItem>
 }) => {
   const [open, setOpen] = useState(false)
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const closeTimerRef = useRef<Nullable<ReturnType<typeof setTimeout>>>(null)
 
   const cancelClose = () => {
     if (closeTimerRef.current) {

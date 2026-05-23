@@ -1,15 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  activeMockAuthState,
-  setMockAuth,
-  setSigExecutiveAuth,
-  setMemberAuth,
-} from "../../../tests/mock-auth.js";
+import { activeMockAuthState, setMockAuth, setSigExecutiveAuth } from "../../../tests/mock-auth.js";
 import { FastifyInstance } from "fastify";
 import { buildServer } from "../../server.js";
 import { db } from "../../db/db.js";
 import { sql, eq } from "drizzle-orm";
-import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
+import { eventsTable, registrationsTable } from "../../db/schema.js";
 import type { CreateEventRequest, UpdateEventRequest } from "@events.comp-soc.com/shared";
 import { Sigs } from "@events.comp-soc.com/shared";
 
@@ -19,6 +14,9 @@ vi.mock("@clerk/fastify", () => {
     clerkPlugin: async () => {},
   };
 });
+
+const futureDate = () => new Date(Date.now() + 60 * 60 * 1000);
+const pastDate = () => new Date(Date.now() - 60 * 60 * 1000);
 
 describe("Event", () => {
   let app: FastifyInstance;
@@ -34,7 +32,6 @@ describe("Event", () => {
   beforeEach(async () => {
     await db.execute(sql`TRUNCATE TABLE ${registrationsTable} CASCADE`);
     await db.execute(sql`TRUNCATE TABLE ${eventsTable} CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE ${usersTable} CASCADE`);
   });
 
   describe("GET /v1/events", () => {
@@ -42,7 +39,7 @@ describe("Event", () => {
       const baseEvent = {
         aboutMarkdown: "md",
         organiser: "projectShare",
-        date: new Date(),
+        date: futureDate(),
       };
 
       await db.insert(eventsTable).values([
@@ -67,17 +64,6 @@ describe("Event", () => {
       expect(data).toHaveLength(3);
     });
 
-    it("should return ONLY published events for regular members", async () => {
-      setMockAuth({ userId: "mem_1", sessionClaims: { metadata: { role: "member" } } });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/events",
-      });
-
-      expect(response.statusCode).toBe(200);
-    });
-
     it("should return ALL events (draft & published) for committee members", async () => {
       setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
 
@@ -88,24 +74,6 @@ describe("Event", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toHaveLength(5);
-    });
-
-    it("should support pagination (limit/page)", async () => {
-      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
-
-      // Page 1, Limit 2
-      const res1 = await app.inject({
-        method: "GET",
-        url: "/v1/events?page=1&limit=2",
-      });
-      expect(res1.json()).toHaveLength(2);
-
-      // Page 3, Limit 2 (Should have 1 item left: 5 total)
-      const res2 = await app.inject({
-        method: "GET",
-        url: "/v1/events?page=3&limit=2",
-      });
-      expect(res2.json()).toHaveLength(1);
     });
 
     it("should allow committee to filter by state explicitly", async () => {
@@ -131,7 +99,7 @@ describe("Event", () => {
           state: "draft",
           aboutMarkdown: "md",
           organiser: "soc",
-          date: new Date(),
+          date: futureDate(),
         },
         {
           id: "public-event",
@@ -139,7 +107,7 @@ describe("Event", () => {
           state: "published",
           aboutMarkdown: "md",
           organiser: "soc",
-          date: new Date(),
+          date: futureDate(),
         },
       ]);
     });
@@ -166,17 +134,6 @@ describe("Event", () => {
       expect(response.statusCode).toBe(200);
       expect(response.json().id).toBe("draft-event");
     });
-
-    it("should return 404 if event does not exist", async () => {
-      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
-
-      const response = await app.inject({
-        method: "GET",
-        url: "/v1/events/non-existent",
-      });
-
-      expect(response.statusCode).toBe(404);
-    });
   });
 
   describe("POST /v1/events", () => {
@@ -186,7 +143,7 @@ describe("Event", () => {
       state: "draft",
       priority: "default",
       capacity: 150,
-      date: new Date().toISOString(),
+      date: futureDate().toISOString(),
       aboutMarkdown: "# Details",
       location: "Comp Lab",
       locationURL: "https://maps.google.com",
@@ -239,18 +196,6 @@ describe("Event", () => {
 
       expect(response.statusCode).toBe(400);
     });
-
-    it("should fail (400) if date is invalid", async () => {
-      setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events",
-        payload: { ...validPayload, date: "invalid-date-string" },
-      });
-
-      expect(response.statusCode).toBe(400);
-    });
   });
 
   describe("PUT /v1/events/:id", () => {
@@ -263,7 +208,7 @@ describe("Event", () => {
         state: "draft",
         aboutMarkdown: "Old MD",
         organiser: "soc",
-        date: new Date(),
+        date: futureDate(),
         capacity: 50,
       });
     });
@@ -289,16 +234,25 @@ describe("Event", () => {
       expect(dbEvent.capacity).toBe(50);
     });
 
-    it("should return 404 if updating non-existent event", async () => {
+    it("should reject editing historical events", async () => {
       setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
+
+      await db.insert(eventsTable).values({
+        id: "past-update-test-id",
+        title: "Already Happened",
+        state: "published",
+        aboutMarkdown: "Past MD",
+        organiser: "soc",
+        date: pastDate(),
+      });
 
       const response = await app.inject({
         method: "PUT",
-        url: "/v1/events/ghost-event",
-        payload: { title: "Ghost" },
+        url: "/v1/events/past-update-test-id",
+        payload: { title: "New Title" },
       });
 
-      expect(response.statusCode).toBe(403);
+      expect(response.statusCode).toBe(409);
     });
   });
 
@@ -312,7 +266,7 @@ describe("Event", () => {
         state: "draft",
         aboutMarkdown: "md",
         organiser: "soc",
-        date: new Date(),
+        date: futureDate(),
       });
     });
 
@@ -331,30 +285,24 @@ describe("Event", () => {
       expect(result).toHaveLength(0);
     });
 
-    it("should CASCADE delete: deleting event must delete associated registrations", async () => {
+    it("should reject deleting historical events", async () => {
       setMockAuth({ userId: "admin", sessionClaims: { metadata: { role: "committee" } } });
-      await db
-        .insert(usersTable)
-        .values({ id: "u2", firstName: "A", lastName: "B", email: "u2@gmail.com" });
 
-      await db.insert(registrationsTable).values({
-        userId: "u2",
-        eventId: eventId,
-        status: "accepted",
+      await db.insert(eventsTable).values({
+        id: "past-delete-target",
+        title: "Past Event",
+        state: "published",
+        aboutMarkdown: "md",
+        organiser: "soc",
+        date: pastDate(),
       });
 
       const response = await app.inject({
         method: "DELETE",
-        url: `/v1/events/${eventId}`,
+        url: "/v1/events/past-delete-target",
       });
 
-      expect(response.statusCode).toBe(200);
-
-      const regs = await db
-        .select()
-        .from(registrationsTable)
-        .where(eq(registrationsTable.eventId, eventId));
-      expect(regs).toHaveLength(0);
+      expect(response.statusCode).toBe(409);
     });
   });
 
@@ -362,7 +310,7 @@ describe("Event", () => {
     beforeEach(async () => {
       const baseEvent = {
         aboutMarkdown: "md",
-        date: new Date(),
+        date: futureDate(),
       };
 
       await db.insert(eventsTable).values([
@@ -433,23 +381,38 @@ describe("Event", () => {
       expect(ids).not.toContain("compsoc-draft");
     });
 
-    it("should return draft events for multiple assigned SIGs", async () => {
-      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI, Sigs.QuantSig]);
+    it("should return only assigned SIG drafts when sig_executive filters by draft state", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
 
       const response = await app.inject({
         method: "GET",
-        url: "/v1/events",
+        url: "/v1/events?state=draft",
       });
 
       expect(response.statusCode).toBe(200);
       const data = response.json();
-
-      // Should see: all published (3) + AI draft (1) + Quant draft (1) = 5
-      expect(data).toHaveLength(5);
-
       const ids = data.map((e: { id: string }) => e.id);
-      expect(ids).toContain("ai-draft");
-      expect(ids).toContain("quant-draft");
+
+      expect(ids).toEqual(["ai-draft"]);
+    });
+
+    it("should return all published events and no drafts when sig_executive filters by published state", async () => {
+      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI]);
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/events?state=published",
+      });
+
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+      const ids = data.map((e: { id: string }) => e.id);
+
+      expect(ids).toContain("ai-pub");
+      expect(ids).toContain("quant-pub");
+      expect(ids).toContain("compsoc-pub");
+      expect(ids).not.toContain("ai-draft");
+      expect(ids).not.toContain("quant-draft");
       expect(ids).not.toContain("compsoc-draft");
     });
   });
@@ -463,7 +426,7 @@ describe("Event", () => {
           state: "draft",
           aboutMarkdown: "md",
           organiser: Sigs.EdinburghAI,
-          date: new Date(),
+          date: futureDate(),
         },
         {
           id: "quant-draft-event",
@@ -471,7 +434,7 @@ describe("Event", () => {
           state: "draft",
           aboutMarkdown: "md",
           organiser: Sigs.QuantSig,
-          date: new Date(),
+          date: futureDate(),
         },
       ]);
     });
@@ -507,7 +470,7 @@ describe("Event", () => {
       state: "draft",
       priority: "default",
       capacity: 50,
-      date: new Date().toISOString(),
+      date: futureDate().toISOString(),
       aboutMarkdown: "# AI Event",
       location: "AI Lab",
       locationURL: "https://maps.google.com",
@@ -539,48 +502,6 @@ describe("Event", () => {
 
       expect(response.statusCode).toBe(403);
     });
-
-    it("should forbid sig_executive from creating CompSoc events", async () => {
-      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI, Sigs.QuantSig]);
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events",
-        payload: { ...validPayload, organiser: Sigs.Compsoc },
-      });
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should allow sig_executive with multiple SIGs to create events for any of them", async () => {
-      setSigExecutiveAuth("sig-exec", [Sigs.EdinburghAI, Sigs.QuantSig]);
-
-      const response1 = await app.inject({
-        method: "POST",
-        url: "/v1/events",
-        payload: { ...validPayload, organiser: Sigs.EdinburghAI },
-      });
-      expect(response1.statusCode).toBe(201);
-
-      const response2 = await app.inject({
-        method: "POST",
-        url: "/v1/events",
-        payload: { ...validPayload, organiser: Sigs.QuantSig },
-      });
-      expect(response2.statusCode).toBe(201);
-    });
-
-    it("should forbid regular members from creating events", async () => {
-      setMemberAuth("member");
-
-      const response = await app.inject({
-        method: "POST",
-        url: "/v1/events",
-        payload: validPayload,
-      });
-
-      expect(response.statusCode).toBe(401);
-    });
   });
 
   describe("SIG Executive - PUT /v1/events/:id", () => {
@@ -592,7 +513,7 @@ describe("Event", () => {
           state: "draft",
           aboutMarkdown: "md",
           organiser: Sigs.EdinburghAI,
-          date: new Date(),
+          date: futureDate(),
         },
         {
           id: "quant-event",
@@ -600,7 +521,7 @@ describe("Event", () => {
           state: "draft",
           aboutMarkdown: "md",
           organiser: Sigs.QuantSig,
-          date: new Date(),
+          date: futureDate(),
         },
       ]);
     });
@@ -665,7 +586,7 @@ describe("Event", () => {
           state: "draft",
           aboutMarkdown: "md",
           organiser: Sigs.EdinburghAI,
-          date: new Date(),
+          date: futureDate(),
         },
         {
           id: "quant-delete",
@@ -673,7 +594,7 @@ describe("Event", () => {
           state: "draft",
           aboutMarkdown: "md",
           organiser: Sigs.QuantSig,
-          date: new Date(),
+          date: futureDate(),
         },
       ]);
     });

@@ -1,6 +1,6 @@
 import { getAuth } from "@clerk/fastify";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { Sigs, canManageSig, isEventManager } from "@events.comp-soc.com/shared";
+import { isEventManager } from "@events.comp-soc.com/shared";
 
 const requireAuth = async (request: FastifyRequest, reply: FastifyReply) => {
   const { userId, sessionClaims } = getAuth(request);
@@ -22,8 +22,4 @@ const requireEventManager = async (request: FastifyRequest, reply: FastifyReply)
   }
 };
 
-const userCanManageSig = (request: FastifyRequest, organiser: Sigs): boolean => {
-  return canManageSig(request.user.role, request.user.sigs, organiser);
-};
-
-export { requireAuth, requireEventManager, userCanManageSig };
+export { requireAuth, requireEventManager };

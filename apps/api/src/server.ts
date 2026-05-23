@@ -34,6 +34,7 @@ export function buildServer() {
 
   server.register(clerkWebhookRoutes, { prefix: "/webhooks" });
 
+  // Business logic routes
   server.register(userRoutes, { prefix: "/v1/users" });
   server.register(eventRoutes, { prefix: "/v1/events" });
   server.register(registrationRoutes, { prefix: "/v1/events/:eventId/registrations" });
