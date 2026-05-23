@@ -45,7 +45,12 @@ function CreateRegisterEventButton({
 
   return (
     <>
-      <Button onClick={handleClick}>Register Now</Button>
+      <Button
+        onClick={handleClick}
+        className="rounded-lg bg-neutral-300 text-black hover:bg-neutral-200"
+      >
+        Register Now
+      </Button>
       <EventRegistrationFormDialog
         onFormSubmit={handleSubmit}
         formStructure={form}

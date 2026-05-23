@@ -22,9 +22,12 @@ import { useEventManagerAuth } from '@/lib/auth.ts'
 import { formatEventDate } from '@/lib/utils.ts'
 import DeleteEventButton from '@/components/controlls/delete-event-button.tsx'
 import PublishEventButton from '@/components/controlls/publish-event-button.tsx'
-import CreateRegisterEventButton from '@/components/controlls/create-register-event-button.tsx'
 import { registrationQueryByUserOption } from '@/lib/data/registration.ts'
-import { RegistrationBlock } from '@/components/registration-block.tsx'
+import {
+  RegistrationBlock,
+  RegistrationBlockSkeleton,
+  SubmitRegistrationBlock,
+} from '@/components/registration-block.tsx'
 import {
   Tooltip,
   TooltipContent,
@@ -62,7 +65,6 @@ function EventRoute() {
   const { full: date } = formatEventDate(event.date)
 
   const isDraft = event.state === 'draft'
-  const isRegistered = Boolean(registration)
   const isPastEvent = new Date(event.date) < new Date()
 
   const canManageEvent = canManage(event.organiser)
@@ -108,14 +110,10 @@ function EventRoute() {
             </div>
           )}
         </div>
-
         <div className="flex gap-2 mt-2.5">
           {isDraft && <DraftBadge />}
           <SigBadge sig={event.organiser} size="sm" />
         </div>
-
-        {registration && <RegistrationBlock registration={registration} />}
-
         <div className="mt-10">
           <div className="flex gap-2 items-center text-sm sm:text-base text-neutral-400">
             <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -125,7 +123,6 @@ function EventRoute() {
             {event.location}
           </div>
         </div>
-
         <div className="my-6 sm:my-8 flex flex-col md:flex-row gap-4 sm:gap-8">
           <div className="flex-1 sm:flex-none">
             <div className="flex gap-2 items-center text-sm sm:text-base text-neutral-400">
@@ -147,6 +144,24 @@ function EventRoute() {
           </div>
         </div>
 
+        {userId && isRegistrationLoading ? (
+          <RegistrationBlockSkeleton />
+        ) : registration ? (
+          <RegistrationBlock registration={registration} />
+        ) : !isDraft && !isPastEvent ? (
+          <SubmitRegistrationBlock
+            eventId={eventId}
+            eventTitle={event.title}
+            form={event.form ?? []}
+          />
+        ) : null}
+
+        {isDraft && canManageEvent && (
+          <div className="my-5">
+            <PublishEventButton eventId={eventId} />
+          </div>
+        )}
+
         {event.aboutMarkdown && (
           <div className="my-5">
             <div className="text-base text-neutral-400">About</div>
@@ -154,7 +169,6 @@ function EventRoute() {
             <Markdown className="mt-4" content={event.aboutMarkdown} />
           </div>
         )}
-
         {event.locationURL && (
           <div className="my-5">
             <div className="text-base text-neutral-400">Location</div>
@@ -165,18 +179,6 @@ function EventRoute() {
             />
           </div>
         )}
-
-        <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          {isDraft ? (
-            <PublishEventButton eventId={eventId} />
-          ) : !isPastEvent && !isRegistered && !isRegistrationLoading ? (
-            <CreateRegisterEventButton
-              form={event.form ?? []}
-              title={event.title}
-              eventId={eventId}
-            />
-          ) : null}
-        </div>
       </Sheet>
     </Window>
   )

@@ -20,6 +20,11 @@ function UpcomingTabs({
     return <Skeleton className="mt-4 h-9 w-full" />
   }
 
+  // Tabs only make sense for committee members who can toggle to drafts.
+  if (!canManageEvents) {
+    return null
+  }
+
   return (
     <Tabs
       value={value}
@@ -28,7 +33,7 @@ function UpcomingTabs({
     >
       <TabsList className="w-full">
         <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-        {canManageEvents && <TabsTrigger value="drafts">Drafts</TabsTrigger>}
+        <TabsTrigger value="drafts">Drafts</TabsTrigger>
       </TabsList>
     </Tabs>
   )
