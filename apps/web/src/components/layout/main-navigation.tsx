@@ -240,7 +240,7 @@ const MobileMenu = ({
 
   const renderItem = (item: PopoverItem) => {
     const inner = (
-      <div className={itemClass} onClick={onNavigate}>
+      <div className={itemClass}>
         <span className={iconClass}>{item.icon}</span>
         <span>{item.label}</span>
       </div>
@@ -251,11 +251,12 @@ const MobileMenu = ({
         href={item.href}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={onNavigate}
       >
         {inner}
       </a>
     ) : (
-      <Link key={item.href} to={item.href}>
+      <Link key={item.href} to={item.href} onClick={onNavigate}>
         {inner}
       </Link>
     )
