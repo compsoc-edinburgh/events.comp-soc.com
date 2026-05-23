@@ -7,13 +7,7 @@ import {
   UpdateRegistration,
 } from "./schema.js";
 import { eventStore } from "../events/store.js";
-import {
-  EventState,
-  RegistrationsQueryFilter,
-  Sigs,
-  UserRole,
-  canManageSig,
-} from "@events.comp-soc.com/shared";
+import { EventState, Sigs, UserRole, canManageSig } from "@events.comp-soc.com/shared";
 import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 import { registrationStore } from "./store.js";
 import { EventId } from "../events/schema.js";
@@ -63,14 +57,8 @@ export const registrationService = {
     });
   },
 
-  async getRegistrations({
-    db,
-    filters,
-  }: {
-    db: SqlContext;
-    filters: RegistrationsQueryFilter & Pick<EventId, "id">;
-  }) {
-    return registrationStore.get({ db, filters });
+  async getRegistrations({ db, data }: { db: SqlContext; data: Pick<EventId, "id"> }) {
+    return registrationStore.get({ db, data });
   },
 
   async updateRegistration({ db, data }: { db: SqlContext; data: UpdateRegistration }) {

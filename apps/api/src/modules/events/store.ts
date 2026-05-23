@@ -36,7 +36,7 @@ export const eventStore = {
   },
 
   async get({ db, filters }: { db: SqlContext; filters: EventsQueryFilter }) {
-    const { state, includePast, search, sigs, date, dateFrom, dateTo } = filters;
+    const { state, includePast, search, sigs, dateFrom, dateTo } = filters;
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -48,20 +48,12 @@ export const eventStore = {
       return dayEnd;
     };
 
-    let rangeStart: Nullable<Date> = null;
-    let rangeEnd: Nullable<Date> = null;
-
-    if (date) {
-      rangeStart = toUtcDayStart(date);
-      rangeEnd = toExclusiveUtcDayEnd(date);
-    } else {
-      rangeStart = dateFrom ? toUtcDayStart(dateFrom) : null;
-      rangeEnd = dateTo ? toExclusiveUtcDayEnd(dateTo) : null;
-    }
+    const rangeStart: Nullable<Date> = dateFrom ? toUtcDayStart(dateFrom) : null;
+    const rangeEnd: Nullable<Date> = dateTo ? toExclusiveUtcDayEnd(dateTo) : null;
 
     const conditions = [
       state ? eq(eventsTable.state, state) : null,
-      !includePast && !date && !dateFrom && !dateTo ? gte(eventsTable.date, today) : null,
+      !includePast && !dateFrom && !dateTo ? gte(eventsTable.date, today) : null,
       search ? ilike(eventsTable.title, `%${search}%`) : null,
       sigs && sigs.length > 0 ? inArray(eventsTable.organiser, sigs) : null,
       rangeStart ? gte(eventsTable.date, rangeStart) : null,

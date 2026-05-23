@@ -83,7 +83,9 @@ function App() {
     () => ({
       search: debouncedSearch,
       sigs: selectedSigs,
-      date: dateFilter,
+      // Calendar single-day pick: send the same date as both bounds.
+      dateFrom: dateFilter,
+      dateTo: dateFilter,
     }),
     [dateFilter, debouncedSearch, selectedSigs],
   )

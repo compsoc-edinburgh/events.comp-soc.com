@@ -11,7 +11,6 @@ import {
   RegistrationContractSchema,
   RegistrationStatusBatchUpdateSchema,
   RegistrationUpdateContractSchema,
-  RegistrationsQueryFilterSchema,
   Sigs,
   canManageSig,
 } from "@events.comp-soc.com/shared";
@@ -94,7 +93,6 @@ export const registrationRoutes = async (server: FastifyInstance) => {
 
   server.get("/", { preHandler: [requireEventManager] }, async (request, reply) => {
     const params = RegistrationEventIdSchema.parse(request.params);
-    const filters = RegistrationsQueryFilterSchema.parse(request.query);
     const { role, sigs } = request.user;
 
     const event = await eventService.getEventForAuth({
@@ -108,10 +106,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
 
     const events = await registrationService.getRegistrations({
       db: server.db,
-      filters: {
-        id: params.eventId,
-        ...filters,
-      },
+      data: { id: params.eventId },
     });
 
     return reply.status(200).send(events);
