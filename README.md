@@ -5,7 +5,7 @@
 <h1 align="center">CompSoc Events Platform</h1>
 
 <p align="center">
-  Event management for the University of Edinburgh's Computing Society and its Special Interest Groups (Sigs).
+  Event management for the University of Edinburgh's Computing Society and its Special Interest Groups (SIGs).
 </p>
 
 ---
