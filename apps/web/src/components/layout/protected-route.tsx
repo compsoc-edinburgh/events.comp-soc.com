@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { useCommitteeAuth, useEventManagerAuth } from '@/lib/auth.ts'
-import Window from '@/components/layout/window.tsx'
-import { Spinner } from '@/components/ui/spinner.tsx'
 import NotFound from '@/components/layout/not-found.tsx'
+import { Spinner } from '@/components/ui/spinner.tsx'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -18,11 +17,9 @@ function ProtectedRoute({
 
   if (!isLoaded) {
     return (
-      <Window>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Spinner className="w-8 h-8 text-neutral-600" />
-        </div>
-      </Window>
+      <div className="flex items-center justify-center min-h-[85vh] px-4">
+        <Spinner strokeWidth={1.5} className="size-10 text-neutral-800" />
+      </div>
     )
   }
 
