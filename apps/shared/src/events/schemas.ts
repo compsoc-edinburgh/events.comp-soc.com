@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Sigs } from "../core/constants.js";
+import { IdSchema } from "../core/schemas.js";
 import { EventPriority, EventState } from "./constants.js";
 
 export const CustomFieldSchema = z
@@ -35,7 +36,7 @@ export const EventContractSchema = z.object({
 export const UpdateEventContractSchema = EventContractSchema.partial();
 
 export const EventResponseSchema = EventContractSchema.extend({
-  id: z.string().min(1, "ID is required"),
+  id: IdSchema,
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

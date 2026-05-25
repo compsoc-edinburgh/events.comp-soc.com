@@ -4,10 +4,10 @@ import {
   CreateRegistration,
   FormAnalyticsEntry,
   RegistrationParams,
-  RegistrationStoreSelection,
   UpdateBatchRegistration,
   UpdateRegistration,
 } from "./schema.js";
+import { RegistrationStoreSelection } from "./projections.js";
 import { SqlContext } from "../../db/db.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import { EventId } from "../events/schema.js";

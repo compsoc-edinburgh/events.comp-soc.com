@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { IdSchema } from "../core/schemas.js";
 import { RegistrationStatus } from "./constants.js";
 
 export const RegistrationAnswerSchema = z.record(z.string(), z.string());
@@ -12,16 +13,16 @@ export const RegistrationUpdateContractSchema = z.object({
 });
 
 export const RegistrationStatusBatchUpdateSchema = z.object({
-  userIds: z.array(z.string()),
+  userIds: z.array(IdSchema),
   status: z.enum(RegistrationStatus),
 });
 
 export const RegistrationResponseSchema = RegistrationContractSchema.extend({
-  userId: z.string(),
+  userId: IdSchema,
   firstName: z.string(),
   lastName: z.string(),
   email: z.email(),
-  eventId: z.string(),
+  eventId: IdSchema,
   eventTitle: z.string().optional(),
   eventDate: z.iso.datetime(),
   eventLocation: z.string().nullable(),

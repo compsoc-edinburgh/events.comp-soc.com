@@ -3,7 +3,8 @@ import { AppError } from "./errors.js";
 import { FastifyReply, FastifyRequest } from "fastify";
 
 export const errorHandler = (error: unknown, request: FastifyRequest, reply: FastifyReply) => {
-  request.log.error(error);
+  const isExpected = error instanceof AppError && error.statusCode < 500;
+  request.log[isExpected ? "warn" : "error"](error);
 
   if (error instanceof ZodError) {
     return reply.status(400).send({

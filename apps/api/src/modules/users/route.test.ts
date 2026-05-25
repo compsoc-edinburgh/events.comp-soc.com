@@ -5,6 +5,7 @@ import { buildServer } from "../../server.js";
 import { db } from "../../db/db.js";
 import { sql, eq } from "drizzle-orm";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
+import { Sigs } from "@events.comp-soc.com/shared";
 
 vi.mock("@clerk/fastify", () => {
   return {
@@ -293,7 +294,7 @@ describe("User", () => {
           title: "Hackathon 2024",
           state: "published",
           aboutMarkdown: "md",
-          organiser: "soc",
+          organiser: Sigs.Compsoc,
           date: new Date(),
         },
       ]);

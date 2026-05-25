@@ -15,6 +15,13 @@
       "when": 1769946474409,
       "tag": "0001_military_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769946474500,
+      "tag": "0002_organiser_enum",
+      "breakpoints": true
     }
   ]
 }

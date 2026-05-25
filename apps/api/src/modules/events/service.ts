@@ -90,12 +90,10 @@ export const eventService = {
     }
 
     if (event.state === EventState.Draft) {
-      if (isCommittee) {
+      if (isCommittee || (isSigExecutive && sigs && sigs.includes(event.organiser))) {
         return event;
       }
-      if (isSigExecutive && sigs && sigs.includes(event.organiser as Sigs)) {
-        return event;
-      }
+
       throw new NotFoundError(`Event with ${id} not found`);
     }
 

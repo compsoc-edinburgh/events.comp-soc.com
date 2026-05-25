@@ -1,11 +1,12 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { IdSchema } from "@events.comp-soc.com/shared";
 import { usersTable } from "../../db/schema.js";
 
 export const BaseUserSchema = createInsertSchema(usersTable);
 
-export const UserIdSchema = BaseUserSchema.pick({
-  id: true,
+export const UserIdSchema = z.object({
+  id: IdSchema,
 });
 
 export const CreateUserSchema = BaseUserSchema.omit({
@@ -20,7 +21,7 @@ export const UpdateUserSchema = BaseUserSchema.omit({
 })
   .partial()
   .extend({
-    id: BaseUserSchema.shape.id,
+    id: IdSchema,
   });
 
 export type UserId = z.infer<typeof UserIdSchema>;

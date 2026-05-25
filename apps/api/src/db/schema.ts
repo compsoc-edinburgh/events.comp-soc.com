@@ -19,28 +19,21 @@ import {
   Sigs,
 } from "@events.comp-soc.com/shared";
 
-export const usersRole = pgEnum("roles", [
-  UserRole.Member,
-  UserRole.SigExecutive,
-  UserRole.Committee,
-]);
+const enumValues = <T extends string>(obj: Record<string, T>): [T, ...T[]] =>
+  Object.values(obj) as [T, ...T[]];
 
-export const eventState = pgEnum("eventState", [EventState.Draft, EventState.Published]);
-export const eventPriority = pgEnum("eventPriority", [EventPriority.Default, EventPriority.Pinned]);
-
-export const registrationStatus = pgEnum("registrationStatus", [
-  RegistrationStatus.Pending,
-  RegistrationStatus.Accepted,
-  RegistrationStatus.Waitlist,
-  RegistrationStatus.Rejected,
-]);
+export const usersRole = pgEnum("roles", enumValues(UserRole));
+export const eventState = pgEnum("eventState", enumValues(EventState));
+export const eventPriority = pgEnum("eventPriority", enumValues(EventPriority));
+export const registrationStatus = pgEnum("registrationStatus", enumValues(RegistrationStatus));
+export const organiserSig = pgEnum("organiserSig", enumValues(Sigs));
 
 export const usersTable = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
-  role: usersRole("role").default("member").notNull(),
+  role: usersRole("role").default(UserRole.Member).notNull(),
   sigs: json("sigs").$type<Sigs[]>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at")
@@ -53,9 +46,9 @@ export const eventsTable = pgTable(
   {
     id: text("id").primaryKey(),
     title: text("title").notNull(),
-    organiser: text("organiser").notNull(),
-    state: eventState("state").default("draft").notNull(),
-    priority: eventPriority("priority").default("default").notNull(),
+    organiser: organiserSig("organiser").notNull(),
+    state: eventState("state").default(EventState.Draft).notNull(),
+    priority: eventPriority("priority").default(EventPriority.Default).notNull(),
     capacity: integer("capacity"),
     date: timestamp("date").notNull(),
     aboutMarkdown: text("about_markdown"),
@@ -79,7 +72,7 @@ export const registrationsTable = pgTable(
     eventId: text("event_id")
       .notNull()
       .references(() => eventsTable.id, { onDelete: "cascade" }),
-    status: registrationStatus("status").notNull().default("pending"),
+    status: registrationStatus("status").notNull().default(RegistrationStatus.Pending),
     answers: json("form_data").$type<RegistrationFormAnswer>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")

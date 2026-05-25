@@ -11,7 +11,6 @@ import {
   RegistrationContractSchema,
   RegistrationStatusBatchUpdateSchema,
   RegistrationUpdateContractSchema,
-  Sigs,
   canManageSig,
 } from "@events.comp-soc.com/shared";
 import { requireAuth, requireEventManager } from "../../lib/auth-guard.js";
@@ -48,7 +47,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { id: eventId },
     });
 
-    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+    if (!event || !canManageSig(role, sigs, event.organiser)) {
       throw new ForbiddenError("You cannot manage registrations for this event");
     }
 
@@ -73,7 +72,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
         data: { id: eventId },
       });
 
-      if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+      if (!event || !canManageSig(role, sigs, event.organiser)) {
         throw new ForbiddenError("You cannot manage registrations for this event");
       }
 
@@ -100,7 +99,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { id: params.eventId },
     });
 
-    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+    if (!event || !canManageSig(role, sigs, event.organiser)) {
       throw new ForbiddenError("You cannot view registrations for this event");
     }
 
@@ -137,7 +136,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { id: params.eventId },
     });
 
-    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+    if (!event || !canManageSig(role, sigs, event.organiser)) {
       throw new ForbiddenError("You cannot manage registrations for this event");
     }
 
@@ -164,7 +163,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { id: eventId },
     });
 
-    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+    if (!event || !canManageSig(role, sigs, event.organiser)) {
       throw new ForbiddenError("You cannot view analytics for this event");
     }
 

@@ -2,7 +2,7 @@ import { and, eq, gte, lt, SQL } from "drizzle-orm";
 import { SqlContext } from "../../db/db.js";
 import { CreateUser, UpdateUser, UserId } from "./schema.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
-import { RegistrationStoreSelection } from "../registration/schema.js";
+import { RegistrationStoreSelection } from "../registration/projections.js";
 import type { UserRegistrationsQueryFilter } from "@events.comp-soc.com/shared";
 
 export const userStore = {

@@ -1,23 +1,9 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
+import { IdSchema } from "@events.comp-soc.com/shared";
+import { registrationsTable } from "../../db/schema.js";
 
 export const BaseRegistrationSchema = createInsertSchema(registrationsTable);
-
-export const RegistrationStoreSelection = {
-  userId: registrationsTable.userId,
-  firstName: usersTable.firstName,
-  lastName: usersTable.lastName,
-  email: usersTable.email,
-  eventId: registrationsTable.eventId,
-  status: registrationsTable.status,
-  answers: registrationsTable.answers,
-  createdAt: registrationsTable.createdAt,
-  updatedAt: registrationsTable.updatedAt,
-  eventTitle: eventsTable.title,
-  eventDate: eventsTable.date,
-  eventLocation: eventsTable.location,
-};
 
 export const CreateRegistrationSchema = BaseRegistrationSchema.omit({
   createdAt: true,
@@ -25,24 +11,24 @@ export const CreateRegistrationSchema = BaseRegistrationSchema.omit({
 });
 
 export const UpdateRegistrationSchema = z.object({
-  userId: BaseRegistrationSchema.shape.userId,
-  eventId: BaseRegistrationSchema.shape.eventId,
+  userId: IdSchema,
+  eventId: IdSchema,
   status: BaseRegistrationSchema.shape.status,
 });
 
 export const UpdateBatchStatusRegistrationSchema = z.object({
-  eventId: BaseRegistrationSchema.shape.eventId,
-  userIds: z.array(BaseRegistrationSchema.shape.userId),
+  eventId: IdSchema,
+  userIds: z.array(IdSchema),
   status: BaseRegistrationSchema.shape.status,
 });
 
 export const RegistrationParamsSchema = z.object({
-  userId: BaseRegistrationSchema.shape.userId,
-  eventId: BaseRegistrationSchema.shape.eventId,
+  userId: IdSchema,
+  eventId: IdSchema,
 });
 
 export const RegistrationEventIdSchema = z.object({
-  eventId: BaseRegistrationSchema.shape.eventId,
+  eventId: IdSchema,
 });
 
 export type CreateRegistration = z.infer<typeof CreateRegistrationSchema>;

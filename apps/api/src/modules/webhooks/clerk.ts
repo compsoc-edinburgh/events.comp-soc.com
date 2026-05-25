@@ -34,6 +34,22 @@ interface ClerkWebhookEvent {
 }
 
 export const clerkWebhookRoutes = async (server: FastifyInstance) => {
+  // Custom parses for the body so webhook can correctly check body for the verification
+  server.addContentTypeParser(
+    "application/json",
+    { parseAs: "string" },
+    (req: FastifyRequest, body: string, done: (err: Nullable<Error>, data: unknown) => void) => {
+      try {
+        const json = JSON.parse(body);
+        // Store raw body for webhook verification
+        req.rawBody = body;
+        done(null, json);
+      } catch (err) {
+        done(err as Error, undefined);
+      }
+    }
+  );
+
   server.post(
     "/clerk",
     {

@@ -5,7 +5,6 @@ import { eventService } from "./service.js";
 import {
   EventContractSchema,
   EventsQueryFilterSchema,
-  Sigs,
   UpdateEventContractSchema,
   canManageSig,
 } from "@events.comp-soc.com/shared";
@@ -50,7 +49,7 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const dto = EventContractSchema.parse(request.body);
     const { role, sigs } = request.user;
 
-    if (!canManageSig(role, sigs, dto.organiser as Sigs)) {
+    if (!canManageSig(role, sigs, dto.organiser)) {
       throw new ForbiddenError("You cannot create events for this Sig");
     }
 
@@ -84,11 +83,11 @@ export const eventRoutes = async (server: FastifyInstance) => {
       throw new ForbiddenError("Event not found");
     }
 
-    if (!canManageSig(role, sigs, existingEvent.organiser as Sigs)) {
+    if (!canManageSig(role, sigs, existingEvent.organiser)) {
       throw new ForbiddenError("You cannot edit events for this Sig");
     }
 
-    if (dto.organiser && !canManageSig(role, sigs, dto.organiser as Sigs)) {
+    if (dto.organiser && !canManageSig(role, sigs, dto.organiser)) {
       throw new ForbiddenError("You cannot transfer events to this Sig");
     }
 
@@ -119,7 +118,7 @@ export const eventRoutes = async (server: FastifyInstance) => {
       throw new ForbiddenError("Event not found");
     }
 
-    if (!canManageSig(role, sigs, existingEvent.organiser as Sigs)) {
+    if (!canManageSig(role, sigs, existingEvent.organiser)) {
       throw new ForbiddenError("You cannot delete events for this Sig");
     }
 

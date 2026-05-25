@@ -38,7 +38,7 @@ describe("Event", () => {
     beforeEach(async () => {
       const baseEvent = {
         aboutMarkdown: "md",
-        organiser: "projectShare",
+        organiser: Sigs.ProjectShare,
         date: futureDate(),
       };
 
@@ -98,7 +98,7 @@ describe("Event", () => {
           title: "Archive January",
           state: "published",
           aboutMarkdown: "md",
-          organiser: "soc",
+          organiser: Sigs.Compsoc,
           date: new Date("2026-01-01T12:00:00.000Z"),
         },
         {
@@ -106,7 +106,7 @@ describe("Event", () => {
           title: "Archive May",
           state: "published",
           aboutMarkdown: "md",
-          organiser: "soc",
+          organiser: Sigs.Compsoc,
           date: new Date("2026-05-22T12:00:00.000Z"),
         },
         {
@@ -114,7 +114,7 @@ describe("Event", () => {
           title: "Archive Today",
           state: "published",
           aboutMarkdown: "md",
-          organiser: "soc",
+          organiser: Sigs.Compsoc,
           date: new Date("2026-05-23T12:00:00.000Z"),
         },
         {
@@ -122,7 +122,7 @@ describe("Event", () => {
           title: "Archive Draft",
           state: "draft",
           aboutMarkdown: "md",
-          organiser: "soc",
+          organiser: Sigs.Compsoc,
           date: new Date("2026-03-01T12:00:00.000Z"),
         },
       ]);
@@ -146,7 +146,7 @@ describe("Event", () => {
           title: "Secret",
           state: "draft",
           aboutMarkdown: "md",
-          organiser: "soc",
+          organiser: Sigs.Compsoc,
           date: futureDate(),
         },
         {
@@ -154,7 +154,7 @@ describe("Event", () => {
           title: "Public",
           state: "published",
           aboutMarkdown: "md",
-          organiser: "soc",
+          organiser: Sigs.Compsoc,
           date: futureDate(),
         },
       ]);
@@ -187,7 +187,7 @@ describe("Event", () => {
   describe("POST /v1/events", () => {
     const validPayload: CreateEventRequest = {
       title: "Hackathon 2025",
-      organiser: "projectShare",
+      organiser: Sigs.ProjectShare,
       state: "draft",
       priority: "default",
       capacity: 150,
@@ -255,7 +255,7 @@ describe("Event", () => {
         title: "Old Title",
         state: "draft",
         aboutMarkdown: "Old MD",
-        organiser: "soc",
+        organiser: Sigs.Compsoc,
         date: futureDate(),
         capacity: 50,
       });
@@ -290,7 +290,7 @@ describe("Event", () => {
         title: "Already Happened",
         state: "published",
         aboutMarkdown: "Past MD",
-        organiser: "soc",
+        organiser: Sigs.Compsoc,
         date: pastDate(),
       });
 
@@ -313,7 +313,7 @@ describe("Event", () => {
         title: "To Be Deleted",
         state: "draft",
         aboutMarkdown: "md",
-        organiser: "soc",
+        organiser: Sigs.Compsoc,
         date: futureDate(),
       });
     });
@@ -341,7 +341,7 @@ describe("Event", () => {
         title: "Past Event",
         state: "published",
         aboutMarkdown: "md",
-        organiser: "soc",
+        organiser: Sigs.Compsoc,
         date: pastDate(),
       });
 

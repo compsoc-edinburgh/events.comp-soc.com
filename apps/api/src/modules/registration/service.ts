@@ -190,7 +190,7 @@ export const registrationService = {
         data: { id: data.eventId },
       });
 
-      if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+      if (!event || !canManageSig(role, sigs, event.organiser)) {
         throw new UnauthorizedError("You do not have permission to delete this registration");
       }
     }
