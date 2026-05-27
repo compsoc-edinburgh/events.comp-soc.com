@@ -59,7 +59,7 @@ export async function apiRequest<T>(
       params: cleanParams,
       data: body,
       headers: {
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(body != null ? { 'Content-Type': 'application/json' } : {}),
       },
     })
