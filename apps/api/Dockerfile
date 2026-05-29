@@ -1,7 +1,8 @@
 # Build stage
 FROM node:22-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+ARG PNPM_VERSION=10.33.0
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 WORKDIR /app
 
@@ -28,7 +29,8 @@ RUN pnpm build
 # Production stage
 FROM node:22-alpine AS production
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+ARG PNPM_VERSION=10.33.0
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 WORKDIR /app
 
