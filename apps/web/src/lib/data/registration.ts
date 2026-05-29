@@ -1,6 +1,4 @@
 import { createServerFn } from '@tanstack/react-start'
-import { auth } from '@clerk/tanstack-react-start/server'
-import axios from 'redaxios'
 import {
   RegistrationAnalyticsResponseSchema,
   RegistrationBatchAcceptResponseSchema,
@@ -12,6 +10,7 @@ import {
 } from '@events.comp-soc.com/shared'
 import { z } from 'zod'
 import { queryOptions } from '@tanstack/react-query'
+import { apiRequest } from './api-client.ts'
 import type {
   CreateRegistrationRequest,
   Nullable,
@@ -30,29 +29,16 @@ export const registrationIDSchema = z.object({
 export const batchAcceptRegistration = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ eventId: z.string() }))
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-    const baseUrl = process.env.API_BASE_URL
-
-    if (!baseUrl) throw new Error('API_BASE_URL is not defined')
-
-    try {
-      const { data: acceptedCount } =
-        await axios.post<RegistrationBatchAcceptResponse>(
-          `${baseUrl}/v1/events/${data.eventId}/registrations/batch-accept`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        )
-
-      return RegistrationBatchAcceptResponseSchema.parse(acceptedCount)
-    } catch (err) {
-      console.error('Batch accept failed', err)
-      throw new Error('Failed to batch accept registrations')
-    }
+    const { data: acceptedCount } =
+      await apiRequest<RegistrationBatchAcceptResponse>(
+        `/v1/events/${data.eventId}/registrations/batch-accept`,
+        {
+          method: 'POST',
+          body: {},
+          errorMessage: 'Failed to batch accept registrations',
+        },
+      )
+    return RegistrationBatchAcceptResponseSchema.parse(acceptedCount)
   })
 
 export const batchUpdateStatus = createServerFn({ method: 'POST' })
@@ -64,126 +50,50 @@ export const batchUpdateStatus = createServerFn({ method: 'POST' })
     },
   )
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-    const baseUrl = process.env.API_BASE_URL
-
-    if (!baseUrl) throw new Error('API_BASE_URL is not defined')
-
     const { eventId, ...payload } = data
-
-    try {
-      const { data: updatedCount } =
-        await axios.post<RegistrationBatchUpdateResponse>(
-          `${baseUrl}/v1/events/${eventId}/registrations/batch-update-status`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          },
-        )
-
-      return RegistrationBatchUpdateResponseSchema.parse(updatedCount)
-    } catch (err) {
-      console.error('Batch update status failed', err)
-      throw new Error('Failed to update registration statuses')
-    }
+    const { data: updatedCount } =
+      await apiRequest<RegistrationBatchUpdateResponse>(
+        `/v1/events/${eventId}/registrations/batch-update-status`,
+        {
+          method: 'POST',
+          body: payload,
+          errorMessage: 'Failed to update registration statuses',
+        },
+      )
+    return RegistrationBatchUpdateResponseSchema.parse(updatedCount)
   })
 
 export const fetchRegistrationByUser = createServerFn({ method: 'GET' })
   .inputValidator(registrationIDSchema)
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    try {
-      const { data: registration } = await axios.get<Nullable<Registration>>(
-        `${baseUrl}/v1/events/${data.eventId}/registrations/me`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-
-      if (!registration) {
-        return null
-      }
-
-      return RegistrationResponseSchema.parse(registration)
-    } catch (err) {
-      console.error(err)
-
-      throw new Error('Failed to load an event')
-    }
+    const { data: registration } = await apiRequest<Nullable<Registration>>(
+      `/v1/events/${data.eventId}/registrations/me`,
+      { errorMessage: 'Failed to load registration' },
+    )
+    if (!registration) return null
+    return RegistrationResponseSchema.parse(registration)
   })
 
 export const fetchRegistrations = createServerFn({ method: 'GET' })
   .inputValidator(registrationIDSchema)
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    try {
-      const { data: registrations } = await axios.get<Array<Registration>>(
-        `${baseUrl}/v1/events/${data.eventId}/registrations`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-
-      return registrations.map((registration) =>
-        RegistrationResponseSchema.parse(registration),
-      )
-    } catch (err) {
-      console.error(err)
-
-      throw new Error('Failed to load an event')
-    }
+    const { data: registrations } = await apiRequest<Array<Registration>>(
+      `/v1/events/${data.eventId}/registrations`,
+      { errorMessage: 'Failed to load registrations' },
+    )
+    return registrations.map((registration) =>
+      RegistrationResponseSchema.parse(registration),
+    )
   })
 
 export const fetchRegistrationAnalytics = createServerFn({ method: 'GET' })
   .inputValidator(registrationIDSchema)
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    try {
-      const { data: analytics } =
-        await axios.get<RegistrationAnalyticsResponse>(
-          `${baseUrl}/v1/events/${data.eventId}/registrations/analytics`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        )
-
-      return RegistrationAnalyticsResponseSchema.parse(analytics)
-    } catch (err) {
-      console.error(err)
-
-      throw new Error('Failed to load an event')
-    }
+    const { data: analytics } = await apiRequest<RegistrationAnalyticsResponse>(
+      `/v1/events/${data.eventId}/registrations/analytics`,
+      { errorMessage: 'Failed to load registration analytics' },
+    )
+    return RegistrationAnalyticsResponseSchema.parse(analytics)
   })
 
 export const createRegistration = createServerFn({ method: 'POST' })
@@ -193,34 +103,16 @@ export const createRegistration = createServerFn({ method: 'POST' })
     }).parse(data)
   })
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    const { eventId, ...registrationData } = data
-
-    try {
-      const { data: registration } = await axios.post<Registration>(
-        `${baseUrl}/v1/events/${eventId}/registrations`,
-        registrationData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-
-      return RegistrationContractSchema.parse(registration)
-    } catch (err) {
-      console.error(err)
-
-      throw new Error('Failed to load an event')
-    }
+    const { eventId, ...payload } = data
+    const { data: registration } = await apiRequest<Registration>(
+      `/v1/events/${eventId}/registrations`,
+      {
+        method: 'POST',
+        body: payload,
+        errorMessage: 'Failed to create registration',
+      },
+    )
+    return RegistrationContractSchema.parse(registration)
   })
 
 export const updateRegistration = createServerFn({ method: 'POST' })
@@ -233,34 +125,16 @@ export const updateRegistration = createServerFn({ method: 'POST' })
     },
   )
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    const { eventId, userId, ...registrationData } = data
-
-    try {
-      const { data: registration } = await axios.put<Registration>(
-        `${baseUrl}/v1/events/${eventId}/registrations/${userId}`,
-        registrationData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-
-      return RegistrationContractSchema.parse(registration)
-    } catch (err) {
-      console.error(err)
-
-      throw new Error('Failed to load an event')
-    }
+    const { eventId, userId, ...payload } = data
+    const { data: registration } = await apiRequest<Registration>(
+      `/v1/events/${eventId}/registrations/${userId}`,
+      {
+        method: 'PUT',
+        body: payload,
+        errorMessage: 'Failed to update registration',
+      },
+    )
+    return RegistrationContractSchema.parse(registration)
   })
 
 export const registrationQueryByUserOption = (eventId: string) =>
@@ -274,6 +148,7 @@ export const registrationQueryOption = (eventId: string) =>
     queryKey: ['registrations', eventId],
     queryFn: () => fetchRegistrations({ data: { eventId } }),
   })
+
 export const registrationAnalyticsQueryOption = (eventId: string) =>
   queryOptions({
     queryKey: ['registrations', eventId, 'analytics'],

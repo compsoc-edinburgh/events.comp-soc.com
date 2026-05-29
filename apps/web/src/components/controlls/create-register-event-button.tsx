@@ -14,12 +14,10 @@ function CreateRegisterEventButton({
   form,
   title,
   eventId,
-  disabled,
 }: {
   form: Array<CustomField>
   title: string
   eventId: string
-  disabled: boolean
 }) {
   const [open, setOpen] = useState(false)
   const { isAuthenticated } = useCommitteeAuth()
@@ -47,7 +45,10 @@ function CreateRegisterEventButton({
 
   return (
     <>
-      <Button onClick={handleClick} disabled={disabled}>
+      <Button
+        onClick={handleClick}
+        className="rounded-lg bg-neutral-300 text-black hover:bg-neutral-200"
+      >
         Register Now
       </Button>
       <EventRegistrationFormDialog

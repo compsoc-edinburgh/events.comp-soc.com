@@ -4,11 +4,10 @@ import {
   CreateRegistration,
   FormAnalyticsEntry,
   RegistrationParams,
-  RegistrationsQueryFilter,
-  RegistrationStoreSelection,
   UpdateBatchRegistration,
   UpdateRegistration,
 } from "./schema.js";
+import { RegistrationStoreSelection } from "./projections.js";
 import { SqlContext } from "../../db/db.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import { EventId } from "../events/schema.js";
@@ -105,27 +104,13 @@ export const registrationStore = {
     return registration;
   },
 
-  async get({
-    db,
-    filters,
-  }: {
-    db: SqlContext;
-    filters: RegistrationsQueryFilter & Pick<EventId, "id">;
-  }) {
-    const { id, status, userId } = filters;
-
+  async get({ db, data }: { db: SqlContext; data: Pick<EventId, "id"> }) {
     return db
       .select(RegistrationStoreSelection)
       .from(registrationsTable)
       .innerJoin(eventsTable, eq(registrationsTable.eventId, eventsTable.id))
       .innerJoin(usersTable, eq(registrationsTable.userId, usersTable.id))
-      .where(
-        and(
-          eq(registrationsTable.eventId, id),
-          userId ? eq(registrationsTable.userId, userId) : undefined,
-          status ? eq(registrationsTable.status, status) : undefined
-        )
-      )
+      .where(eq(registrationsTable.eventId, data.id))
       .orderBy(registrationsTable.createdAt);
   },
 

@@ -6,7 +6,7 @@ import type { EventFormSchema } from '@/components/forms/modify-event-form.tsx'
 import ModifyEventForm, {
   FormToRequest,
 } from '@/components/forms/modify-event-form.tsx'
-import Window from '@/components/layout/window/window.tsx'
+import Window from '@/components/layout/window.tsx'
 import Sheet from '@/components/layout/sheet.tsx'
 import { ProtectedRoute } from '@/components/layout/protected-route.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
@@ -56,8 +56,8 @@ function CreateRoute() {
   }
 
   return (
-    <ProtectedRoute activeTab="/events/create" requireEventManager>
-      <Window activeTab="/events/create">
+    <ProtectedRoute requireEventManager>
+      <Window maxWidth="3xl">
         <Sheet>
           <div className="text-xl sm:text-2xl font-bold gap-2 items-center flex text-white">
             Create Event

@@ -1,16 +1,11 @@
 import { FastifyInstance } from "fastify";
 import { getAuth } from "@clerk/fastify";
-import {
-  CreateEventSchema,
-  EventIdSchema,
-  EventsQueryFilterSchema,
-  UpdateEventSchema,
-} from "./schema.js";
+import { CreateEventSchema, EventIdSchema, UpdateEventSchema } from "./schema.js";
 import { eventService } from "./service.js";
 import {
   EventContractSchema,
+  EventsQueryFilterSchema,
   UpdateEventContractSchema,
-  Sigs,
   canManageSig,
 } from "@events.comp-soc.com/shared";
 import { nanoid } from "nanoid";
@@ -54,8 +49,8 @@ export const eventRoutes = async (server: FastifyInstance) => {
     const dto = EventContractSchema.parse(request.body);
     const { role, sigs } = request.user;
 
-    if (!canManageSig(role, sigs, dto.organiser as Sigs)) {
-      throw new ForbiddenError("You cannot create events for this SIG");
+    if (!canManageSig(role, sigs, dto.organiser)) {
+      throw new ForbiddenError("You cannot create events for this Sig");
     }
 
     const generatedId = nanoid();
@@ -88,12 +83,12 @@ export const eventRoutes = async (server: FastifyInstance) => {
       throw new ForbiddenError("Event not found");
     }
 
-    if (!canManageSig(role, sigs, existingEvent.organiser as Sigs)) {
-      throw new ForbiddenError("You cannot edit events for this SIG");
+    if (!canManageSig(role, sigs, existingEvent.organiser)) {
+      throw new ForbiddenError("You cannot edit events for this Sig");
     }
 
-    if (dto.organiser && !canManageSig(role, sigs, dto.organiser as Sigs)) {
-      throw new ForbiddenError("You cannot transfer events to this SIG");
+    if (dto.organiser && !canManageSig(role, sigs, dto.organiser)) {
+      throw new ForbiddenError("You cannot transfer events to this Sig");
     }
 
     const data = UpdateEventSchema.parse({
@@ -123,8 +118,8 @@ export const eventRoutes = async (server: FastifyInstance) => {
       throw new ForbiddenError("Event not found");
     }
 
-    if (!canManageSig(role, sigs, existingEvent.organiser as Sigs)) {
-      throw new ForbiddenError("You cannot delete events for this SIG");
+    if (!canManageSig(role, sigs, existingEvent.organiser)) {
+      throw new ForbiddenError("You cannot delete events for this Sig");
     }
 
     const deletedEvent = await eventService.deleteEvent({

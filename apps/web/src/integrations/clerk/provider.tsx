@@ -1,4 +1,5 @@
 import { ClerkProvider } from '@clerk/tanstack-react-start'
+import { AuthQuerySync } from './auth-query-sync.tsx'
 import type { ReactNode } from 'react'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -18,6 +19,7 @@ export default function AppClerkProvider({
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
     >
+      <AuthQuerySync />
       {children}
     </ClerkProvider>
   )

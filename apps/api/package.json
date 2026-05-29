@@ -18,12 +18,12 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@clerk/fastify": "^2.6.12",
+    "@clerk/fastify": "^3.1.31",
     "@events.comp-soc.com/shared": "workspace:*",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
-    "fastify": "^5.6.2",
+    "fastify": "5.8.5",
     "fastify-plugin": "^5.1.0",
     "fastify-tsconfig": "^3.0.0",
     "nanoid": "^5.1.6",

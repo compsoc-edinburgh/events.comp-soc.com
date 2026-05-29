@@ -3,7 +3,6 @@ import {
   CreateRegistrationSchema,
   RegistrationEventIdSchema,
   RegistrationParamsSchema,
-  RegistrationsQueryFilterSchema,
   UpdateBatchStatusRegistrationSchema,
   UpdateRegistrationSchema,
 } from "./schema.js";
@@ -12,7 +11,6 @@ import {
   RegistrationContractSchema,
   RegistrationStatusBatchUpdateSchema,
   RegistrationUpdateContractSchema,
-  Sigs,
   canManageSig,
 } from "@events.comp-soc.com/shared";
 import { requireAuth, requireEventManager } from "../../lib/auth-guard.js";
@@ -49,7 +47,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { id: eventId },
     });
 
-    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+    if (!event || !canManageSig(role, sigs, event.organiser)) {
       throw new ForbiddenError("You cannot manage registrations for this event");
     }
 
@@ -74,7 +72,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
         data: { id: eventId },
       });
 
-      if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+      if (!event || !canManageSig(role, sigs, event.organiser)) {
         throw new ForbiddenError("You cannot manage registrations for this event");
       }
 
@@ -94,7 +92,6 @@ export const registrationRoutes = async (server: FastifyInstance) => {
 
   server.get("/", { preHandler: [requireEventManager] }, async (request, reply) => {
     const params = RegistrationEventIdSchema.parse(request.params);
-    const filters = RegistrationsQueryFilterSchema.parse(request.query);
     const { role, sigs } = request.user;
 
     const event = await eventService.getEventForAuth({
@@ -102,16 +99,13 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { id: params.eventId },
     });
 
-    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+    if (!event || !canManageSig(role, sigs, event.organiser)) {
       throw new ForbiddenError("You cannot view registrations for this event");
     }
 
     const events = await registrationService.getRegistrations({
       db: server.db,
-      filters: {
-        id: params.eventId,
-        ...filters,
-      },
+      data: { id: params.eventId },
     });
 
     return reply.status(200).send(events);
@@ -142,7 +136,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { id: params.eventId },
     });
 
-    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+    if (!event || !canManageSig(role, sigs, event.organiser)) {
       throw new ForbiddenError("You cannot manage registrations for this event");
     }
 
@@ -169,7 +163,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { id: eventId },
     });
 
-    if (!event || !canManageSig(role, sigs, event.organiser as Sigs)) {
+    if (!event || !canManageSig(role, sigs, event.organiser)) {
       throw new ForbiddenError("You cannot view analytics for this event");
     }
 

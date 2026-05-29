@@ -1,4 +1,4 @@
-import Fastify, { FastifyRequest } from "fastify";
+import Fastify from "fastify";
 import dbPlugin from "./plugins/db.js";
 import { clerkPlugin } from "@clerk/fastify";
 import { loggerConfig } from "./lib/logger.js";
@@ -14,26 +14,13 @@ export function buildServer() {
     logger: loggerConfig,
   });
 
-  server.addContentTypeParser(
-    "application/json",
-    { parseAs: "string" },
-    (req: FastifyRequest, body: string, done: (err: Error | null, data: unknown) => void) => {
-      try {
-        const json = JSON.parse(body);
-        // Store raw body for webhook verification
-        req.rawBody = body;
-        done(null, json);
-      } catch (err) {
-        done(err as Error, undefined);
-      }
-    }
-  );
-
   server.register(dbPlugin);
-  server.register(clerkPlugin);
 
+  // Handles connection between clerk and backend (will be removed when migration from clerk starts)
+  server.register(clerkPlugin);
   server.register(clerkWebhookRoutes, { prefix: "/webhooks" });
 
+  // Handles all business logic
   server.register(userRoutes, { prefix: "/v1/users" });
   server.register(eventRoutes, { prefix: "/v1/events" });
   server.register(registrationRoutes, { prefix: "/v1/events/:eventId/registrations" });

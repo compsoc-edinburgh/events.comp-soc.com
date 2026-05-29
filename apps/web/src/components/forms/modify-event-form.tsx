@@ -51,7 +51,6 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-  InputGroupText,
 } from '@/components/ui/input-group.tsx'
 import {
   Tooltip,
@@ -290,7 +289,7 @@ function ModifyEventForm({
                     </Select>
                     {!isCommittee && (
                       <FieldDescription>
-                        You can only create events for your assigned SIGs
+                        You can only create events for your assigned Sigs
                       </FieldDescription>
                     )}
                     {isInvalid && (
@@ -527,11 +526,8 @@ function ModifyEventForm({
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
-                        placeholder="example.com"
+                        placeholder="https://maps.app.goo.gl/fgNpzT2rWR5GHqSb7"
                       />
-                      <InputGroupAddon>
-                        <InputGroupText>https://</InputGroupText>
-                      </InputGroupAddon>
                       <InputGroupAddon align="inline-end">
                         <Tooltip>
                           <TooltipTrigger asChild>

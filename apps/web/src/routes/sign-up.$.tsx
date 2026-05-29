@@ -31,7 +31,7 @@ function SignUpPage() {
         <p className="text-sm text-neutral-400 pb-10">
           Already have an account?{' '}
           <Link to="/sign-in/$" className="text-red-500 hover:text-red-400">
-            Sign in
+            Sign up
           </Link>
         </p>
       </div>

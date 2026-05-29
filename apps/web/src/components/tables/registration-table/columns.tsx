@@ -81,7 +81,7 @@ export function getColumns(
       id: question.id,
       header: question.label,
       accessorFn: (row) => {
-        const answer = row.answers[question.id]
+        const answer = row.answers ? row.answers[question.id] : null
         if (Array.isArray(answer)) {
           return answer.join(', ')
         }

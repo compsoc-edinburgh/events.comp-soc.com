@@ -1,5 +1,6 @@
 import type { CustomField } from '@events.comp-soc.com/shared'
 
+// Default form that is used for most of the events from comp-soc
 export const DEFAULT_FIELDS: Array<CustomField> = [
   {
     id: `field-${Date.now()}-1`,

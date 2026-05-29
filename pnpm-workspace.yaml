@@ -1,2 +1,9 @@
 packages:
   - "apps/*"
+
+# pnpm 10.26+ requires dependency build scripts to be explicitly reviewed.
+# Approve only packages we trust to run install scripts.
+allowBuilds:
+  "@clerk/shared": true
+  esbuild: true
+  unrs-resolver: true

@@ -1,14 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
-import axios from 'redaxios'
 import { queryOptions } from '@tanstack/react-query'
 import {
   EventContractSchema,
   EventResponseSchema,
-  EventState,
   UpdateEventContractSchema,
 } from '@events.comp-soc.com/shared'
 import { z } from 'zod'
-import { auth } from '@clerk/tanstack-react-start/server'
+import { apiRequest } from './api-client.ts'
 import type {
   CreateEventRequest,
   Event,
@@ -22,94 +20,59 @@ export const eventIDSchema = z.object({
 export const fetchEvent = createServerFn({ method: 'GET' })
   .inputValidator(eventIDSchema)
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    try {
-      const { data: event } = await axios.get<Event>(
-        `${baseUrl}/v1/events/${data.eventId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-
-      return EventResponseSchema.parse(event)
-    } catch (err) {
-      console.error(err)
-
-      throw new Error('Failed to load an event')
-    }
+    const { data: event } = await apiRequest<Event>(
+      `/v1/events/${data.eventId}`,
+      { errorMessage: 'Failed to load an event' },
+    )
+    return EventResponseSchema.parse(event)
   })
 
-const eventsFilterSchema = z
+/**
+ * Web-side input shape for `fetchEvents`. Mirrors the shared
+ * `EventsQueryFilter` shape but with typed inputs (array for `sigs`,
+ * boolean for `includePast`). Encoded to the wire format inside the
+ * server fn below.
+ */
+const eventsFilterInputSchema = z
   .object({
-    state: z.enum(EventState).optional(),
+    state: z.enum(['draft', 'published']).optional(),
     includePast: z.boolean().optional(),
+    search: z.string().optional(),
+    sigs: z.array(z.string()).optional(),
+    dateFrom: z.string().optional(),
+    dateTo: z.string().optional(),
   })
   .optional()
 
 export const fetchEvents = createServerFn({ method: 'GET' })
-  .inputValidator((data) => eventsFilterSchema.parse(data))
+  .inputValidator((data) => eventsFilterInputSchema.parse(data))
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    try {
-      const { data: events } = await axios.get<Array<Event>>(
-        `${baseUrl}/v1/events`,
-        {
-          params: {
-            state: data?.state,
-            ...(data?.includePast && { includePast: 'true' }),
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-
-      return events.map((event) => EventResponseSchema.parse(event))
-    } catch (err) {
-      console.error(err)
-
-      throw new Error('Failed to load events')
-    }
+    const { data: events } = await apiRequest<Array<Event>>(`/v1/events`, {
+      params: {
+        state: data?.state,
+        includePast: data?.includePast ? 'true' : undefined,
+        search:
+          data?.search && data.search.trim() !== ''
+            ? data.search.trim()
+            : undefined,
+        sigs:
+          data?.sigs && data.sigs.length > 0 ? data.sigs.join(',') : undefined,
+        dateFrom: data?.dateFrom,
+        dateTo: data?.dateTo,
+      },
+      errorMessage: 'Failed to load events',
+    })
+    return events.map((event) => EventResponseSchema.parse(event))
   })
 
 export const createEvent = createServerFn({ method: 'POST' })
   .inputValidator((data: CreateEventRequest) => EventContractSchema.parse(data))
   .handler(async ({ data }) => {
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    const { data: event } = await axios.post<Event>(
-      `${baseUrl}/v1/events`,
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    )
-
+    const { data: event } = await apiRequest<Event>(`/v1/events`, {
+      method: 'POST',
+      body: data,
+      errorMessage: 'Failed to create event',
+    })
     return EventResponseSchema.parse(event)
   })
 
@@ -120,61 +83,59 @@ export const updateEvent = createServerFn({ method: 'POST' })
     }).parse(data)
   })
   .handler(async ({ data }) => {
-    const eventId = data.id
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    const { data: event } = await axios.put<Event>(
-      `${baseUrl}/v1/events/${eventId}`,
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    )
-
+    const { data: event } = await apiRequest<Event>(`/v1/events/${data.id}`, {
+      method: 'PUT',
+      body: data,
+      errorMessage: 'Failed to update event',
+    })
     return EventResponseSchema.parse(event)
   })
 
 export const deleteEvent = createServerFn({ method: 'POST' })
   .inputValidator(eventIDSchema)
   .handler(async ({ data }) => {
-    const eventId = data.eventId
-    const authObj = await auth()
-    const token = await authObj.getToken()
-
-    const baseUrl = process.env.API_BASE_URL
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined')
-    }
-
-    const { data: event } = await axios.delete<Event>(
-      `${baseUrl}/v1/events/${eventId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
+    const { data: event } = await apiRequest<Event>(
+      `/v1/events/${data.eventId}`,
+      { method: 'DELETE', errorMessage: 'Failed to delete event' },
     )
-
     return EventResponseSchema.parse(event)
   })
 
+export interface EventsQueryParams {
+  state?: 'draft' | 'published'
+  includePast?: boolean
+  search?: string
+  sigs?: Array<string>
+  dateFrom?: string
+  dateTo?: string
+}
+
 export const eventsQueryOptions = (
-  state?: 'draft' | 'published',
+  stateOrParams?: 'draft' | 'published' | EventsQueryParams,
   includePast?: boolean,
-) =>
-  queryOptions({
-    queryKey: ['events', { state, includePast }],
-    queryFn: () => fetchEvents({ data: { state, includePast } }),
+) => {
+  const params: EventsQueryParams =
+    typeof stateOrParams === 'object'
+      ? stateOrParams
+      : { state: stateOrParams, includePast }
+
+  const normalised = {
+    state: params.state,
+    includePast: params.includePast,
+    search: params.search?.trim() ? params.search.trim() : undefined,
+    sigs:
+      params.sigs && params.sigs.length > 0
+        ? [...params.sigs].sort()
+        : undefined,
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
+  }
+
+  return queryOptions({
+    queryKey: ['events', normalised],
+    queryFn: () => fetchEvents({ data: normalised }),
   })
+}
 
 export const eventQueryOption = (eventId: string) =>
   queryOptions({

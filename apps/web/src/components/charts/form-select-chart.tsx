@@ -68,7 +68,7 @@ export function SelectAnalyticsBarChart({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="max-h-[260px] w-full">
           <BarChart
             accessibilityLayer
             data={chartData}

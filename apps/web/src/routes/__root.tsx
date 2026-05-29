@@ -13,10 +13,9 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import type { ReactNode } from 'react'
 
 import type { QueryClient } from '@tanstack/react-query'
-import { WindowBar } from '@/components/layout/window/window-bar.tsx'
 import MainNavigation from '@/components/layout/main-navigation.tsx'
 import { Toaster } from '@/components/ui/sooner.tsx'
-import NotFound from '@/components/not-found.tsx'
+import NotFound from '@/components/layout/not-found.tsx'
 import { PAGE_METADATA } from '@/config/meta.ts'
 
 interface MyRouterContext {
@@ -33,13 +32,13 @@ function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <title>Compsoc Events</title>
         <HeadContent />
       </head>
       <body className="bg-background">
         <ClerkProvider>
           <Toaster />
           <MainNavigation />
-          <WindowBar />
           {children}
           <TanStackDevtools
             config={{

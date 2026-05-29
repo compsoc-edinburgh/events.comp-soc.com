@@ -1,8 +1,10 @@
+import { Badge } from '@/components/ui/badge.tsx'
+
 function DraftBadge() {
   return (
-    <span className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 border border-neutral-800 px-1.5 py-0.5 rounded">
+    <Badge variant="outline" size="sm">
       Draft
-    </span>
+    </Badge>
   )
 }
 

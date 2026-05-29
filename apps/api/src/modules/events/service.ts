@@ -1,8 +1,15 @@
 import { eventStore } from "./store.js";
 import { SqlContext } from "../../db/db.js";
-import { CreateEvent, EventId, EventsQueryFilter, UpdateEvent } from "./schema.js";
-import { NotFoundError } from "../../lib/errors.js";
-import { UserRole, EventState, Nullable, Sigs } from "@events.comp-soc.com/shared";
+import { CreateEvent, EventId, UpdateEvent } from "./schema.js";
+import { ConflictError, NotFoundError } from "../../lib/errors.js";
+import {
+  EventState,
+  EventsQueryFilter,
+  Nullable,
+  Sigs,
+  UserRole,
+} from "@events.comp-soc.com/shared";
+import { isHistoricalEvent, mergeEventsByDate, scopeSigs } from "./utils.js";
 
 export const eventService = {
   async getEvents({
@@ -19,28 +26,47 @@ export const eventService = {
     const isCommittee = role === UserRole.Committee;
     const isSigExecutive = role === UserRole.SigExecutive;
 
-    const authorisedFilters = {
-      ...filters,
-      state: isCommittee ? filters.state : EventState.Published,
-    };
-
-    let events = await eventStore.get({ db, filters: authorisedFilters });
-
-    if (isSigExecutive && sigs && sigs.length > 0 && !filters.state) {
-      const draftEvents = await eventStore.get({
-        db,
-        filters: { ...filters, state: EventState.Draft },
-      });
-
-      const sigDraftEvents = draftEvents.filter((e) => sigs.includes(e.organiser as Sigs));
-      events = [...events, ...sigDraftEvents];
-
-      events = events
-        .filter((event, index, self) => index === self.findIndex((e) => e.id === event.id))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (isCommittee) {
+      return eventStore.get({ db, filters });
     }
 
-    return events;
+    if (isSigExecutive) {
+      const managedSigs = scopeSigs(sigs, filters.sigs);
+
+      if (filters.state === EventState.Draft) {
+        if (managedSigs.length === 0) return [];
+
+        return eventStore.get({
+          db,
+          filters: { ...filters, state: EventState.Draft, sigs: managedSigs },
+        });
+      }
+
+      const publishedEvents = await eventStore.get({
+        db,
+        filters: { ...filters, state: EventState.Published },
+      });
+
+      if (filters.state === EventState.Published || managedSigs.length === 0) {
+        return publishedEvents;
+      }
+
+      const draftEvents = await eventStore.get({
+        db,
+        filters: { ...filters, state: EventState.Draft, sigs: managedSigs },
+      });
+
+      return mergeEventsByDate(publishedEvents, draftEvents);
+    }
+
+    if (filters.state === EventState.Draft) {
+      return [];
+    }
+
+    return eventStore.get({
+      db,
+      filters: { ...filters, state: EventState.Published },
+    });
   },
 
   async getEventById({
@@ -64,12 +90,10 @@ export const eventService = {
     }
 
     if (event.state === EventState.Draft) {
-      if (isCommittee) {
+      if (isCommittee || (isSigExecutive && sigs && sigs.includes(event.organiser))) {
         return event;
       }
-      if (isSigExecutive && sigs && sigs.includes(event.organiser as Sigs)) {
-        return event;
-      }
+
       throw new NotFoundError(`Event with ${id} not found`);
     }
 
@@ -83,6 +107,15 @@ export const eventService = {
   async updateEvent({ db, data }: { db: SqlContext; data: UpdateEvent }) {
     const { id } = data;
 
+    const existing = await eventStore.findById({ db, data: { id } });
+    if (!existing) {
+      throw new NotFoundError(`Event with ${id} not found`);
+    }
+
+    if (isHistoricalEvent(existing.date)) {
+      throw new ConflictError("Historical events cannot be edited");
+    }
+
     const updated = await eventStore.update({ db, data });
     if (!updated) {
       throw new NotFoundError(`Event with ${id} not found`);
@@ -93,6 +126,15 @@ export const eventService = {
 
   async deleteEvent({ db, data }: { db: SqlContext; data: EventId }) {
     const { id } = data;
+
+    const existing = await eventStore.findById({ db, data });
+    if (!existing) {
+      throw new NotFoundError(`Event with ${id} not found`);
+    }
+
+    if (isHistoricalEvent(existing.date)) {
+      throw new ConflictError("Historical events cannot be deleted");
+    }
 
     const deleted = await eventStore.delete({ db, data });
     if (!deleted) {

@@ -6,44 +6,42 @@
   --font-serif: 'IBM Plex Serif', ui-serif, Georgia, serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
-  --color-background: #0d0d0d;
-  --color-surface: #1a1a1a;
-  --color-window: #121212;
-  --color-subnavbar: #1e1e1e;
+  /* Surface hierarchy (3 primary tokens) */
+  --color-background: #0d0c0c; /* body / page backdrop (lightest) */
+  --color-surface: #141414; /* Window / main content surface (mid) */
+  --color-navigation: #0e0d0d; /* navbar / top chrome (darkest) */
 
+  /* Text */
+  --color-foreground: #ececec;
+  --color-muted-foreground: #9a9a9a;
+
+  /* Brand */
   --color-primary: #dc2626;
   --color-primary-foreground: #ffffff;
   --color-accent: #b91c1c;
-
-  --color-foreground: #f2f2f2;
-  --color-muted-foreground: #a1a1aa;
-
-  --color-popover: #262626;
-  --color-popover-foreground: #ffffff;
-
-  --color-border: #333333;
-  --color-input: #2a2a2a;
-
-  --color-secondary: #2a2a2a;
-  --color-secondary-foreground: #f2f2f2;
-  --color-muted: #262626;
-
-  --color-accent-soft: #ef4444;
   --color-accent-foreground: #ffffff;
+
+  /* Component surfaces (derived from base) */
+  --color-card: #1a1a1a;
+  --color-card-foreground: #ececec;
+  --color-card-muted: #181818;
+  --color-card-hover: #222222;
+  --color-card-border: #2a2a2a;
+
+  --color-popover: #1a1a1a;
+  --color-popover-foreground: #ececec;
+
+  --color-secondary: #1a1a1a;
+  --color-secondary-foreground: #ececec;
+  --color-muted: #1a1a1a;
+
+  /* Inputs / borders */
+  --color-border: #3a3a3a;
+  --color-input: #2a2a2a;
+  --color-divider: #2a2a2a;
 
   --color-destructive: #7f1d1d;
   --color-ring: #dc2626;
-
-  --color-card: #161616; /* slightly above window */
-  --color-card-foreground: #f2f2f2;
-
-  /* Card subtle variants */
-  --color-card-muted: #1b1b1b;
-  --color-card-hover: #1f1f1f;
-
-  /* Borders & dividers */
-  --color-card-border: #2a2a2a;
-  --color-divider: #2f2f2f;
 
   --chart-1: var(--color-red-100);
   --chart-2: var(--color-red-200);
@@ -84,11 +82,14 @@
 }
 
 body {
-  @apply m-0 font-sans bg-[--color-background] text-[#E4E4E4];
+  @apply m-0 font-sans bg-background text-foreground;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
 }
+
+/*Markdown styles*/
+/*Used for parsing markdown in "About" for every event*/
 
 h1,
 h2,
