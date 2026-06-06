@@ -70,7 +70,7 @@ export const EventFormSchema = z
     date: z.date(),
     aboutMarkdown: z.string(),
     capacity: z.string(),
-    locationURL: z.string(),
+    locationUrl: z.string(),
     time: z.string().min(1, 'Time is required'),
     location: z.string().min(1, 'Location is required'),
     registrationFormEnabled: z.boolean(),
@@ -103,7 +103,7 @@ export const FormToRequest = EventFormSchema.transform((form) => {
     capacity: form.capacity ? parseInt(form.capacity, 10) : null,
     date: date.toISOString(),
     aboutMarkdown: form.aboutMarkdown || null,
-    locationURL: form.locationURL ? form.locationURL : null,
+    locationUrl: form.locationUrl ? form.locationUrl : null,
     form: form.registrationFormEnabled ? form.customFields : null,
   }
 }).pipe(EventContractSchema)
@@ -510,7 +510,7 @@ function ModifyEventForm({
             />
 
             <form.Field
-              name="locationURL"
+              name="locationUrl"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid

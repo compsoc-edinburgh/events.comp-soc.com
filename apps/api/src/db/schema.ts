@@ -13,7 +13,7 @@ import {
   CustomField,
   EventPriority,
   EventState,
-  RegistrationFormAnswer,
+  RegistrationAnswer,
   RegistrationStatus,
   UserRole,
   Sigs,
@@ -53,7 +53,7 @@ export const eventsTable = pgTable(
     date: timestamp("date").notNull(),
     aboutMarkdown: text("about_markdown"),
     location: text("location"),
-    locationURL: text("location_url"),
+    locationUrl: text("location_url"),
     form: json("form").$type<Array<CustomField>>(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at")
@@ -73,7 +73,7 @@ export const registrationsTable = pgTable(
       .notNull()
       .references(() => eventsTable.id, { onDelete: "cascade" }),
     status: registrationStatus("status").notNull().default(RegistrationStatus.Pending),
-    answers: json("form_data").$type<RegistrationFormAnswer>(),
+    answers: json("form_data").$type<RegistrationAnswer>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

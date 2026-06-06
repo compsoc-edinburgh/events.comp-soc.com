@@ -59,13 +59,13 @@ function MeRoute() {
   }, [])
 
   const { data: upcomingData, isPending: isUpcomingPending } = useQuery({
-    ...userRegistrationQueryOption({ from: todayIso }),
+    ...userRegistrationQueryOption({ dateFrom: todayIso }),
     enabled: !!isSignedIn,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60_000,
   })
   const { data: archiveData, isPending: isArchivePending } = useQuery({
-    ...userRegistrationQueryOption({ until: todayIso }),
+    ...userRegistrationQueryOption({ dateTo: todayIso }),
     enabled: !!isSignedIn,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60_000,
@@ -216,7 +216,7 @@ function MeRoute() {
                           </div>
 
                           <h3 className="text-base sm:text-2xl font-bold text-neutral-100 leading-tight wrap-break-word">
-                            {reg.eventTitle ?? 'Untitled event'}
+                            {reg.eventTitle}
                           </h3>
 
                           <div className="flex items-center gap-2 sm:gap-3 flex-wrap text-xs sm:text-sm text-neutral-400 mt-1">

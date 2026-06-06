@@ -1,3 +1,7 @@
+/**
+ * Special Interest Groups (SIGs) under CompSoc — the owning unit
+ * for every event. Values are the canonical wire identifiers.
+ */
 export const Sigs = {
   Compsoc: "compsoc",
   ProjectShare: "projectShare",

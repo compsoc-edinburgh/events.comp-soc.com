@@ -46,8 +46,8 @@ export const userStore = {
 
     const conditions = [
       eq(registrationsTable.userId, id),
-      filters?.from ? gte(eventsTable.date, new Date(filters.from)) : null,
-      filters?.until ? lt(eventsTable.date, new Date(filters.until)) : null,
+      filters?.dateFrom ? gte(eventsTable.date, new Date(filters.dateFrom)) : null,
+      filters?.dateTo ? lt(eventsTable.date, new Date(filters.dateTo)) : null,
     ].filter((c): c is SQL => c !== null);
 
     return db

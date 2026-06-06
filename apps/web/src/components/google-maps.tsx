@@ -1,11 +1,11 @@
 import { ExternalLink } from 'lucide-react'
 
 interface GoogleMapsCardProps {
-  locationURL: string
+  locationUrl: string
   locationName?: string
 }
 
-function GoogleMaps({ locationURL, locationName }: GoogleMapsCardProps) {
+function GoogleMaps({ locationUrl, locationName }: GoogleMapsCardProps) {
   // Convert Google Maps URL to embeddable format (no API key required)
   const getEmbedUrl = (url: string): string => {
     // Use the simple embed format that doesn't require an API key
@@ -25,7 +25,7 @@ function GoogleMaps({ locationURL, locationName }: GoogleMapsCardProps) {
     return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
   }
 
-  const embedUrl = getEmbedUrl(locationURL)
+  const embedUrl = getEmbedUrl(locationUrl)
 
   return (
     <div className="mt-4 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900/50">
@@ -48,7 +48,7 @@ function GoogleMaps({ locationURL, locationName }: GoogleMapsCardProps) {
           </span>
         )}
         <a
-          href={locationURL}
+          href={locationUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-[--color-accent] transition-colors ml-auto"

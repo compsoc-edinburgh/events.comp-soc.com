@@ -71,7 +71,7 @@ function MyEventsList({
                     </TooltipContent>
                   </Tooltip>
                   <span className="text-[15px] text-neutral-200 truncate">
-                    {reg.eventTitle ?? 'Untitled event'}
+                    {reg.eventTitle}
                   </span>
                 </div>
                 <span className="text-sm text-neutral-500 pl-4">{when}</span>

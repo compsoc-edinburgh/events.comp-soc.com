@@ -1,4 +1,4 @@
-import type { CustomField, Nullable, RegistrationFormAnswer } from "@events.comp-soc.com/shared";
+import type { CustomField, Nullable, RegistrationAnswer } from "@events.comp-soc.com/shared";
 import { BadRequestError } from "../../lib/errors.js";
 
 export const validateRegistrationAnswers = ({
@@ -6,8 +6,8 @@ export const validateRegistrationAnswers = ({
   answers,
 }: {
   form: Nullable<CustomField[]> | undefined;
-  answers: Nullable<RegistrationFormAnswer> | undefined;
-}): RegistrationFormAnswer => {
+  answers: Nullable<RegistrationAnswer> | undefined;
+}): RegistrationAnswer => {
   const fields = form ?? [];
   const providedAnswers = answers ?? {};
   const fieldIds = new Set(fields.map((field) => field.id));
@@ -18,7 +18,7 @@ export const validateRegistrationAnswers = ({
     }
   }
 
-  const normalisedAnswers: RegistrationFormAnswer = {};
+  const normalisedAnswers: RegistrationAnswer = {};
 
   for (const field of fields) {
     const answer = providedAnswers[field.id]?.trim();
