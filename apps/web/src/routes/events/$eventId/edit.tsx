@@ -49,7 +49,7 @@ function EditEventRoute() {
     }),
     capacity: event.capacity ? String(event.capacity) : '',
     aboutMarkdown: event.aboutMarkdown ?? '',
-    locationURL: event.locationURL ?? '',
+    locationUrl: event.locationUrl ?? '',
     registrationFormEnabled: !!event.form && event.form.length > 0,
     customFields: event.form ?? [],
   })

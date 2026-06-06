@@ -172,12 +172,12 @@ function EventRoute() {
             <Markdown className="mt-4" content={event.aboutMarkdown} />
           </div>
         )}
-        {event.locationURL && (
+        {event.locationUrl && (
           <div className="my-5">
             <div className="text-base text-neutral-400">Location</div>
             <Separator className="mt-1" />
             <GoogleMaps
-              locationURL={event.locationURL}
+              locationUrl={event.locationUrl}
               locationName={event.location}
             />
           </div>

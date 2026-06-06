@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { RegistrationUpdateStatusBatch } from '@events.comp-soc.com/shared'
+import type { UpdateRegistrationStatusBatch } from '@events.comp-soc.com/shared'
 import { batchUpdateStatus } from '@/lib/data/registration.ts'
 import { formatErrorMessage } from '@/lib/utils.ts'
 
@@ -8,7 +8,7 @@ export function useBatchUpdateRegistrations(eventId: string, title: string) {
   const queryClient = useQueryClient()
 
   const { mutate, isPending } = useMutation({
-    mutationFn: ({ data }: { data: RegistrationUpdateStatusBatch }) =>
+    mutationFn: ({ data }: { data: UpdateRegistrationStatusBatch }) =>
       batchUpdateStatus({
         data: {
           eventId,

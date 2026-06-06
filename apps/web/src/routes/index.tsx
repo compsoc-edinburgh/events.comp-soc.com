@@ -129,7 +129,7 @@ function App() {
 
   const { data: userRegistrations, isPending: isRegistrationsPending } =
     useQuery({
-      ...userRegistrationQueryOption({ from: todayIso }),
+      ...userRegistrationQueryOption({ dateFrom: todayIso }),
       enabled: !!isSignedIn,
     })
 

@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { RegistrationContractSchema } from '@events.comp-soc.com/shared'
 import type {
   CustomField,
-  RegistrationFormAnswer,
+  RegistrationAnswer,
 } from '@events.comp-soc.com/shared'
 import { Button } from '@/components/ui/button.tsx'
 import { useCommitteeAuth } from '@/lib/auth.ts'
@@ -35,7 +35,7 @@ function CreateRegisterEventButton({
     setOpen(!open)
   }
 
-  const handleSubmit = (value: RegistrationFormAnswer) => {
+  const handleSubmit = (value: RegistrationAnswer) => {
     const data = RegistrationContractSchema.parse({
       answers: value,
     })

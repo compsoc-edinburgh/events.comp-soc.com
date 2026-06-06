@@ -194,7 +194,7 @@ describe("Event", () => {
       date: futureDate().toISOString(),
       aboutMarkdown: "# Details",
       location: "Comp Lab",
-      locationURL: "https://maps.google.com",
+      locationUrl: "https://maps.google.com",
       form: [],
     };
 
@@ -521,7 +521,7 @@ describe("Event", () => {
       date: futureDate().toISOString(),
       aboutMarkdown: "# AI Event",
       location: "AI Lab",
-      locationURL: "https://maps.google.com",
+      locationUrl: "https://maps.google.com",
       form: [],
     };
 

@@ -5,8 +5,8 @@ import {
   RegistrationBatchUpdateResponseSchema,
   RegistrationContractSchema,
   RegistrationResponseSchema,
-  RegistrationStatusBatchUpdateSchema,
-  RegistrationUpdateContractSchema,
+  UpdateRegistrationContractSchema,
+  UpdateRegistrationStatusBatchSchema,
 } from '@events.comp-soc.com/shared'
 import { z } from 'zod'
 import { queryOptions } from '@tanstack/react-query'
@@ -18,8 +18,8 @@ import type {
   RegistrationAnalyticsResponse,
   RegistrationBatchAcceptResponse,
   RegistrationBatchUpdateResponse,
-  RegistrationUpdateStatusBatch,
   UpdateRegistrationRequest,
+  UpdateRegistrationStatusBatch,
 } from '@events.comp-soc.com/shared'
 
 export const registrationIDSchema = z.object({
@@ -43,8 +43,8 @@ export const batchAcceptRegistration = createServerFn({ method: 'POST' })
 
 export const batchUpdateStatus = createServerFn({ method: 'POST' })
   .inputValidator(
-    (data: RegistrationUpdateStatusBatch & { eventId: string }) => {
-      return RegistrationStatusBatchUpdateSchema.extend({
+    (data: UpdateRegistrationStatusBatch & { eventId: string }) => {
+      return UpdateRegistrationStatusBatchSchema.extend({
         eventId: z.string(),
       }).parse(data)
     },
@@ -118,7 +118,7 @@ export const createRegistration = createServerFn({ method: 'POST' })
 export const updateRegistration = createServerFn({ method: 'POST' })
   .inputValidator(
     (data: UpdateRegistrationRequest & { eventId: string; userId: string }) => {
-      return RegistrationUpdateContractSchema.extend({
+      return UpdateRegistrationContractSchema.extend({
         eventId: z.string(),
         userId: z.string(),
       }).parse(data)

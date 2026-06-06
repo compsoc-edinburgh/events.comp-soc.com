@@ -38,7 +38,7 @@ function CreateRoute() {
     location: '',
     aboutMarkdown: '',
     capacity: '',
-    locationURL: '',
+    locationUrl: '',
     registrationFormEnabled: false,
     customFields: [] as Array<CustomField>,
   } as z.infer<typeof EventFormSchema>

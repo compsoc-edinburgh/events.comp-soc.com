@@ -1,3 +1,7 @@
+/**
+ * Lifecycle of a registration. `pending` is the initial state on signup;
+ * organisers move users to `accepted` / `rejected`, or to `waitlist` when at capacity.
+ */
 export const RegistrationStatus = {
   Pending: "pending",
   Accepted: "accepted",

@@ -5,7 +5,7 @@ import * as z from 'zod'
 import { RegistrationAnswerSchema } from '@events.comp-soc.com/shared'
 import type {
   CustomField,
-  RegistrationFormAnswer,
+  RegistrationAnswer,
 } from '@events.comp-soc.com/shared'
 
 import {
@@ -85,7 +85,7 @@ function EventRegistrationFormDialog({
   onOpenChange,
   eventTitle,
 }: {
-  onFormSubmit: (value: RegistrationFormAnswer) => void
+  onFormSubmit: (value: RegistrationAnswer) => void
   formStructure: Array<CustomField>
   isLoading?: boolean
   isOpen: boolean

@@ -7,14 +7,14 @@ import type { Nullable, Registration } from '@events.comp-soc.com/shared'
 
 const userRegistrationsFilterSchema = z
   .object({
-    from: z.string().optional(),
-    until: z.string().optional(),
+    dateFrom: z.string().optional(),
+    dateTo: z.string().optional(),
   })
   .optional()
 
 export interface UserRegistrationsParams {
-  from?: string
-  until?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
 export const fetchUserRegistrations = createServerFn({ method: 'GET' })
@@ -24,8 +24,8 @@ export const fetchUserRegistrations = createServerFn({ method: 'GET' })
       Nullable<Array<Registration>>
     >(`/v1/users/registrations`, {
       params: {
-        from: data?.from,
-        until: data?.until,
+        dateFrom: data?.dateFrom,
+        dateTo: data?.dateTo,
       },
       errorMessage: 'Failed to load list of registrations',
     })
@@ -43,8 +43,8 @@ export const userRegistrationQueryOption = (
   params?: UserRegistrationsParams,
 ) => {
   const normalised = {
-    from: params?.from,
-    until: params?.until,
+    dateFrom: params?.dateFrom,
+    dateTo: params?.dateTo,
   }
   return queryOptions({
     queryKey: ['users', 'registrations', normalised],

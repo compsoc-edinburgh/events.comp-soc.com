@@ -9,8 +9,8 @@ import {
 import { registrationService } from "./service.js";
 import {
   RegistrationContractSchema,
-  RegistrationStatusBatchUpdateSchema,
-  RegistrationUpdateContractSchema,
+  UpdateRegistrationStatusBatchSchema,
+  UpdateRegistrationContractSchema,
   canManageSig,
 } from "@events.comp-soc.com/shared";
 import { requireAuth, requireEventManager } from "../../lib/auth-guard.js";
@@ -64,7 +64,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     { preHandler: [requireEventManager] },
     async (request, reply) => {
       const { eventId } = RegistrationEventIdSchema.parse(request.params);
-      const dto = RegistrationStatusBatchUpdateSchema.parse(request.body);
+      const dto = UpdateRegistrationStatusBatchSchema.parse(request.body);
       const { role, sigs } = request.user;
 
       const event = await eventService.getEventForAuth({
@@ -127,7 +127,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
   });
 
   server.put("/:userId", { preHandler: [requireEventManager] }, async (request, reply) => {
-    const dto = RegistrationUpdateContractSchema.parse(request.body);
+    const dto = UpdateRegistrationContractSchema.parse(request.body);
     const params = RegistrationParamsSchema.parse(request.params);
     const { role, sigs } = request.user;
 
