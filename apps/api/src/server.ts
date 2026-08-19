@@ -26,6 +26,14 @@ export function buildServer() {
   server.register(registrationRoutes, { prefix: "/v1/events/:eventId/registrations" });
 
   server.register(healthCheck);
+  server.setNotFoundHandler((request, reply) => {
+    return reply.status(404).send({
+      statusCode: 404,
+      message: "Route not found",
+      requestId: request.id,
+    });
+  });
+
   server.setErrorHandler(errorHandler);
 
   return server;

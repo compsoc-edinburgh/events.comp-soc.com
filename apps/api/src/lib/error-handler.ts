@@ -1,10 +1,32 @@
 import { z, ZodError } from "zod";
-import { AppError } from "./errors.js";
 import { FastifyReply, FastifyRequest } from "fastify";
 
+const hasStatusCode = (error: unknown): error is { statusCode: number } =>
+  typeof error === "object" &&
+  error !== null &&
+  "statusCode" in error &&
+  typeof (error as { statusCode: unknown }).statusCode === "number";
+
+const resolveStatusCode = (error: unknown): number => {
+  if (error instanceof ZodError) {
+    return 400;
+  }
+
+  if (hasStatusCode(error)) {
+    return error.statusCode;
+  }
+
+  return 500;
+};
+
 export const errorHandler = (error: unknown, request: FastifyRequest, reply: FastifyReply) => {
-  const isExpected = error instanceof AppError && error.statusCode < 500;
-  request.log[isExpected ? "warn" : "error"](error);
+  const statusCode = resolveStatusCode(error);
+  const type = error instanceof Error ? error.name : typeof error;
+
+  request.log[statusCode >= 500 ? "error" : "warn"](
+    { err: error, statusCode, type },
+    "request failed"
+  );
 
   if (error instanceof ZodError) {
     return reply.status(400).send({
@@ -12,18 +34,12 @@ export const errorHandler = (error: unknown, request: FastifyRequest, reply: Fas
       error: "Bad Request",
       message: "Validation failed",
       details: z.treeifyError(error),
+      requestId: request.id,
     });
   }
 
-  if (error instanceof AppError) {
-    return reply.status(error.statusCode).send({
-      statusCode: error.statusCode,
-      message: error.message,
-    });
-  }
+  const message =
+    statusCode < 500 && error instanceof Error ? error.message : "Internal Server Error";
 
-  reply.status(500).send({
-    statusCode: 500,
-    message: "Internal Server Error",
-  });
+  return reply.status(statusCode).send({ statusCode, message, requestId: request.id });
 };
