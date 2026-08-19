@@ -8,7 +8,7 @@ import {
 } from "./schema.js";
 import { eventStore } from "../events/store.js";
 import { EventState, Sigs, UserRole, canManageSig } from "@events.comp-soc.com/shared";
-import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
+import { ConflictError, NotFoundError, ForbiddenError } from "../../lib/errors.js";
 import { registrationStore } from "./store.js";
 import { EventId } from "../events/schema.js";
 import { validateRegistrationAnswers } from "./utils.js";
@@ -191,7 +191,7 @@ export const registrationService = {
       });
 
       if (!event || !canManageSig(role, sigs, event.organiser)) {
-        throw new UnauthorizedError("You do not have permission to delete this registration");
+        throw new ForbiddenError("You do not have permission to delete this registration");
       }
     }
 

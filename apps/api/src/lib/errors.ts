@@ -1,10 +1,11 @@
 export class AppError extends Error {
   constructor(
     public statusCode: number,
-    message: string
+    message: string,
+    options?: ErrorOptions
   ) {
-    super(message);
-    this.name = "AppError";
+    super(message, options);
+    this.name = new.target.name;
   }
 }
 
@@ -27,8 +28,8 @@ export class NotFoundError extends AppError {
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message = "You do not have permission") {
-    super(403, message);
+  constructor(message = "Unauthorised") {
+    super(401, message);
   }
 }
 

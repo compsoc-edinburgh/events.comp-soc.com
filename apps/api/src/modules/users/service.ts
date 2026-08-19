@@ -1,6 +1,6 @@
 import { SqlContext } from "../../db/db.js";
 import { CreateUser, UpdateUser, UserId } from "./schema.js";
-import { NotFoundError, UnauthorizedError } from "../../lib/errors.js";
+import { NotFoundError, ForbiddenError } from "../../lib/errors.js";
 import { userStore } from "./store.js";
 import { Nullable, UserRegistrationsQueryFilter, UserRole } from "@events.comp-soc.com/shared";
 
@@ -64,7 +64,7 @@ export const userService = {
     const isSelf = id === requesterId;
 
     if (!isCommittee && !isSelf) {
-      throw new UnauthorizedError("You can only update your own profile");
+      throw new ForbiddenError("You can only update your own profile");
     }
 
     const updated = await userStore.update({ db, data });
@@ -92,7 +92,7 @@ export const userService = {
     const isSelf = id === requesterId;
 
     if (!isCommittee && !isSelf) {
-      throw new UnauthorizedError("You can only delete your own profile");
+      throw new ForbiddenError("You can only delete your own profile");
     }
 
     const deleted = await userStore.delete({ db, data });
