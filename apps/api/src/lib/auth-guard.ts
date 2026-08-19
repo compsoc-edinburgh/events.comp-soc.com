@@ -17,6 +17,10 @@ const requireAuth = async (request: FastifyRequest, reply: FastifyReply) => {
 const requireEventManager = async (request: FastifyRequest, reply: FastifyReply) => {
   await requireAuth(request, reply);
 
+  if (!request.user) {
+    return;
+  }
+
   if (!isEventManager(request.user.role)) {
     return reply.status(401).send({ message: "Unauthorised" });
   }

@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import { db } from "../db/db.js";
+import { db, pool } from "../db/db.js";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -10,6 +10,11 @@ declare module "fastify" {
 
 const dbPlugin: FastifyPluginAsync = async (server) => {
   server.decorate("db", db);
+
+  server.addHook("onClose", async () => {
+    server.log.info("draining database pool");
+    await pool.end();
+  });
 };
 
 export default fp(dbPlugin);
