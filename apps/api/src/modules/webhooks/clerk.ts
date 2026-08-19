@@ -61,7 +61,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
       const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
       if (!webhookSecret) {
-        server.log.error("CLERK_WEBHOOK_SECRET is not set");
+        request.log.error("CLERK_WEBHOOK_SECRET is not set");
         return reply.status(500).send({ error: "Webhook secret not configured" });
       }
 
@@ -70,6 +70,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
       const svixSignature = request.headers["svix-signature"] as string;
 
       if (!svixId || !svixTimestamp || !svixSignature) {
+        request.log.warn("clerk webhook missing svix headers");
         return reply.status(400).send({ error: "Missing svix headers" });
       }
 
@@ -82,13 +83,15 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
           "svix-timestamp": svixTimestamp,
           "svix-signature": svixSignature,
         }) as ClerkWebhookEvent;
-      } catch {
+      } catch (err) {
+        request.log.warn({ err, svixId }, "clerk webhook signature verification failed");
         return reply.status(400).send({ error: "Invalid webhook signature" });
       }
 
       const { type, data } = event;
+      const log = request.log.child({ svixId, webhookType: type });
 
-      server.log.info(`Received Clerk webhook: ${type}`);
+      log.info("clerk webhook received");
 
       try {
         switch (type) {
@@ -99,6 +102,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             );
 
             if (!primaryEmail) {
+              log.warn({ clerkUserId: userData.id }, "clerk webhook has no primary email");
               return reply.status(400).send({ error: "No primary email found" });
             }
 
@@ -124,8 +128,9 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
               },
             });
 
-            server.log.info(
-              `Created user: ${userData.id} with role: ${existingRole || UserRole.Member}`
+            log.info(
+              { clerkUserId: userData.id, role: existingRole || UserRole.Member },
+              "user created"
             );
             break;
           }
@@ -137,6 +142,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             );
 
             if (!primaryEmail) {
+              log.warn({ clerkUserId: userData.id }, "clerk webhook has no primary email");
               return reply.status(400).send({ error: "No primary email found" });
             }
 
@@ -152,14 +158,14 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
               requesterId: `clerk_webhook_${userData.id}`,
             });
 
-            server.log.info(`Updated user: ${userData.id}`);
+            log.info({ clerkUserId: userData.id }, "user updated");
             break;
           }
 
           case "user.deleted": {
             const deletedData = data as ClerkDeletedUserEventData;
             if (!deletedData.id) {
-              server.log.warn(`user.deleted event missing id, skipping`);
+              log.warn("user.deleted event missing id, skipping");
               break;
             }
 
@@ -171,22 +177,23 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
                 requesterId: `clerk_webhook_${deletedData.id}`,
               });
 
-              server.log.info(`Deleted user: ${deletedData.id}`);
-            } catch (error) {
-              if (error instanceof NotFoundError) {
-                server.log.info(`User ${deletedData.id} not found in DB, skipping deletion`);
-              } else {
-                server.log.info(`Unknown error`);
+              log.info({ clerkUserId: deletedData.id }, "user deleted");
+            } catch (err) {
+              if (!(err instanceof NotFoundError)) {
+                throw err;
               }
+
+              log.info({ clerkUserId: deletedData.id }, "user not in database, skipping deletion");
             }
 
             break;
           }
 
           default:
-            server.log.info(`Unhandled webhook type: ${type}`);
+            log.info("unhandled clerk webhook type");
         }
-      } catch {
+      } catch (err) {
+        log.error({ err }, "clerk webhook processing failed");
         return reply.status(500).send({ error: "Error processing webhook" });
       }
 
