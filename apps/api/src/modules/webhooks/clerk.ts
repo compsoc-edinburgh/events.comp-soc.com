@@ -4,12 +4,29 @@ import { clerkClient } from "@clerk/fastify";
 import { userService } from "../users/service.js";
 import { Nullable, Sigs, UserRole } from "@events.comp-soc.com/shared";
 import { NotFoundError } from "../../lib/errors.js";
+import { SpanStatusCode, trace, type Span } from "@opentelemetry/api";
 
+const tracer = trace.getTracer("compsoc.webhooks.clerk");
+
+// Span error handling
+const recordSpanError = (span: Span, error: unknown) => {
+  const exception = error instanceof Error ? error : new Error(String(error));
+
+  span.setAttribute("compsoc.user.sync.outcome", "failed");
+  span.recordException(exception);
+  span.setStatus({
+    code: SpanStatusCode.ERROR,
+    message: exception.message,
+  });
+};
+
+// Clerk metadata when any user registers. (Useful for updating or custom registration)
 interface ClerkPublicMetadata {
   role?: UserRole;
   sigs?: Sigs[];
 }
 
+// User data, which recieved from clerk on registration
 interface ClerkUserEventData {
   id: string;
   email_addresses: Array<{
@@ -29,7 +46,7 @@ interface ClerkDeletedUserEventData {
 }
 
 interface ClerkWebhookEvent {
-  type: string;
+  type: "user.created" | "user.updated" | "user.deleted";
   data: ClerkUserEventData | ClerkDeletedUserEventData;
 }
 
@@ -84,7 +101,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
     const { type, data } = event;
     const log = request.log.child({ svixId, webhookType: type });
 
-    log.info("clerk webhook received");
+    log.info("clerk webhook verified");
 
     try {
       switch (type) {
@@ -99,32 +116,55 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             return reply.status(400).send({ error: "No primary email found" });
           }
 
-          const existingRole = userData.public_metadata?.role;
-          const existingSigs = userData.public_metadata?.sigs;
+          await tracer.startActiveSpan("user.sync.create", async (span) => {
+            try {
+              span.setAttributes({
+                "compsoc.user.id": userData.id,
+                "compsoc.webhook.provider": "clerk",
+                "compsoc.webhook.delivery_id": svixId,
+                "compsoc.webhook.event_type": type,
+              });
 
-          if (!existingRole) {
-            await clerkClient.users.updateUserMetadata(userData.id, {
-              publicMetadata: {
-                role: UserRole.Member,
-              },
-            });
-          }
+              const existingRole = userData.public_metadata?.role;
+              const existingSigs = userData.public_metadata?.sigs;
 
-          await userService.createUser({
-            db: server.db,
-            data: {
-              id: userData.id,
-              email: primaryEmail.email_address,
-              firstName: userData.first_name || "",
-              lastName: userData.last_name || "",
-              sigs: existingSigs,
-            },
+              if (!existingRole) {
+                span.addEvent("clerk.metadata.role_defaulted");
+
+                await clerkClient.users.updateUserMetadata(userData.id, {
+                  publicMetadata: {
+                    role: UserRole.Member,
+                  },
+                });
+              }
+
+              await userService.createUser({
+                db: server.db,
+                data: {
+                  id: userData.id,
+                  email: primaryEmail.email_address,
+                  firstName: userData.first_name || "",
+                  lastName: userData.last_name || "",
+                  sigs: existingSigs,
+                },
+              });
+
+              span.setAttribute("compsoc.user.sync.outcome", "created");
+              span.setAttribute("compsoc.user.role", existingRole || UserRole.Member);
+              log.info(
+                {
+                  clerkUserId: userData.id,
+                  role: existingRole || UserRole.Member,
+                },
+                "user created"
+              );
+            } catch (error) {
+              recordSpanError(span, error);
+              throw error;
+            } finally {
+              span.end();
+            }
           });
-
-          log.info(
-            { clerkUserId: userData.id, role: existingRole || UserRole.Member },
-            "user created"
-          );
           break;
         }
 
@@ -139,19 +179,36 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             return reply.status(400).send({ error: "No primary email found" });
           }
 
-          await userService.updateUser({
-            db: server.db,
-            data: {
-              id: userData.id,
-              email: primaryEmail.email_address,
-              firstName: userData.first_name || "",
-              lastName: userData.last_name || "",
-            },
-            role: "committee",
-            requesterId: `clerk_webhook_${userData.id}`,
-          });
+          await tracer.startActiveSpan("user.sync.update", async (span) => {
+            span.setAttributes({
+              "compsoc.user.id": userData.id,
+              "compsoc.webhook.provider": "clerk",
+              "compsoc.webhook.delivery_id": svixId,
+              "compsoc.webhook.event_type": type,
+            });
 
-          log.info({ clerkUserId: userData.id }, "user updated");
+            try {
+              await userService.updateUser({
+                db: server.db,
+                data: {
+                  id: userData.id,
+                  email: primaryEmail.email_address,
+                  firstName: userData.first_name || "",
+                  lastName: userData.last_name || "",
+                },
+                role: "committee",
+                requesterId: `clerk_webhook_${userData.id}`,
+              });
+
+              span.setAttribute("compsoc.user.sync.outcome", "updated");
+              log.info({ clerkUserId: userData.id }, "user updated");
+            } catch (error) {
+              recordSpanError(span, error);
+              throw error;
+            } finally {
+              span.end();
+            }
+          });
           break;
         }
 
@@ -162,22 +219,43 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             break;
           }
 
-          try {
-            await userService.deleteUser({
-              db: server.db,
-              data: { id: deletedData.id },
-              role: "committee",
-              requesterId: `clerk_webhook_${deletedData.id}`,
+          const deletedUserId = deletedData.id;
+
+          await tracer.startActiveSpan("user.sync.delete", async (span) => {
+            span.setAttributes({
+              "compsoc.user.id": deletedUserId,
+              "compsoc.webhook.provider": "clerk",
+              "compsoc.webhook.delivery_id": svixId,
+              "compsoc.webhook.event_type": type,
             });
 
-            log.info({ clerkUserId: deletedData.id }, "user deleted");
-          } catch (err) {
-            if (!(err instanceof NotFoundError)) {
-              throw err;
-            }
+            try {
+              try {
+                await userService.deleteUser({
+                  db: server.db,
+                  data: { id: deletedUserId },
+                  role: "committee",
+                  requesterId: `clerk_webhook_${deletedUserId}`,
+                });
 
-            log.info({ clerkUserId: deletedData.id }, "user not in database, skipping deletion");
-          }
+                span.setAttribute("compsoc.user.sync.outcome", "deleted");
+                log.info({ clerkUserId: deletedUserId }, "user deleted");
+              } catch (error) {
+                if (!(error instanceof NotFoundError)) {
+                  throw error;
+                }
+
+                span.setAttribute("compsoc.user.sync.outcome", "not_found");
+                span.addEvent("user.sync.delete.skipped", { reason: "not_found" });
+                log.info({ clerkUserId: deletedUserId }, "user not in database, skipping deletion");
+              }
+            } catch (error) {
+              recordSpanError(span, error);
+              throw error;
+            } finally {
+              span.end();
+            }
+          });
 
           break;
         }
