@@ -35,12 +35,21 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data,
     });
 
+    request.log.info(
+      {
+        eventId: data.eventId,
+        userId: data.userId,
+        status: registration?.status,
+      },
+      "registration created"
+    );
+
     return reply.status(201).send(registration);
   });
 
   server.post("/batch-accept", { preHandler: [requireEventManager] }, async (request, reply) => {
     const { eventId } = RegistrationEventIdSchema.parse(request.params);
-    const { role, sigs } = request.user;
+    const { userId: actorUserId, role, sigs } = request.user;
 
     const event = await eventService.getEventForAuth({
       db: server.db,
@@ -56,6 +65,15 @@ export const registrationRoutes = async (server: FastifyInstance) => {
       data: { eventId },
     });
 
+    request.log.info(
+      {
+        eventId,
+        actorUserId,
+        acceptedCount: result.acceptedCount,
+      },
+      "registration batch accept completed"
+    );
+
     return reply.status(200).send(result);
   });
 
@@ -65,7 +83,7 @@ export const registrationRoutes = async (server: FastifyInstance) => {
     async (request, reply) => {
       const { eventId } = RegistrationEventIdSchema.parse(request.params);
       const dto = UpdateRegistrationStatusBatchSchema.parse(request.body);
-      const { role, sigs } = request.user;
+      const { userId: actorUserId, role, sigs } = request.user;
 
       const event = await eventService.getEventForAuth({
         db: server.db,
@@ -85,6 +103,17 @@ export const registrationRoutes = async (server: FastifyInstance) => {
         db: server.db,
         data,
       });
+
+      request.log.info(
+        {
+          eventId,
+          actorUserId,
+          targetStatus: data.status,
+          requestedCount: data.userIds.length,
+          updatedCount: result.updatedCount,
+        },
+        "registration batch status update completed"
+      );
 
       return reply.status(200).send(result);
     }
