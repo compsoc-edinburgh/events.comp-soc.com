@@ -50,154 +50,146 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.post(
-    "/clerk",
-    {
-      config: {
-        rawBody: true,
-      },
-    },
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+  server.post("/clerk", async (request: FastifyRequest, reply: FastifyReply) => {
+    const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
-      if (!webhookSecret) {
-        request.log.error("CLERK_WEBHOOK_SECRET is not set");
-        return reply.status(500).send({ error: "Webhook secret not configured" });
-      }
-
-      const svixId = request.headers["svix-id"] as string;
-      const svixTimestamp = request.headers["svix-timestamp"] as string;
-      const svixSignature = request.headers["svix-signature"] as string;
-
-      if (!svixId || !svixTimestamp || !svixSignature) {
-        request.log.warn("clerk webhook missing svix headers");
-        return reply.status(400).send({ error: "Missing svix headers" });
-      }
-
-      const wh = new Webhook(webhookSecret);
-      let event: ClerkWebhookEvent;
-
-      try {
-        event = wh.verify(request.rawBody!, {
-          "svix-id": svixId,
-          "svix-timestamp": svixTimestamp,
-          "svix-signature": svixSignature,
-        }) as ClerkWebhookEvent;
-      } catch (err) {
-        request.log.warn({ err, svixId }, "clerk webhook signature verification failed");
-        return reply.status(400).send({ error: "Invalid webhook signature" });
-      }
-
-      const { type, data } = event;
-      const log = request.log.child({ svixId, webhookType: type });
-
-      log.info("clerk webhook received");
-
-      try {
-        switch (type) {
-          case "user.created": {
-            const userData = data as ClerkUserEventData;
-            const primaryEmail = userData.email_addresses.find(
-              (email) => email.id === userData.primary_email_address_id
-            );
-
-            if (!primaryEmail) {
-              log.warn({ clerkUserId: userData.id }, "clerk webhook has no primary email");
-              return reply.status(400).send({ error: "No primary email found" });
-            }
-
-            const existingRole = userData.public_metadata?.role;
-            const existingSigs = userData.public_metadata?.sigs;
-
-            if (!existingRole) {
-              await clerkClient.users.updateUserMetadata(userData.id, {
-                publicMetadata: {
-                  role: UserRole.Member,
-                },
-              });
-            }
-
-            await userService.createUser({
-              db: server.db,
-              data: {
-                id: userData.id,
-                email: primaryEmail.email_address,
-                firstName: userData.first_name || "",
-                lastName: userData.last_name || "",
-                sigs: existingSigs,
-              },
-            });
-
-            log.info(
-              { clerkUserId: userData.id, role: existingRole || UserRole.Member },
-              "user created"
-            );
-            break;
-          }
-
-          case "user.updated": {
-            const userData = data as ClerkUserEventData;
-            const primaryEmail = userData.email_addresses.find(
-              (email) => email.id === userData.primary_email_address_id
-            );
-
-            if (!primaryEmail) {
-              log.warn({ clerkUserId: userData.id }, "clerk webhook has no primary email");
-              return reply.status(400).send({ error: "No primary email found" });
-            }
-
-            await userService.updateUser({
-              db: server.db,
-              data: {
-                id: userData.id,
-                email: primaryEmail.email_address,
-                firstName: userData.first_name || "",
-                lastName: userData.last_name || "",
-              },
-              role: "committee",
-              requesterId: `clerk_webhook_${userData.id}`,
-            });
-
-            log.info({ clerkUserId: userData.id }, "user updated");
-            break;
-          }
-
-          case "user.deleted": {
-            const deletedData = data as ClerkDeletedUserEventData;
-            if (!deletedData.id) {
-              log.warn("user.deleted event missing id, skipping");
-              break;
-            }
-
-            try {
-              await userService.deleteUser({
-                db: server.db,
-                data: { id: deletedData.id },
-                role: "committee",
-                requesterId: `clerk_webhook_${deletedData.id}`,
-              });
-
-              log.info({ clerkUserId: deletedData.id }, "user deleted");
-            } catch (err) {
-              if (!(err instanceof NotFoundError)) {
-                throw err;
-              }
-
-              log.info({ clerkUserId: deletedData.id }, "user not in database, skipping deletion");
-            }
-
-            break;
-          }
-
-          default:
-            log.info("unhandled clerk webhook type");
-        }
-      } catch (err) {
-        log.error({ err }, "clerk webhook processing failed");
-        return reply.status(500).send({ error: "Error processing webhook" });
-      }
-
-      return reply.status(200).send({ received: true });
+    if (!webhookSecret) {
+      request.log.error("CLERK_WEBHOOK_SECRET is not set");
+      return reply.status(500).send({ error: "Webhook secret not configured" });
     }
-  );
+
+    const svixId = request.headers["svix-id"] as string;
+    const svixTimestamp = request.headers["svix-timestamp"] as string;
+    const svixSignature = request.headers["svix-signature"] as string;
+
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      request.log.warn("clerk webhook missing svix headers");
+      return reply.status(400).send({ error: "Missing svix headers" });
+    }
+
+    const wh = new Webhook(webhookSecret);
+    let event: ClerkWebhookEvent;
+
+    try {
+      event = wh.verify(request.rawBody!, {
+        "svix-id": svixId,
+        "svix-timestamp": svixTimestamp,
+        "svix-signature": svixSignature,
+      }) as ClerkWebhookEvent;
+    } catch (err) {
+      request.log.warn({ err, svixId }, "clerk webhook signature verification failed");
+      return reply.status(400).send({ error: "Invalid webhook signature" });
+    }
+
+    const { type, data } = event;
+    const log = request.log.child({ svixId, webhookType: type });
+
+    log.info("clerk webhook received");
+
+    try {
+      switch (type) {
+        case "user.created": {
+          const userData = data as ClerkUserEventData;
+          const primaryEmail = userData.email_addresses.find(
+            (email) => email.id === userData.primary_email_address_id
+          );
+
+          if (!primaryEmail) {
+            log.warn({ clerkUserId: userData.id }, "clerk webhook has no primary email");
+            return reply.status(400).send({ error: "No primary email found" });
+          }
+
+          const existingRole = userData.public_metadata?.role;
+          const existingSigs = userData.public_metadata?.sigs;
+
+          if (!existingRole) {
+            await clerkClient.users.updateUserMetadata(userData.id, {
+              publicMetadata: {
+                role: UserRole.Member,
+              },
+            });
+          }
+
+          await userService.createUser({
+            db: server.db,
+            data: {
+              id: userData.id,
+              email: primaryEmail.email_address,
+              firstName: userData.first_name || "",
+              lastName: userData.last_name || "",
+              sigs: existingSigs,
+            },
+          });
+
+          log.info(
+            { clerkUserId: userData.id, role: existingRole || UserRole.Member },
+            "user created"
+          );
+          break;
+        }
+
+        case "user.updated": {
+          const userData = data as ClerkUserEventData;
+          const primaryEmail = userData.email_addresses.find(
+            (email) => email.id === userData.primary_email_address_id
+          );
+
+          if (!primaryEmail) {
+            log.warn({ clerkUserId: userData.id }, "clerk webhook has no primary email");
+            return reply.status(400).send({ error: "No primary email found" });
+          }
+
+          await userService.updateUser({
+            db: server.db,
+            data: {
+              id: userData.id,
+              email: primaryEmail.email_address,
+              firstName: userData.first_name || "",
+              lastName: userData.last_name || "",
+            },
+            role: "committee",
+            requesterId: `clerk_webhook_${userData.id}`,
+          });
+
+          log.info({ clerkUserId: userData.id }, "user updated");
+          break;
+        }
+
+        case "user.deleted": {
+          const deletedData = data as ClerkDeletedUserEventData;
+          if (!deletedData.id) {
+            log.warn("user.deleted event missing id, skipping");
+            break;
+          }
+
+          try {
+            await userService.deleteUser({
+              db: server.db,
+              data: { id: deletedData.id },
+              role: "committee",
+              requesterId: `clerk_webhook_${deletedData.id}`,
+            });
+
+            log.info({ clerkUserId: deletedData.id }, "user deleted");
+          } catch (err) {
+            if (!(err instanceof NotFoundError)) {
+              throw err;
+            }
+
+            log.info({ clerkUserId: deletedData.id }, "user not in database, skipping deletion");
+          }
+
+          break;
+        }
+
+        default:
+          log.info("unhandled clerk webhook type");
+      }
+    } catch (err) {
+      log.error({ err }, "clerk webhook processing failed");
+      return reply.status(500).send({ error: "Error processing webhook" });
+    }
+
+    return reply.status(200).send({ received: true });
+  });
 };
