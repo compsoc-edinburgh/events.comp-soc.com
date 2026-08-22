@@ -104,6 +104,12 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
     log.info("clerk webhook verified");
 
     try {
+      const clerkAttributes = {
+        "compsoc.webhook.provider": "clerk",
+        "compsoc.webhook.delivery_id": svixId,
+        "compsoc.webhook.event_type": type,
+      };
+
       switch (type) {
         case "user.created": {
           const userData = data as ClerkUserEventData;
@@ -120,9 +126,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             try {
               span.setAttributes({
                 "compsoc.user.id": userData.id,
-                "compsoc.webhook.provider": "clerk",
-                "compsoc.webhook.delivery_id": svixId,
-                "compsoc.webhook.event_type": type,
+                ...clerkAttributes,
               });
 
               const existingRole = userData.public_metadata?.role;
@@ -182,9 +186,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
           await tracer.startActiveSpan("user.sync.update", async (span) => {
             span.setAttributes({
               "compsoc.user.id": userData.id,
-              "compsoc.webhook.provider": "clerk",
-              "compsoc.webhook.delivery_id": svixId,
-              "compsoc.webhook.event_type": type,
+              ...clerkAttributes,
             });
 
             try {
@@ -224,9 +226,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
           await tracer.startActiveSpan("user.sync.delete", async (span) => {
             span.setAttributes({
               "compsoc.user.id": deletedUserId,
-              "compsoc.webhook.provider": "clerk",
-              "compsoc.webhook.delivery_id": svixId,
-              "compsoc.webhook.event_type": type,
+              ...clerkAttributes,
             });
 
             try {
