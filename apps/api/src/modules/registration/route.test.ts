@@ -548,6 +548,8 @@ describe("Registration", () => {
       expect(data.countByStatus).toEqual({
         accepted: 2,
         pending: 1,
+        waitlist: 0,
+        rejected: 0,
       });
 
       const dateKeys = Object.keys(data.countByDate);
