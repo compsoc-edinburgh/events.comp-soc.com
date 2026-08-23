@@ -16,6 +16,7 @@ const EnvSchema = z.object({
   OTEL_SERVICE_NAME: z.string().default("events.compsoc.api"),
   OTEL_SERVICE_VERSION: z.string().default("development"),
   OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().default("http://127.0.0.1:4318"),
+  OTEL_EXPORTER_OTLP_HEADERS: z.string().min(1).optional(),
 });
 
 export const env = EnvSchema.parse(process.env);
