@@ -3,17 +3,17 @@ import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentation
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { FastifyOtelInstrumentation } from "@fastify/otel";
-import { OTEL_SERVICE_NAME, OTEL_SERVICE_VERSION, OTEL_BASE_URL } from "./config.js";
+import { env } from "../env.js";
 
-const sdk = new NodeSDK({
+export const sdk = new NodeSDK({
   resource: resourceFromAttributes({
-    "service.name": OTEL_SERVICE_NAME,
-    "service.version": OTEL_SERVICE_VERSION,
-    "deployment.environment.name": "development",
+    "service.name": env.OTEL_SERVICE_NAME,
+    "service.version": env.OTEL_SERVICE_VERSION,
+    "deployment.environment.name": env.NODE_ENV,
   }),
 
   traceExporter: new OTLPTraceExporter({
-    url: `${OTEL_BASE_URL}/v1/traces`,
+    url: `${env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`,
   }),
 
   instrumentations: [
@@ -33,5 +33,3 @@ const sdk = new NodeSDK({
     }),
   ],
 });
-
-sdk.start();

@@ -5,6 +5,7 @@ import { userService } from "../users/service.js";
 import { Nullable, Sigs, UserRole } from "@events.comp-soc.com/shared";
 import { NotFoundError } from "../../lib/errors.js";
 import { SpanStatusCode, trace, type Span } from "@opentelemetry/api";
+import { env } from "../../env.js";
 
 const tracer = trace.getTracer("compsoc.webhooks.clerk");
 
@@ -68,12 +69,7 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
   );
 
   server.post("/clerk", async (request: FastifyRequest, reply: FastifyReply) => {
-    const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
-
-    if (!webhookSecret) {
-      request.log.error("CLERK_WEBHOOK_SECRET is not set");
-      return reply.status(500).send({ error: "Webhook secret not configured" });
-    }
+    const webhookSecret = env.CLERK_WEBHOOK_SECRET;
 
     const svixId = request.headers["svix-id"] as string;
     const svixTimestamp = request.headers["svix-timestamp"] as string;
