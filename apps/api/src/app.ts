@@ -1,25 +1,22 @@
-import "dotenv/config";
+import { env } from "./env.js";
 import { buildServer } from "./server.js";
+import { sdk } from "./telemetry/sdk.js";
 
 const server = buildServer();
 
-const PORT = Number(process.env.PORT) || 8080;
-const HOST = process.env.HOST || "0.0.0.0";
-
-const SHUTDOWN_TIMEOUT_MS = Number(process.env.SHUTDOWN_TIMEOUT_MS) || 10_000;
-
 const shutdown = async (signal: NodeJS.Signals) => {
-  server.log.info({ signal, timeoutMs: SHUTDOWN_TIMEOUT_MS }, "shutdown started");
+  server.log.info({ signal, timeoutMs: env.SHUTDOWN_TIMEOUT_MS }, "shutdown started");
 
   const forceExit = setTimeout(() => {
-    server.log.error({ timeoutMs: SHUTDOWN_TIMEOUT_MS }, "shutdown timed out, forcing exit");
+    server.log.error({ timeoutMs: env.SHUTDOWN_TIMEOUT_MS }, "shutdown timed out, forcing exit");
     process.exit(1);
-  }, SHUTDOWN_TIMEOUT_MS);
+  }, env.SHUTDOWN_TIMEOUT_MS);
 
   forceExit.unref();
 
   try {
     await server.close();
+    await sdk.shutdown();
 
     server.log.info("shutdown complete");
     process.exitCode = 0;
@@ -37,7 +34,7 @@ for (const signal of ["SIGTERM", "SIGINT"] as const) {
 
 const start = async () => {
   try {
-    await server.listen({ port: PORT, host: HOST });
+    await server.listen({ port: env.PORT, host: env.HOST });
   } catch (err) {
     server.log.error(err);
     process.exit(1);

@@ -1,9 +1,10 @@
 import { PinoLoggerOptions } from "fastify/types/logger.js";
+import { env } from "../env.js";
 
 export const loggerConfig: PinoLoggerOptions = {
-  level: process.env.NODE_ENV === "test" ? "warn" : "info",
+  level: env.NODE_ENV === "test" ? "warn" : "info",
   transport:
-    process.env.NODE_ENV !== "production"
+    env.NODE_ENV !== "production"
       ? {
           target: "pino-pretty",
           options: {

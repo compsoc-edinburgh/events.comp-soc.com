@@ -11,7 +11,7 @@ import { RegistrationStoreSelection } from "./projections.js";
 import { SqlContext } from "../../db/db.js";
 import { eventsTable, registrationsTable, usersTable } from "../../db/schema.js";
 import { EventId } from "../events/schema.js";
-import { CustomField } from "@events.comp-soc.com/shared";
+import { RegistrationStatus, type CustomField } from "@events.comp-soc.com/shared";
 
 export const registrationStore = {
   async create({ db, data }: { db: SqlContext; data: CreateRegistration }) {
@@ -124,11 +124,15 @@ export const registrationStore = {
       .where(eq(registrationsTable.eventId, eventId))
       .groupBy(registrationsTable.status);
 
+    const counts = Object.fromEntries(
+      Object.values(RegistrationStatus).map((status) => [status, 0])
+    ) as AnalyticsEntry;
+
     return results.reduce((acc, result) => {
       acc[result.status] = result.value;
 
       return acc;
-    }, {} as AnalyticsEntry);
+    }, counts);
   },
 
   async countByDate({ db, eventId }: { db: SqlContext; eventId: string }) {
