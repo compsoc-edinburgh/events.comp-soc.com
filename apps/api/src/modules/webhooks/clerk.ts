@@ -6,6 +6,7 @@ import { Nullable, Sigs, UserRole } from "@events.comp-soc.com/shared";
 import { NotFoundError } from "../../lib/errors.js";
 import { SpanStatusCode, trace, type Span } from "@opentelemetry/api";
 import { env } from "../../env.js";
+import z from "zod";
 
 const tracer = trace.getTracer("compsoc.webhooks.clerk");
 
@@ -70,15 +71,22 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
 
   server.post("/clerk", async (request: FastifyRequest, reply: FastifyReply) => {
     const webhookSecret = env.CLERK_WEBHOOK_SECRET;
+    const headersResult = SvixHeadersSchema.safeParse(request.headers);
 
-    const svixId = request.headers["svix-id"] as string;
-    const svixTimestamp = request.headers["svix-timestamp"] as string;
-    const svixSignature = request.headers["svix-signature"] as string;
+    if (!headersResult.success) {
+      const invalidHeaders = headersResult.error.issues.map((issue) => String(issue.path[0]));
 
-    if (!svixId || !svixTimestamp || !svixSignature) {
-      request.log.warn("clerk webhook missing svix headers");
-      return reply.status(400).send({ error: "Missing svix headers" });
+      request.log.warn({ invalidHeaders }, "clerk webhook missing or invalid svix headers");
+      return reply.status(400).send({
+        error: "Missing or invalid svix headers",
+      });
     }
+
+    const {
+      "svix-id": svixId,
+      "svix-timestamp": svixTimestamp,
+      "svix-signature": svixSignature,
+    } = headersResult.data;
 
     const wh = new Webhook(webhookSecret);
     let event: ClerkWebhookEvent;
@@ -273,3 +281,9 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
     return reply.status(200).send({ received: true });
   });
 };
+
+const SvixHeadersSchema = z.object({
+  "svix-id": z.string().min(1),
+  "svix-timestamp": z.string().min(1),
+  "svix-signature": z.string().min(1),
+});
