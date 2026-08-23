@@ -83,8 +83,14 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
     const wh = new Webhook(webhookSecret);
     let event: ClerkWebhookEvent;
 
+    const rawBody = request.rawBody;
+    if (typeof rawBody !== "string") {
+      request.log.warn({ svixId }, "clerk webhook missing raw body");
+      return reply.status(400).send({ error: "Missing webhook body" });
+    }
+
     try {
-      event = wh.verify(request.rawBody!, {
+      event = wh.verify(rawBody, {
         "svix-id": svixId,
         "svix-timestamp": svixTimestamp,
         "svix-signature": svixSignature,
