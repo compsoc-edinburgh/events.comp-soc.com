@@ -1,6 +1,5 @@
 import { env } from "./env.js";
 import { buildServer } from "./server.js";
-import { sdk } from "./telemetry/sdk.js";
 
 const server = buildServer();
 
@@ -16,8 +15,6 @@ const shutdown = async (signal: NodeJS.Signals) => {
 
   try {
     await server.close();
-    await sdk.shutdown();
-
     server.log.info("shutdown complete");
     process.exitCode = 0;
   } catch (err) {
