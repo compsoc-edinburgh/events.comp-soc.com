@@ -4,8 +4,8 @@
   "main": "dist/app.js",
   "type": "module",
   "scripts": {
-    "start": "node dist/src/app.js",
-    "build": "tsc",
+    "start": "node dist/app.js",
+    "build": "tsc -p tsconfig.build.json",
     "dev": "nodemon --watch src --exec tsx src/app.ts",
     "type-check": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
