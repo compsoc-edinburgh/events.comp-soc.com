@@ -4,23 +4,8 @@ import { clerkClient } from "@clerk/fastify";
 import { userService } from "../users/service.js";
 import { Nullable, Sigs, UserRole } from "@events.comp-soc.com/shared";
 import { NotFoundError } from "../../lib/errors.js";
-import { SpanStatusCode, trace, type Span } from "@opentelemetry/api";
 import { env } from "../../env.js";
 import z from "zod";
-
-const tracer = trace.getTracer("compsoc.webhooks.clerk");
-
-// Span error handling
-const recordSpanError = (span: Span, error: unknown) => {
-  const exception = error instanceof Error ? error : new Error(String(error));
-
-  span.setAttribute("compsoc.user.sync.outcome", "failed");
-  span.recordException(exception);
-  span.setStatus({
-    code: SpanStatusCode.ERROR,
-    message: exception.message,
-  });
-};
 
 // Clerk metadata when any user registers. (Useful for updating or custom registration)
 interface ClerkPublicMetadata {
@@ -114,12 +99,6 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
     log.info("clerk webhook verified");
 
     try {
-      const clerkAttributes = {
-        "compsoc.webhook.provider": "clerk",
-        "compsoc.webhook.delivery_id": svixId,
-        "compsoc.webhook.event_type": type,
-      };
-
       switch (type) {
         case "user.created": {
           const userData = data as ClerkUserEventData;
@@ -132,53 +111,35 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             return reply.status(400).send({ error: "No primary email found" });
           }
 
-          await tracer.startActiveSpan("user.sync.create", async (span) => {
-            try {
-              span.setAttributes({
-                "compsoc.user.id": userData.id,
-                ...clerkAttributes,
-              });
+          const existingRole = userData.public_metadata?.role;
+          const existingSigs = userData.public_metadata?.sigs;
 
-              const existingRole = userData.public_metadata?.role;
-              const existingSigs = userData.public_metadata?.sigs;
+          if (!existingRole) {
+            await clerkClient.users.updateUserMetadata(userData.id, {
+              publicMetadata: {
+                role: UserRole.Member,
+              },
+            });
+          }
 
-              if (!existingRole) {
-                span.addEvent("clerk.metadata.role_defaulted");
-
-                await clerkClient.users.updateUserMetadata(userData.id, {
-                  publicMetadata: {
-                    role: UserRole.Member,
-                  },
-                });
-              }
-
-              await userService.createUser({
-                db: server.db,
-                data: {
-                  id: userData.id,
-                  email: primaryEmail.email_address,
-                  firstName: userData.first_name || "",
-                  lastName: userData.last_name || "",
-                  sigs: existingSigs,
-                },
-              });
-
-              span.setAttribute("compsoc.user.sync.outcome", "created");
-              span.setAttribute("compsoc.user.role", existingRole || UserRole.Member);
-              log.info(
-                {
-                  clerkUserId: userData.id,
-                  role: existingRole || UserRole.Member,
-                },
-                "user created"
-              );
-            } catch (error) {
-              recordSpanError(span, error);
-              throw error;
-            } finally {
-              span.end();
-            }
+          await userService.createUser({
+            db: server.db,
+            data: {
+              id: userData.id,
+              email: primaryEmail.email_address,
+              firstName: userData.first_name || "",
+              lastName: userData.last_name || "",
+              sigs: existingSigs,
+            },
           });
+
+          log.info(
+            {
+              clerkUserId: userData.id,
+              role: existingRole || UserRole.Member,
+            },
+            "user created"
+          );
           break;
         }
 
@@ -193,34 +154,19 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             return reply.status(400).send({ error: "No primary email found" });
           }
 
-          await tracer.startActiveSpan("user.sync.update", async (span) => {
-            span.setAttributes({
-              "compsoc.user.id": userData.id,
-              ...clerkAttributes,
-            });
-
-            try {
-              await userService.updateUser({
-                db: server.db,
-                data: {
-                  id: userData.id,
-                  email: primaryEmail.email_address,
-                  firstName: userData.first_name || "",
-                  lastName: userData.last_name || "",
-                },
-                role: "committee",
-                requesterId: `clerk_webhook_${userData.id}`,
-              });
-
-              span.setAttribute("compsoc.user.sync.outcome", "updated");
-              log.info({ clerkUserId: userData.id }, "user updated");
-            } catch (error) {
-              recordSpanError(span, error);
-              throw error;
-            } finally {
-              span.end();
-            }
+          await userService.updateUser({
+            db: server.db,
+            data: {
+              id: userData.id,
+              email: primaryEmail.email_address,
+              firstName: userData.first_name || "",
+              lastName: userData.last_name || "",
+            },
+            role: "committee",
+            requesterId: `clerk_webhook_${userData.id}`,
           });
+
+          log.info({ clerkUserId: userData.id }, "user updated");
           break;
         }
 
@@ -231,41 +177,22 @@ export const clerkWebhookRoutes = async (server: FastifyInstance) => {
             break;
           }
 
-          const deletedUserId = deletedData.id;
-
-          await tracer.startActiveSpan("user.sync.delete", async (span) => {
-            span.setAttributes({
-              "compsoc.user.id": deletedUserId,
-              ...clerkAttributes,
+          try {
+            await userService.deleteUser({
+              db: server.db,
+              data: { id: deletedData.id },
+              role: "committee",
+              requesterId: `clerk_webhook_${deletedData.id}`,
             });
 
-            try {
-              try {
-                await userService.deleteUser({
-                  db: server.db,
-                  data: { id: deletedUserId },
-                  role: "committee",
-                  requesterId: `clerk_webhook_${deletedUserId}`,
-                });
-
-                span.setAttribute("compsoc.user.sync.outcome", "deleted");
-                log.info({ clerkUserId: deletedUserId }, "user deleted");
-              } catch (error) {
-                if (!(error instanceof NotFoundError)) {
-                  throw error;
-                }
-
-                span.setAttribute("compsoc.user.sync.outcome", "not_found");
-                span.addEvent("user.sync.delete.skipped", { reason: "not_found" });
-                log.info({ clerkUserId: deletedUserId }, "user not in database, skipping deletion");
-              }
-            } catch (error) {
-              recordSpanError(span, error);
+            log.info({ clerkUserId: deletedData.id }, "user deleted");
+          } catch (error) {
+            if (!(error instanceof NotFoundError)) {
               throw error;
-            } finally {
-              span.end();
             }
-          });
+
+            log.info({ clerkUserId: deletedData.id }, "user not in database, skipping deletion");
+          }
 
           break;
         }

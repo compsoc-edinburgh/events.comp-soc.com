@@ -34,7 +34,7 @@ export const Route = createFileRoute('/')({
     <ErrorState
       title="We couldn't load events"
       message={
-        error.message ||
+        (error instanceof Error && error.message) ||
         'The events API is having a bad day. Try again in a moment.'
       }
     />
