@@ -24,7 +24,7 @@
   "pnpm": {
     "overrides": {
       "seroval": "^1.6.2",
-      "shell-quote": "^1.10.0"
+      "shell-quote": "^1.11.0"
     }
   }
 }
