@@ -43,7 +43,7 @@ export const Route = createFileRoute('/events/$eventId/')({
     <ErrorState
       title="We couldn't load this event"
       message={
-        error.message ||
+        (error instanceof Error && error.message) ||
         "Either it doesn't exist anymore, or the events API is having a bad day. Try again in a moment."
       }
     />
@@ -52,7 +52,7 @@ export const Route = createFileRoute('/events/$eventId/')({
 
 function EventRoute() {
   const { userId } = useAuth()
-  const navigate = useNavigate({ from: '/events/$eventId' })
+  const navigate = useNavigate({ from: '/events/$eventId/' })
   const { eventId } = Route.useParams()
 
   const { canManage } = useEventManagerAuth()

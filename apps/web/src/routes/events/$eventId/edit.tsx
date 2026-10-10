@@ -22,7 +22,7 @@ export const Route = createFileRoute('/events/$eventId/edit')({
     <ErrorState
       title="We couldn't load this event"
       message={
-        error.message ||
+        (error instanceof Error && error.message) ||
         "Either it doesn't exist anymore, or the events API is having a bad day. Try again in a moment."
       }
     />

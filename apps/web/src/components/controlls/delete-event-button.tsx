@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/tooltip.tsx'
 
 function DeleteEventButton({ eventId }: { eventId: string }) {
-  const navigate = useNavigate({ from: '/events/$eventId' })
+  const navigate = useNavigate({ from: '/events/$eventId/' })
   const { deleteEvent, isDeleting } = useDeleteEvent(eventId)
 
   return (
